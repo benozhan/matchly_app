@@ -1,0 +1,15 @@
+[Unit]
+Description=Matchly Match Search API
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/kuponbot
+Environment=KUPONBOT_DB=/home/ubuntu/kuponbot/matches.db
+ExecStart=/home/ubuntu/kuponbot/venv/bin/uvicorn api_server:app --host 0.0.0.0 --port 8001
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
