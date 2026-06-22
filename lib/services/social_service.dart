@@ -186,6 +186,60 @@ class SocialService {
     return null;
   }
 
+  /// Searches users by username or displayName.
+  Future<List<SocialUser>> searchUsers(String q) async {
+    if (q.trim().isEmpty) return [];
+    final res = await _client
+        .get(Uri.parse(
+            '$_kBaseUrl/social/find-users?q=${Uri.encodeQueryComponent(q.trim())}'))
+        .timeout(_kTimeout);
+    _checkStatus(res);
+    return (jsonDecode(res.body) as List)
+        .cast<Map<String, dynamic>>()
+        .map(SocialUser.fromJson)
+        .toList();
+  }
+
+  /// Returns activity feed for [username] (coupons from followed users).
+  Future<List<FeedItem>> getFeed(String username) async {
+    final res = await _client
+        .get(Uri.parse('$_kBaseUrl/social/feed/$username'))
+        .timeout(_kTimeout);
+    _checkStatus(res);
+    return (jsonDecode(res.body) as List)
+        .cast<Map<String, dynamic>>()
+        .map(FeedItem.fromJson)
+        .toList();
+  }
+
+  /// Follows [followingId] as [followerId]. Fire-and-forget safe.
+  Future<void> follow(String followerId, String followingId) async {
+    try {
+      await _client
+          .post(
+            Uri.parse('$_kBaseUrl/social/follow'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode(
+                {'followerId': followerId, 'followingId': followingId}),
+          )
+          .timeout(_kTimeout);
+    } catch (_) {}
+  }
+
+  /// Unfollows [followingId] as [followerId]. Fire-and-forget safe.
+  Future<void> unfollow(String followerId, String followingId) async {
+    try {
+      await _client
+          .delete(
+            Uri.parse('$_kBaseUrl/social/follow'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode(
+                {'followerId': followerId, 'followingId': followingId}),
+          )
+          .timeout(_kTimeout);
+    } catch (_) {}
+  }
+
   void _checkStatus(http.Response res) {
     if (res.statusCode != 200) {
       throw SocialException('Server error ${res.statusCode}', res.statusCode);
@@ -272,4 +326,30 @@ class SocialException implements Exception {
 
   @override
   String toString() => 'SocialException: $message';
+}
+
+// ── FeedItem model ────────────────────────────────────────────────────────────
+
+class FeedItem {
+  final String type;         // SHARED_COUPON | COUPON_WON | COUPON_LOST
+  final String username;
+  final String displayName;
+  final String couponId;
+  final String createdAt;
+
+  const FeedItem({
+    required this.type,
+    required this.username,
+    required this.displayName,
+    required this.couponId,
+    required this.createdAt,
+  });
+
+  factory FeedItem.fromJson(Map<String, dynamic> j) => FeedItem(
+        type:        j['type']        as String? ?? 'SHARED_COUPON',
+        username:    j['username']    as String? ?? '',
+        displayName: j['displayName'] as String? ?? '',
+        couponId:    j['couponId']    as String? ?? '',
+        createdAt:   j['createdAt']   as String? ?? '',
+      );
 }

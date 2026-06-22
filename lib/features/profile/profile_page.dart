@@ -3,18 +3,24 @@ import 'package:flutter/material.dart';
 import '../../core/app_colors.dart';
 import '../../models/coupon.dart';
 import '../../services/social_service.dart';
+import 'feed_page.dart';
 import 'shared_coupon_detail_page.dart';
 import 'user_list_page.dart';
+import 'user_search_page.dart';
 
 class ProfilePage extends StatefulWidget {
   final String username;
   /// Local coupons from the app — matched against sharedCoupon.couponId ↔ Coupon.sharedId
   final List<Coupon> localCoupons;
+  /// Username of the currently logged-in user.
+  /// When null or equal to [username], the page is in "own profile" mode.
+  final String? currentUsername;
 
   const ProfilePage({
     super.key,
     required this.username,
     this.localCoupons = const [],
+    this.currentUsername,
   });
 
   @override
@@ -26,6 +32,15 @@ class _ProfilePageState extends State<ProfilePage> {
   List<SharedCoupon> _sharedCoupons = [];
   bool    _loading = true;
   String? _error;
+
+  // Follow state — only relevant when viewing another user's profile.
+  bool? _isFollowing;
+  bool  _followLoading = false;
+  String? _currentUserId;
+
+  bool get _isOwnProfile =>
+      widget.currentUsername == null ||
+      widget.currentUsername == widget.username;
 
   final _scrollController  = ScrollController();
   final _couponsHeaderKey  = GlobalKey();
@@ -50,14 +65,48 @@ class _ProfilePageState extends State<ProfilePage> {
         SocialService.instance.getSharedCoupons(widget.username),
       ]);
       if (!mounted) return;
-      setState(() {
-        _user          = results[0] as SocialUser;
-        _sharedCoupons = results[1] as List<SharedCoupon>;
-        _loading       = false;
-      });
+      _user          = results[0] as SocialUser;
+      _sharedCoupons = results[1] as List<SharedCoupon>;
+
+      // Load follow state when viewing another user's profile.
+      if (!_isOwnProfile) {
+        try {
+          final cu       = await SocialService.instance.getUser(widget.currentUsername!);
+          final following = await SocialService.instance.getFollowing(widget.currentUsername!);
+          if (!mounted) return;
+          _currentUserId = cu.id;
+          _isFollowing   = following.any((u) => u.username == widget.username);
+        } catch (_) {
+          _isFollowing = false;
+        }
+      }
+
+      if (!mounted) return;
+      setState(() { _loading = false; });
     } catch (e) {
       if (!mounted) return;
       setState(() { _error = e.toString(); _loading = false; });
+    }
+  }
+
+  Future<void> _toggleFollow() async {
+    if (_currentUserId == null || _user == null || _followLoading) return;
+    final was = _isFollowing ?? false;
+    // Optimistic update.
+    setState(() { _followLoading = true; _isFollowing = !was; });
+    try {
+      if (was) {
+        await SocialService.instance.unfollow(_currentUserId!, _user!.id);
+      } else {
+        await SocialService.instance.follow(_currentUserId!, _user!.id);
+      }
+      // Refresh counts.
+      final updated = await SocialService.instance.getUser(widget.username);
+      if (!mounted) return;
+      setState(() { _user = updated; _followLoading = false; });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() { _isFollowing = was; _followLoading = false; });
     }
   }
 
@@ -92,6 +141,10 @@ class _ProfilePageState extends State<ProfilePage> {
                         scrollController: _scrollController,
                         couponsHeaderKey: _couponsHeaderKey,
                         onScrollToCoupons: _scrollToCoupons,
+                        isOwnProfile: _isOwnProfile,
+                        isFollowing: _isFollowing,
+                        followLoading: _followLoading,
+                        onFollowTap: _toggleFollow,
                       ),
                     ),
         ),
@@ -175,6 +228,10 @@ class _ProfileBody extends StatelessWidget {
   final ScrollController scrollController;
   final GlobalKey couponsHeaderKey;
   final VoidCallback onScrollToCoupons;
+  final bool isOwnProfile;
+  final bool? isFollowing;
+  final bool followLoading;
+  final VoidCallback onFollowTap;
 
   const _ProfileBody({
     required this.user,
@@ -183,6 +240,10 @@ class _ProfileBody extends StatelessWidget {
     required this.scrollController,
     required this.couponsHeaderKey,
     required this.onScrollToCoupons,
+    required this.isOwnProfile,
+    this.isFollowing,
+    this.followLoading = false,
+    required this.onFollowTap,
   });
 
   @override
@@ -253,6 +314,48 @@ class _ProfileBody extends StatelessWidget {
           ),
         ),
 
+        // ── Action buttons ────────────────────────────────────────────────
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+            child: isOwnProfile
+                // Own profile: Arkadaş Ekle + Akış
+                ? Row(
+                    children: [
+                      Expanded(
+                        child: _ActionButton(
+                          icon: Icons.person_add_rounded,
+                          label: 'Arkadaş Ekle',
+                          onTap: () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => UserSearchPage(currentUser: user),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: _ActionButton(
+                          icon: Icons.dynamic_feed_rounded,
+                          label: 'Akış',
+                          onTap: () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => FeedPage(username: user.username),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+                // Another user's profile: follow / unfollow button
+                : _FollowButton(
+                    isFollowing: isFollowing,
+                    loading: followLoading,
+                    onTap: onFollowTap,
+                  ),
+          ),
+        ),
+
         // ── Shared coupons header ─────────────────────────────────────────
         SliverToBoxAdapter(
           child: Padding(
@@ -301,15 +404,8 @@ class _ProfileBody extends StatelessWidget {
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 10),
                     child: GestureDetector(
-                      onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => SharedCouponDetailPage(
-                            sharedCoupon: sc,
-                            localCoupon: local,
-                            owner: user,
-                          ),
-                        ),
-                      ),
+                      onTap: () => Navigator.of(context)
+                          .pushNamed('/coupon/${sc.couponId}'),
                       child: local != null
                           ? _LocalCouponCard(coupon: local)
                           : _SharedCouponRow(coupon: sc),
@@ -323,6 +419,120 @@ class _ProfileBody extends StatelessWidget {
 
         const SliverToBoxAdapter(child: SizedBox(height: 32)),
       ],
+    );
+  }
+}
+
+// ── Action button ─────────────────────────────────────────────────────────────
+
+class _ActionButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _ActionButton({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 11),
+        decoration: BoxDecoration(
+          color: AppColors.card,
+          borderRadius: BorderRadius.circular(14),
+          border:
+              Border.all(color: Colors.white.withOpacity(0.08), width: 0.5),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 15, color: AppColors.brand),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: const TextStyle(
+                color: AppColors.textPrimary,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Follow button (other user's profile) ─────────────────────────────────────
+
+class _FollowButton extends StatelessWidget {
+  final bool? isFollowing;
+  final bool loading;
+  final VoidCallback onTap;
+
+  const _FollowButton({
+    required this.isFollowing,
+    required this.loading,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final following = isFollowing ?? false;
+    return GestureDetector(
+      onTap: loading ? null : onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 11),
+        decoration: BoxDecoration(
+          color: following
+              ? Colors.white.withOpacity(0.06)
+              : AppColors.brand.withOpacity(0.15),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: following
+                ? Colors.white.withOpacity(0.10)
+                : AppColors.brand.withOpacity(0.35),
+            width: 0.5,
+          ),
+        ),
+        child: loading
+            ? const Center(
+                child: SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                      strokeWidth: 1.5, color: AppColors.brand),
+                ),
+              )
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    following
+                        ? Icons.person_remove_rounded
+                        : Icons.person_add_rounded,
+                    size: 15,
+                    color: following ? AppColors.textSecondary : AppColors.brand,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    following ? 'Takibi Bırak' : 'Takip Et',
+                    style: TextStyle(
+                      color: following
+                          ? AppColors.textSecondary
+                          : AppColors.brand,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+      ),
     );
   }
 }
@@ -604,183 +814,4 @@ class _LocalCouponCard extends StatelessWidget {
               padding: EdgeInsets.fromLTRB(16, 0, 16, 0),
               child: Divider(height: 1, thickness: 0.5, color: Color(0x0DFFFFFF)),
             ),
-            ...coupon.matches.take(3).map(
-              (m) => Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        m.teams,
-                        style: const TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      m.selection,
-                      style: const TextStyle(
-                        color: AppColors.textPrimary,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            if (coupon.matches.length > 3)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
-                child: Text(
-                  '+${coupon.matches.length - 3} maç daha',
-                  style: const TextStyle(
-                    color: AppColors.textTertiary,
-                    fontSize: 11,
-                  ),
-                ),
-              ),
-          ],
-          const SizedBox(height: 14),
-        ],
-      ),
-    );
-  }
-}
-
-// ── Mini stat cell ────────────────────────────────────────────────────────────
-
-class _MiniStat extends StatelessWidget {
-  final String label;
-  final String value;
-  const _MiniStat({required this.label, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label,
-            style: const TextStyle(
-                color: AppColors.textTertiary,
-                fontSize: 10,
-                fontWeight: FontWeight.w500)),
-        const SizedBox(height: 2),
-        Text(value,
-            style: const TextStyle(
-                color: AppColors.textPrimary,
-                fontSize: 13,
-                fontWeight: FontWeight.w700)),
-      ],
-    );
-  }
-}
-
-// ── Fallback shared coupon row ────────────────────────────────────────────────
-
-class _SharedCouponRow extends StatelessWidget {
-  final SharedCoupon coupon;
-  const _SharedCouponRow({required this.coupon});
-
-  String _fmtDate(String raw) {
-    try {
-      final dt = DateTime.parse(raw);
-      const months = ['', 'Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz',
-                      'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
-      return '${dt.day} ${months[dt.month]} ${dt.year}';
-    } catch (_) { return raw; }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: BoxDecoration(
-        color: AppColors.card,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.07), width: 0.5),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 36, height: 36,
-            decoration: BoxDecoration(
-              color: AppColors.brand.withOpacity(0.12),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: AppColors.brand.withOpacity(0.20), width: 0.5),
-            ),
-            child: const Icon(Icons.confirmation_number_outlined,
-                size: 16, color: AppColors.brand),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Kupon #${coupon.couponId.length > 8 ? coupon.couponId.substring(0, 8) : coupon.couponId}',
-                  style: const TextStyle(
-                    color: AppColors.textPrimary, fontSize: 14, fontWeight: FontWeight.w600),
-                ),
-                const SizedBox(height: 2),
-                Text(_fmtDate(coupon.createdAt),
-                    style: const TextStyle(color: AppColors.textTertiary, fontSize: 11)),
-              ],
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: AppColors.green.withOpacity(0.12),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: const Text('Herkese Açık',
-                style: TextStyle(
-                    color: AppColors.green, fontSize: 10, fontWeight: FontWeight.w700)),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ── Empty shared coupons ──────────────────────────────────────────────────────
-
-class _EmptySharedCoupons extends StatelessWidget {
-  const _EmptySharedCoupons();
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 32),
-        decoration: BoxDecoration(
-          color: AppColors.card,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.white.withOpacity(0.07), width: 0.5),
-        ),
-        child: Column(
-          children: [
-            Icon(Icons.confirmation_number_outlined,
-                size: 32, color: AppColors.textTertiary.withOpacity(0.4)),
-            const SizedBox(height: 10),
-            const Text(
-              'Henüz aktif kupon yok',
-              style: TextStyle(
-                color: AppColors.textTertiary,
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+            ...coupon.matche

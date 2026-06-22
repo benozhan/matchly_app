@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -24,14 +26,28 @@ class SharedCouponDetailPage extends StatefulWidget {
 class _SharedCouponDetailPageState extends State<SharedCouponDetailPage> {
   CouponDetail? _detail;
   bool _fetching = false;
+  bool _silentRefreshing = false;
   String? _fetchError;
+  Timer? _timer;
+
+  static const _kRefreshInterval = Duration(seconds: 15);
 
   @override
   void initState() {
     super.initState();
-    if (widget.localCoupon == null) _fetchDetail();
+    if (widget.localCoupon == null) {
+      _fetchDetail();
+      _timer = Timer.periodic(_kRefreshInterval, (_) => _silentRefresh());
+    }
   }
 
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  /// First load — shows spinner.
   Future<void> _fetchDetail() async {
     setState(() { _fetching = true; _fetchError = null; });
     final d = await SocialService.instance
@@ -41,6 +57,19 @@ class _SharedCouponDetailPageState extends State<SharedCouponDetailPage> {
       _detail = d;
       _fetching = false;
       if (d == null) _fetchError = 'Kupon detayı bulunamadı';
+    });
+  }
+
+  /// Subsequent refreshes — updates silently, no full-screen spinner.
+  Future<void> _silentRefresh() async {
+    if (_silentRefreshing || _fetching) return;
+    setState(() => _silentRefreshing = true);
+    final d = await SocialService.instance
+        .getCouponDetail(widget.sharedCoupon.couponId);
+    if (!mounted) return;
+    setState(() {
+      if (d != null) _detail = d;
+      _silentRefreshing = false;
     });
   }
 
@@ -65,9 +94,14 @@ class _SharedCouponDetailPageState extends State<SharedCouponDetailPage> {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: CustomScrollView(
+        child: RefreshIndicator(
+          color: AppColors.brand,
+          backgroundColor: AppColors.card,
+          onRefresh: widget.localCoupon == null ? _silentRefresh : () async {},
+          child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
-            // ── Back button ───────────────────────────────────────────────
+            // ── Back button + refresh ──────────────────────────────────────
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(8, 8, 16, 0),
@@ -78,6 +112,24 @@ class _SharedCouponDetailPageState extends State<SharedCouponDetailPage> {
                           size: 18, color: AppColors.textSecondary),
                       onPressed: () => Navigator.of(context).pop(),
                     ),
+                    const Spacer(),
+                    if (widget.localCoupon == null)
+                      SizedBox(
+                        width: 36, height: 36,
+                        child: _silentRefreshing
+                            ? const Padding(
+                                padding: EdgeInsets.all(9),
+                                child: CircularProgressIndicator(
+                                    strokeWidth: 1.5,
+                                    color: AppColors.textTertiary),
+                              )
+                            : IconButton(
+                                padding: EdgeInsets.zero,
+                                icon: const Icon(Icons.refresh_rounded,
+                                    size: 18, color: AppColors.textTertiary),
+                                onPressed: _silentRefresh,
+                              ),
+                      ),
                   ],
                 ),
               ),
@@ -153,6 +205,7 @@ class _SharedCouponDetailPageState extends State<SharedCouponDetailPage> {
                 child: _MetaSection(
                   sharedCoupon: sharedCoupon,
                   owner: owner,
+                  detail: _detail,
                   fmtDate: _fmtDate,
                 ),
               ),
@@ -176,6 +229,7 @@ class _SharedCouponDetailPageState extends State<SharedCouponDetailPage> {
             ),
           ],
         ),
+        ),
       ),
     );
   }
@@ -186,11 +240,13 @@ class _SharedCouponDetailPageState extends State<SharedCouponDetailPage> {
 class _MetaSection extends StatelessWidget {
   final SharedCoupon sharedCoupon;
   final SocialUser? owner;
+  final CouponDetail? detail;
   final String Function(String) fmtDate;
 
   const _MetaSection({
     required this.sharedCoupon,
     required this.owner,
+    this.detail,
     required this.fmtDate,
   });
 
@@ -216,7 +272,9 @@ class _MetaSection extends StatelessWidget {
             label: 'Paylaşan',
             value: owner != null
                 ? '${owner!.displayName} (@${owner!.username})'
-                : '@bilinmiyor',
+                : detail != null
+                    ? '${detail!.ownerDisplayName} (@${detail!.ownerUsername})'
+                    : '@bilinmiyor',
           ),
           _Divider(),
           _MetaRow(
@@ -729,7 +787,8 @@ class _LoadingDetail extends StatelessWidget {
         border: Border.all(color: Colors.white.withOpacity(0.07), width: 0.5),
       ),
       child: const Center(
-        child: CircularProgressIndicator(
+
+        child: const CircularProgressIndicator(
             color: AppColors.brand, strokeWidth: 2),
       ),
     );
