@@ -95,6 +95,19 @@ class _ProfilePageState extends State<ProfilePage> {
     setState(() {
       _followLoading = true;
       _isFollowing = !was;
+      // Optimistic count — corrected by getUser() once API responds
+      if (_user != null) {
+        final u = _user!;
+        _user = SocialUser(
+          id: u.id,
+          username: u.username,
+          displayName: u.displayName,
+          avatar: u.avatar,
+          createdAt: u.createdAt,
+          followerCount: (u.followerCount + (was ? -1 : 1)).clamp(0, 999999),
+          followingCount: u.followingCount,
+        );
+      }
     });
 
     try {

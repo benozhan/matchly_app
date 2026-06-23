@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../core/app_colors.dart';
 import '../../models/coupon.dart';
+import '../coupon/coupon_detail_page.dart';
+import '../gecmis/gecmis_page.dart';
 import '../profile/profile_page.dart';
 
 class AyarlarPage extends StatefulWidget {
@@ -157,6 +159,35 @@ class _AyarlarPageState extends State<AyarlarPage> {
           ),
         ),
         const SizedBox(height: 26),
+
+        // ── Geçmiş ───────────────────────────────────────────────────────────
+        _SectionLabel('GEÇMİŞ'),
+        const SizedBox(height: 8),
+        Container(
+          decoration: _sectionDeco(),
+          child: _ActionRow(
+            icon: Icons.history_rounded,
+            title: 'Kupon Geçmişi',
+            subtitle: 'Tamamlanan kuponları görüntüle',
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (ctx) => GecmisPage(
+                  coupons: widget.coupons,
+                  onCouponTap: (c) => Navigator.of(ctx).push(
+                    MaterialPageRoute(
+                      builder: (_) => CouponDetailPage(
+                        coupon: c,
+                        resolved: true,
+                        allCoupons: widget.coupons,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
 
         // ── Genel ────────────────────────────────────────────────────────────
         _SectionLabel('GENEL'),

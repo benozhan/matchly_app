@@ -7,7 +7,7 @@ import '../../models/coupon.dart';
 import '../add_coupon/add_coupon_sheet.dart';
 import '../coupon/coupon_detail_page.dart';
 import '../ayarlar/ayarlar_page.dart';
-import '../gecmis/gecmis_page.dart';
+import '../profile/feed_page.dart';
 import '../istatistik/istatistik_page.dart';
 import '../shared_coupon/shared_coupon_preview_page.dart';
 import 'bottom_nav.dart';
@@ -421,21 +421,7 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
               children: [
                 Expanded(
                   child: _navIndex == 1
-                      ? GecmisPage(
-                          coupons: _historyEntries.map((e) => e.coupon).toList(),
-                          onCouponTap: (c) => Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => CouponDetailPage(
-                                coupon: c,
-                                resolved: true,
-                                onSharedIdGenerated: (id) => _saveHistorySharedId(c, id),
-                                onStatusChanged: (s) => _updateHistoryStatus(c, s),
-                                allCoupons: _allCoupons,
-                              ),
-                            ),
-                          ),
-                          onSharedIdGenerated: _saveHistorySharedId,
-                        )
+                      ? FeedPage(username: 'ozhan')
                       : _navIndex == 2
                           ? IstatistikPage(
                               allCoupons: _allCoupons,

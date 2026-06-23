@@ -50,8 +50,8 @@ class BottomNav extends StatelessWidget {
               onTap: () => onTabChanged?.call(0),
             ),
             _NavTab(
-              icon: Icons.history_rounded,
-              label: 'Geçmiş',
+              icon: Icons.dynamic_feed_rounded,
+              label: 'Akış',
               active: activeIndex == 1,
               onTap: () => onTabChanged?.call(1),
             ),
