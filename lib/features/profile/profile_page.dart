@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/app_colors.dart';
 import '../../models/coupon.dart';
 import '../../services/social_service.dart';
+import '../home/match_row.dart';
 import 'feed_page.dart';
 import 'user_list_page.dart';
 import 'user_search_page.dart';
@@ -135,120 +136,312 @@ class _ProfilePageState extends State<ProfilePage> {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: _loading
-            ? const Center(child: CircularProgressIndicator())
-            : _error != null
-                ? Center(child: Text(_error!))
-                : CustomScrollView(
-                    controller: _scrollController,
-                    slivers: [
-                      SliverToBoxAdapter(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Text(
-                            '@${widget.username}',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
+        child: Align(
+          alignment: Alignment.topCenter,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 800),
+            child: _loading
+                ? const Center(
+                    child: CircularProgressIndicator(
+                        color: AppColors.brand, strokeWidth: 2))
+                : _error != null
+                    ? _ErrorState(message: _error!, onRetry: _load)
+                    : CustomScrollView(
+                        controller: _scrollController,
+                        slivers: [
+                          // ── Top bar ──────────────────────────────────────────
+                          SliverToBoxAdapter(
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(4, 8, 16, 0),
+                              child: Row(
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(
+                                        Icons.arrow_back_ios_new_rounded,
+                                        size: 18,
+                                        color: AppColors.textSecondary),
+                                    onPressed: () =>
+                                        Navigator.of(context).pop(),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                      ),
 
-                      SliverToBoxAdapter(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: _isOwnProfile
-                              ? Row(
-                                  children: [
-                                    Expanded(
-                                      child: ElevatedButton(
-                                        onPressed: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (_) =>
-                                                  UserSearchPage(),
-                                            ),
-                                          );
-                                        },
-                                        child: const Text("Arkadaş Ekle"),
-                                      ),
+                          // ── Avatar + display name + username ─────────────────
+                          SliverToBoxAdapter(
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  _Avatar(
+                                      displayName:
+                                          _user?.displayName ?? widget.username),
+                                  const SizedBox(height: 14),
+                                  Text(
+                                    _user?.displayName ?? widget.username,
+                                    style: const TextStyle(
+                                      color: AppColors.textPrimary,
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: -0.5,
                                     ),
-                                    const SizedBox(width: 10),
-                                    Expanded(
-                                      child: ElevatedButton(
-                                        onPressed: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (_) =>
-                                                  FeedPage(username: widget.username),
-                                            ),
-                                          );
-                                        },
-                                        child: const Text("Akış"),
-                                      ),
-                                    ),
-                                  ],
-                                )
-                              : ElevatedButton(
-                                  onPressed: _toggleFollow,
-                                  child: Text(
-                                    (_isFollowing ?? false)
-                                        ? "Takibi Bırak"
-                                        : "Takip Et",
                                   ),
-                                ),
-                        ),
-                      ),
-
-                      SliverToBoxAdapter(
-                        child: Padding(
-                          key: _couponsHeaderKey,
-                          padding: const EdgeInsets.all(16),
-                          child: const Text(
-                            "AKTİF KUPONLAR",
-                            style: TextStyle(color: Colors.white),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    '@${widget.username}',
+                                    style: const TextStyle(
+                                      color: AppColors.textSecondary,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
 
-                      SliverList(
-                        delegate: SliverChildBuilderDelegate(
-                          (context, i) {
-                            final sc = _sharedCoupons[i];
+                          // ── Stats: followers / following / coupons ───────────
+                          SliverToBoxAdapter(
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(20, 22, 20, 0),
+                              child: _StatsRow(
+                                followers: _user?.followerCount ?? 0,
+                                following: _user?.followingCount ?? 0,
+                                coupons: _sharedCoupons.length,
+                                username: widget.username,
+                                onScrollToCoupons: _scrollToCoupons,
+                              ),
+                            ),
+                          ),
 
-                            final local = widget.localCoupons
-                                .where((c) => c.sharedId == sc.couponId)
-                                .firstOrNull;
-
-                            return Padding(
-                              padding: const EdgeInsets.all(8),
-                              child: local != null
-                                  ? Column(
+                          // ── Action buttons ───────────────────────────────────
+                          SliverToBoxAdapter(
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
+                              child: _isOwnProfile
+                                  ? Row(
                                       children: [
-                                        if (local.matches.isNotEmpty) ...[
-                                          const SizedBox(height: 10),
-                                          ...local.matches.map(
-                                            (m) => Padding(
-                                              padding:
-                                                  const EdgeInsets.all(8),
-                                              child: MatchRow(match: m),
+                                        Expanded(
+                                          child: _ActionButton(
+                                            label: 'Kullanıcı Ara',
+                                            icon: Icons.person_search_rounded,
+                                            onTap: () {
+                                              if (_user == null) return;
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (_) => UserSearchPage(
+                                                      currentUser: _user!),
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                        ),
+                                        const SizedBox(width: 10),
+                                        Expanded(
+                                          child: _ActionButton(
+                                            label: 'Akış',
+                                            icon: Icons.dynamic_feed_rounded,
+                                            filled: true,
+                                            onTap: () => Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (_) => FeedPage(
+                                                    username: widget.username),
+                                              ),
                                             ),
                                           ),
-                                        ]
+                                        ),
                                       ],
                                     )
-                                  : Text("Kupon #${sc.couponId}"),
-                            );
-                          },
-                          childCount: _sharedCoupons.length,
-                        ),
+                                  : _FollowButton(
+                                      isFollowing: _isFollowing,
+                                      loading: _followLoading,
+                                      onTap: _toggleFollow,
+                                    ),
+                            ),
+                          ),
+
+                          // ── Section header ───────────────────────────────────
+                          SliverToBoxAdapter(
+                            child: Padding(
+                              key: _couponsHeaderKey,
+                              padding:
+                                  const EdgeInsets.fromLTRB(20, 30, 20, 14),
+                              child: Row(
+                                children: [
+                                  const Text(
+                                    'AKTİF KUPONLAR',
+                                    style: TextStyle(
+                                      color: AppColors.textSecondary,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w700,
+                                      letterSpacing: 0.8,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  if (_sharedCoupons.isNotEmpty)
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 7, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color:
+                                            AppColors.brand.withOpacity(0.15),
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Text(
+                                        '${_sharedCoupons.length}',
+                                        style: const TextStyle(
+                                          color: AppColors.brand,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ),
+
+                          // ── Coupon list or empty state ───────────────────────
+                          if (_sharedCoupons.isEmpty)
+                            const SliverToBoxAdapter(
+                                child: _EmptySharedCoupons())
+                          else
+                            SliverPadding(
+                              padding:
+                                  const EdgeInsets.fromLTRB(16, 0, 16, 40),
+                              sliver: SliverList(
+                                delegate: SliverChildBuilderDelegate(
+                                  (context, i) {
+                                    final sc = _sharedCoupons[i];
+                                    final local = widget.localCoupons
+                                        .where((c) =>
+                                            c.sharedId == sc.couponId)
+                                        .firstOrNull;
+                                    return Padding(
+                                      padding:
+                                          const EdgeInsets.only(bottom: 12),
+                                      child: local != null
+                                          ? _LocalCouponCard(coupon: local)
+                                          : _SharedCouponRow(coupon: sc),
+                                    );
+                                  },
+                                  childCount: _sharedCoupons.length,
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
-                    ],
-                  ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Error state ───────────────────────────────────────────────────────────────
+
+class _ErrorState extends StatelessWidget {
+  final String message;
+  final VoidCallback onRetry;
+  const _ErrorState({required this.message, required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.cloud_off_rounded,
+                color: AppColors.textTertiary, size: 40),
+            const SizedBox(height: 14),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                  color: AppColors.textSecondary, fontSize: 13),
+            ),
+            const SizedBox(height: 20),
+            GestureDetector(
+              onTap: onRetry,
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 11),
+                decoration: BoxDecoration(
+                  color: AppColors.brand.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                      color: AppColors.brand.withOpacity(0.35), width: 0.5),
+                ),
+                child: const Text('Tekrar Dene',
+                    style: TextStyle(
+                        color: AppColors.brand,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Action button (own-profile) ───────────────────────────────────────────────
+
+class _ActionButton extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final VoidCallback onTap;
+  final bool filled;
+
+  const _ActionButton({
+    required this.label,
+    required this.icon,
+    required this.onTap,
+    this.filled = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: filled
+              ? AppColors.brand.withOpacity(0.15)
+              : Colors.white.withOpacity(0.06),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: filled
+                ? AppColors.brand.withOpacity(0.35)
+                : Colors.white.withOpacity(0.10),
+            width: 0.5,
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon,
+                size: 15,
+                color: filled ? AppColors.brand : AppColors.textSecondary),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                color: filled ? AppColors.brand : AppColors.textSecondary,
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -273,7 +466,7 @@ class _FollowButton extends StatelessWidget {
     return GestureDetector(
       onTap: loading ? null : onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 11),
+        padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
           color: following
               ? Colors.white.withOpacity(0.06)
@@ -303,7 +496,9 @@ class _FollowButton extends StatelessWidget {
                         ? Icons.person_remove_rounded
                         : Icons.person_add_rounded,
                     size: 15,
-                    color: following ? AppColors.textSecondary : AppColors.brand,
+                    color: following
+                        ? AppColors.textSecondary
+                        : AppColors.brand,
                   ),
                   const SizedBox(width: 6),
                   Text(
@@ -340,8 +535,8 @@ class _Avatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 72,
-      height: 72,
+      width: 84,
+      height: 84,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: LinearGradient(
@@ -352,8 +547,8 @@ class _Avatar extends StatelessWidget {
         boxShadow: [
           BoxShadow(
             color: AppColors.brand.withOpacity(0.35),
-            blurRadius: 20,
-            offset: const Offset(0, 6),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
@@ -362,7 +557,7 @@ class _Avatar extends StatelessWidget {
         _initials,
         style: const TextStyle(
           color: Colors.white,
-          fontSize: 24,
+          fontSize: 28,
           fontWeight: FontWeight.w800,
           letterSpacing: -0.5,
         ),
@@ -411,9 +606,6 @@ class _StatsRow extends StatelessWidget {
             child: _StatCell(
               value: followers,
               label: 'Takipçi',
-              onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) => FollowersPage(username: username),
-              )),
             ),
           ),
           _VertDivider(),
@@ -421,9 +613,6 @@ class _StatsRow extends StatelessWidget {
             child: _StatCell(
               value: following,
               label: 'Takip',
-              onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) => FollowingPage(username: username),
-              )),
             ),
           ),
           _VertDivider(),
@@ -431,6 +620,7 @@ class _StatsRow extends StatelessWidget {
             child: _StatCell(
               value: coupons,
               label: 'Kupon',
+              onTap: onScrollToCoupons,
             ),
           ),
         ],
@@ -489,6 +679,7 @@ class _VertDivider extends StatelessWidget {
       );
 }
 
+// ── Empty state ───────────────────────────────────────────────────────────────
 
 class _EmptySharedCoupons extends StatelessWidget {
   const _EmptySharedCoupons();
@@ -496,46 +687,24 @@ class _EmptySharedCoupons extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Padding(
-      padding: EdgeInsets.fromLTRB(24, 8, 24, 0),
-      child: Text(
-        'Henüz paylaşılan kupon yok.',
-        style: TextStyle(
-          color: AppColors.textTertiary,
-          fontSize: 12,
-        ),
-      ),
-    );
-  }
-}
-
-class _SharedCouponRow extends StatelessWidget {
-  final SharedCoupon coupon;
-  const _SharedCouponRow({required this.coupon});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: AppColors.card,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
+      padding: EdgeInsets.fromLTRB(20, 16, 20, 0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Expanded(
-            child: Text(
-              'Kupon #${coupon.couponId}',
-              style: const TextStyle(
-                color: AppColors.textPrimary,
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-              ),
+          Text('🏟️', style: TextStyle(fontSize: 32)),
+          SizedBox(height: 12),
+          Text(
+            'Henüz paylaşılan kupon yok.',
+            style: TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
             ),
           ),
-          const Icon(
-            Icons.chevron_right,
-            color: AppColors.textTertiary,
-            size: 18,
+          SizedBox(height: 6),
+          Text(
+            'Kupon paylaşıldığında burada görünür.',
+            style: TextStyle(color: AppColors.textTertiary, fontSize: 12),
           ),
         ],
       ),
@@ -543,6 +712,207 @@ class _SharedCouponRow extends StatelessWidget {
   }
 }
 
+// ── Shared coupon card (fetches CouponDetail for rich display) ────────────────
+
+class _SharedCouponRow extends StatefulWidget {
+  final SharedCoupon coupon;
+  const _SharedCouponRow({required this.coupon});
+
+  @override
+  State<_SharedCouponRow> createState() => _SharedCouponRowState();
+}
+
+class _SharedCouponRowState extends State<_SharedCouponRow> {
+  CouponDetail? _detail;
+  bool _fetching = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetch();
+  }
+
+  Future<void> _fetch() async {
+    try {
+      final d = await SocialService.instance
+          .getCouponDetail(widget.coupon.couponId);
+      if (mounted) setState(() { _detail = d; _fetching = false; });
+    } catch (_) {
+      if (mounted) setState(() => _fetching = false);
+    }
+  }
+
+  Color _statusColor(String s) {
+    switch (s.toLowerCase()) {
+      case 'winning':   return AppColors.green;
+      case 'risk':      return AppColors.red;
+      case 'cancelled': return AppColors.textTertiary;
+      default:          return AppColors.textSecondary;
+    }
+  }
+
+  String _statusLabel(String s) {
+    switch (s.toLowerCase()) {
+      case 'winning':   return 'Kazanıyor';
+      case 'risk':      return 'Riskli';
+      case 'pending':   return 'Bekliyor';
+      case 'cancelled': return 'İptal';
+      default:          return s;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_fetching) {
+      return Container(
+        height: 80,
+        decoration: BoxDecoration(
+          color: AppColors.card,
+          borderRadius: BorderRadius.circular(18),
+          border:
+              Border.all(color: Colors.white.withOpacity(0.07), width: 0.5),
+        ),
+        child: const Center(
+          child: SizedBox(
+            width: 18,
+            height: 18,
+            child: CircularProgressIndicator(
+                color: AppColors.brand, strokeWidth: 1.5),
+          ),
+        ),
+      );
+    }
+
+    final d = _detail;
+    if (d == null) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: AppColors.card,
+          borderRadius: BorderRadius.circular(16),
+          border:
+              Border.all(color: Colors.white.withOpacity(0.07), width: 0.5),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 34,
+              height: 34,
+              decoration: BoxDecoration(
+                color: AppColors.brand.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(Icons.receipt_long_rounded,
+                  color: AppColors.brand, size: 17),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'Kupon #${widget.coupon.couponId}',
+                style: const TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: Colors.white.withOpacity(0.07), width: 0.5),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.25),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    d.title.isNotEmpty ? d.title : 'Kupon #${d.couponId}',
+                    style: const TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: _statusColor(d.status).withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    _statusLabel(d.status),
+                    style: TextStyle(
+                      color: _statusColor(d.status),
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+            child: Row(
+              children: [
+                if (d.siteName.isNotEmpty) ...[
+                  const Icon(Icons.language_rounded,
+                      size: 11, color: AppColors.textTertiary),
+                  const SizedBox(width: 4),
+                  Text(d.siteName,
+                      style: const TextStyle(
+                          color: AppColors.textTertiary, fontSize: 11)),
+                  const SizedBox(width: 10),
+                ],
+                if (d.selections.isNotEmpty) ...[
+                  const Icon(Icons.format_list_numbered_rounded,
+                      size: 11, color: AppColors.textTertiary),
+                  const SizedBox(width: 4),
+                  Text('${d.selections.length} seçim',
+                      style: const TextStyle(
+                          color: AppColors.textTertiary, fontSize: 11)),
+                ],
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
+            child: Row(
+              children: [
+                _MiniStat(label: 'Bahis',    value: d.stake),
+                const SizedBox(width: 16),
+                _MiniStat(label: 'Oran',     value: d.odds),
+                const SizedBox(width: 16),
+                _MiniStat(label: 'Beklenti', value: d.potential),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 // ── Local coupon card (rich display when matched) ─────────────────────────────
 
@@ -607,7 +977,8 @@ class _LocalCouponCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
                     color: _statusColor(coupon.status).withOpacity(0.12),
                     borderRadius: BorderRadius.circular(8),
@@ -669,6 +1040,8 @@ class _LocalCouponCard extends StatelessWidget {
     );
   }
 }
+
+// ── Mini stat cell inside coupon card ─────────────────────────────────────────
 
 class _MiniStat extends StatelessWidget {
   final String label;
