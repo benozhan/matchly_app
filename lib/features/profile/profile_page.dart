@@ -4,16 +4,12 @@ import '../../core/app_colors.dart';
 import '../../models/coupon.dart';
 import '../../services/social_service.dart';
 import 'feed_page.dart';
-import 'shared_coupon_detail_page.dart';
 import 'user_list_page.dart';
 import 'user_search_page.dart';
 
 class ProfilePage extends StatefulWidget {
   final String username;
-  /// Local coupons from the app — matched against sharedCoupon.couponId ↔ Coupon.sharedId
   final List<Coupon> localCoupons;
-  /// Username of the currently logged-in user.
-  /// When null or equal to [username], the page is in "own profile" mode.
   final String? currentUsername;
 
   const ProfilePage({
@@ -28,22 +24,21 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  SocialUser?        _user;
+  SocialUser? _user;
   List<SharedCoupon> _sharedCoupons = [];
-  bool    _loading = true;
+  bool _loading = true;
   String? _error;
 
-  // Follow state — only relevant when viewing another user's profile.
   bool? _isFollowing;
-  bool  _followLoading = false;
+  bool _followLoading = false;
   String? _currentUserId;
 
   bool get _isOwnProfile =>
       widget.currentUsername == null ||
       widget.currentUsername == widget.username;
 
-  final _scrollController  = ScrollController();
-  final _couponsHeaderKey  = GlobalKey();
+  final _scrollController = ScrollController();
+  final _couponsHeaderKey = GlobalKey();
 
   @override
   void initState() {
@@ -51,71 +46,87 @@ class _ProfilePageState extends State<ProfilePage> {
     _load();
   }
 
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-
   Future<void> _load() async {
-    setState(() { _loading = true; _error = null; });
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+
     try {
       final results = await Future.wait([
         SocialService.instance.getUser(widget.username),
         SocialService.instance.getSharedCoupons(widget.username),
       ]);
-      if (!mounted) return;
-      _user          = results[0] as SocialUser;
+
+      _user = results[0] as SocialUser;
       _sharedCoupons = results[1] as List<SharedCoupon>;
 
-      // Load follow state when viewing another user's profile.
       if (!_isOwnProfile) {
         try {
-          final cu       = await SocialService.instance.getUser(widget.currentUsername!);
-          final following = await SocialService.instance.getFollowing(widget.currentUsername!);
-          if (!mounted) return;
+          final cu =
+              await SocialService.instance.getUser(widget.currentUsername!);
+          final following =
+              await SocialService.instance.getFollowing(widget.currentUsername!);
+
           _currentUserId = cu.id;
-          _isFollowing   = following.any((u) => u.username == widget.username);
+          _isFollowing =
+              following.any((u) => u.username == widget.username);
         } catch (_) {
           _isFollowing = false;
         }
       }
 
       if (!mounted) return;
-      setState(() { _loading = false; });
+      setState(() => _loading = false);
     } catch (e) {
-      if (!mounted) return;
-      setState(() { _error = e.toString(); _loading = false; });
+      setState(() {
+        _error = e.toString();
+        _loading = false;
+      });
     }
   }
 
   Future<void> _toggleFollow() async {
     if (_currentUserId == null || _user == null || _followLoading) return;
+
     final was = _isFollowing ?? false;
-    // Optimistic update.
-    setState(() { _followLoading = true; _isFollowing = !was; });
+
+    setState(() {
+      _followLoading = true;
+      _isFollowing = !was;
+    });
+
     try {
       if (was) {
         await SocialService.instance.unfollow(_currentUserId!, _user!.id);
       } else {
         await SocialService.instance.follow(_currentUserId!, _user!.id);
       }
-      // Refresh counts.
-      final updated = await SocialService.instance.getUser(widget.username);
+
+      final updated =
+          await SocialService.instance.getUser(widget.username);
+
       if (!mounted) return;
-      setState(() { _user = updated; _followLoading = false; });
+      setState(() {
+        _user = updated;
+        _followLoading = false;
+      });
     } catch (_) {
-      if (!mounted) return;
-      setState(() { _isFollowing = was; _followLoading = false; });
+      setState(() {
+        _isFollowing = was;
+        _followLoading = false;
+      });
     }
   }
 
   void _scrollToCoupons() {
     final ctx = _couponsHeaderKey.currentContext;
     if (ctx != null) {
-      Scrollable.ensureVisible(ctx,
-          duration: const Duration(milliseconds: 350),
-          curve: Curves.easeInOut);
+      Scrollable.ensureVisible(
+        ctx,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
     }
   }
 
@@ -124,345 +135,120 @@ class _ProfilePageState extends State<ProfilePage> {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 430),
-          child: _loading
-              ? const _LoadingBody()
-              : _error != null
-                  ? _ErrorBody(error: _error!, onRetry: _load)
-                  : RefreshIndicator(
-                      color: AppColors.brand,
-                      backgroundColor: AppColors.card,
-                      onRefresh: _load,
-                      child: _ProfileBody(
-                        user: _user!,
-                        sharedCoupons: _sharedCoupons,
-                        localCoupons: widget.localCoupons,
-                        scrollController: _scrollController,
-                        couponsHeaderKey: _couponsHeaderKey,
-                        onScrollToCoupons: _scrollToCoupons,
-                        isOwnProfile: _isOwnProfile,
-                        isFollowing: _isFollowing,
-                        followLoading: _followLoading,
-                        onFollowTap: _toggleFollow,
-                      ),
-                    ),
-        ),
-      ),
-    );
-  }
-}
-
-// ── Loading ───────────────────────────────────────────────────────────────────
-
-class _LoadingBody extends StatelessWidget {
-  const _LoadingBody();
-
-  @override
-  Widget build(BuildContext context) => const Center(
-        child: CircularProgressIndicator(color: AppColors.brand, strokeWidth: 2),
-      );
-}
-
-// ── Error ─────────────────────────────────────────────────────────────────────
-
-class _ErrorBody extends StatelessWidget {
-  final String error;
-  final VoidCallback onRetry;
-  const _ErrorBody({required this.error, required this.onRetry});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.cloud_off_rounded,
-                size: 44, color: AppColors.textTertiary.withOpacity(0.5)),
-            const SizedBox(height: 16),
-            const Text('Profil yüklenemedi',
-                style: TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700)),
-            const SizedBox(height: 6),
-            Text('Sunucuya bağlanılamıyor',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                    color: AppColors.textTertiary.withOpacity(0.8),
-                    fontSize: 13)),
-            const SizedBox(height: 24),
-            GestureDetector(
-              onTap: onRetry,
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 11),
-                decoration: BoxDecoration(
-                  color: AppColors.brand.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                      color: AppColors.brand.withOpacity(0.30), width: 0.5),
-                ),
-                child: const Text('Tekrar Dene',
-                    style: TextStyle(
-                        color: AppColors.brand,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700)),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ── Profile body ──────────────────────────────────────────────────────────────
-
-class _ProfileBody extends StatelessWidget {
-  final SocialUser user;
-  final List<SharedCoupon> sharedCoupons;
-  final List<Coupon> localCoupons;
-  final ScrollController scrollController;
-  final GlobalKey couponsHeaderKey;
-  final VoidCallback onScrollToCoupons;
-  final bool isOwnProfile;
-  final bool? isFollowing;
-  final bool followLoading;
-  final VoidCallback onFollowTap;
-
-  const _ProfileBody({
-    required this.user,
-    required this.sharedCoupons,
-    required this.localCoupons,
-    required this.scrollController,
-    required this.couponsHeaderKey,
-    required this.onScrollToCoupons,
-    required this.isOwnProfile,
-    this.isFollowing,
-    this.followLoading = false,
-    required this.onFollowTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return CustomScrollView(
-      controller: scrollController,
-      physics: const AlwaysScrollableScrollPhysics(),
-      slivers: [
-        // ── Back button ───────────────────────────────────────────────────
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(8, 8, 16, 0),
-            child: Row(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                      size: 18, color: AppColors.textSecondary),
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
-              ],
-            ),
-          ),
-        ),
-
-        // ── Avatar + name ─────────────────────────────────────────────────
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _Avatar(displayName: user.displayName),
-                const SizedBox(height: 16),
-                Text(
-                  user.displayName,
-                  style: const TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 26,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.6,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  '@${user.username}',
-                  style: const TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-
-        // ── Stats row (tappable) ──────────────────────────────────────────
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(24, 22, 24, 0),
-            child: _StatsRow(
-              followers:         user.followerCount,
-              following:         user.followingCount,
-              coupons:           sharedCoupons.length,
-              username:          user.username,
-              onScrollToCoupons: onScrollToCoupons,
-            ),
-          ),
-        ),
-
-        // ── Action buttons ────────────────────────────────────────────────
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
-            child: isOwnProfile
-                // Own profile: Arkadaş Ekle + Akış
-                ? Row(
-                    children: [
-                      Expanded(
-                        child: _ActionButton(
-                          icon: Icons.person_add_rounded,
-                          label: 'Arkadaş Ekle',
-                          onTap: () => Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => UserSearchPage(currentUser: user),
+        child: _loading
+            ? const Center(child: CircularProgressIndicator())
+            : _error != null
+                ? Center(child: Text(_error!))
+                : CustomScrollView(
+                    controller: _scrollController,
+                    slivers: [
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Text(
+                            '@${widget.username}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
                       ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: _ActionButton(
-                          icon: Icons.dynamic_feed_rounded,
-                          label: 'Akış',
-                          onTap: () => Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => FeedPage(username: user.username),
-                            ),
+
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: _isOwnProfile
+                              ? Row(
+                                  children: [
+                                    Expanded(
+                                      child: ElevatedButton(
+                                        onPressed: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) =>
+                                                  UserSearchPage(),
+                                            ),
+                                          );
+                                        },
+                                        child: const Text("Arkadaş Ekle"),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: ElevatedButton(
+                                        onPressed: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) =>
+                                                  FeedPage(username: widget.username),
+                                            ),
+                                          );
+                                        },
+                                        child: const Text("Akış"),
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              : ElevatedButton(
+                                  onPressed: _toggleFollow,
+                                  child: Text(
+                                    (_isFollowing ?? false)
+                                        ? "Takibi Bırak"
+                                        : "Takip Et",
+                                  ),
+                                ),
+                        ),
+                      ),
+
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          key: _couponsHeaderKey,
+                          padding: const EdgeInsets.all(16),
+                          child: const Text(
+                            "AKTİF KUPONLAR",
+                            style: TextStyle(color: Colors.white),
                           ),
+                        ),
+                      ),
+
+                      SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, i) {
+                            final sc = _sharedCoupons[i];
+
+                            final local = widget.localCoupons
+                                .where((c) => c.sharedId == sc.couponId)
+                                .firstOrNull;
+
+                            return Padding(
+                              padding: const EdgeInsets.all(8),
+                              child: local != null
+                                  ? Column(
+                                      children: [
+                                        if (local.matches.isNotEmpty) ...[
+                                          const SizedBox(height: 10),
+                                          ...local.matches.map(
+                                            (m) => Padding(
+                                              padding:
+                                                  const EdgeInsets.all(8),
+                                              child: MatchRow(match: m),
+                                            ),
+                                          ),
+                                        ]
+                                      ],
+                                    )
+                                  : Text("Kupon #${sc.couponId}"),
+                            );
+                          },
+                          childCount: _sharedCoupons.length,
                         ),
                       ),
                     ],
-                  )
-                // Another user's profile: follow / unfollow button
-                : _FollowButton(
-                    isFollowing: isFollowing,
-                    loading: followLoading,
-                    onTap: onFollowTap,
                   ),
-          ),
-        ),
-
-        // ── Shared coupons header ─────────────────────────────────────────
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(24, 28, 24, 8),
-            child: Row(
-              key: couponsHeaderKey,
-              children: [
-                const Text(
-                  'AKTİF KUPONLAR',
-                  style: TextStyle(
-                    color: AppColors.textTertiary,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1.0,
-                  ),
-                ),
-                const Spacer(),
-                if (sharedCoupons.isNotEmpty)
-                  Text(
-                    '${sharedCoupons.length}',
-                    style: const TextStyle(
-                      color: AppColors.textTertiary,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ),
-
-        // ── Shared coupons list ───────────────────────────────────────────
-        if (sharedCoupons.isEmpty)
-          const SliverToBoxAdapter(child: _EmptySharedCoupons())
-        else
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
-            sliver: SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, i) {
-                  final sc = sharedCoupons[i];
-                  // Try to match against a local coupon by sharedId
-                  final local = localCoupons
-                      .where((c) => c.sharedId == sc.couponId)
-                      .firstOrNull;
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 10),
-                    child: GestureDetector(
-                      onTap: () => Navigator.of(context)
-                          .pushNamed('/coupon/${sc.couponId}'),
-                      child: local != null
-                          ? _LocalCouponCard(coupon: local)
-                          : _SharedCouponRow(coupon: sc),
-                    ),
-                  );
-                },
-                childCount: sharedCoupons.length,
-              ),
-            ),
-          ),
-
-        const SliverToBoxAdapter(child: SizedBox(height: 32)),
-      ],
-    );
-  }
-}
-
-// ── Action button ─────────────────────────────────────────────────────────────
-
-class _ActionButton extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-
-  const _ActionButton({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 11),
-        decoration: BoxDecoration(
-          color: AppColors.card,
-          borderRadius: BorderRadius.circular(14),
-          border:
-              Border.all(color: Colors.white.withOpacity(0.08), width: 0.5),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 15, color: AppColors.brand),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: const TextStyle(
-                color: AppColors.textPrimary,
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -866,45 +652,18 @@ class _LocalCouponCard extends StatelessWidget {
             const SizedBox(height: 12),
             const Padding(
               padding: EdgeInsets.fromLTRB(16, 0, 16, 0),
-              child: Divider(height: 1, thickness: 0.5, color: Color(0x0DFFFFFF)),
-            ),
-            ...coupon.matches.map((match) => _CouponMatchRow(match: match)),
-            const SizedBox(height: 12),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _CouponMatchRow extends StatelessWidget {
-  final MatchItem match;
-  const _CouponMatchRow({required this.match});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              match.teams,
-              style: const TextStyle(
-                color: AppColors.textPrimary,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
+              child: Divider(
+                height: 1,
+                thickness: 0.5,
+                color: Color(0x0DFFFFFF),
               ),
             ),
-          ),
-          const SizedBox(width: 8),
-          Text(
-            match.selection,
-            style: const TextStyle(
-              color: AppColors.textSecondary,
-              fontSize: 11,
-            ),
-          ),
+            ...coupon.matches.map((m) => Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                  child: MatchRow(match: m),
+                )).toList(),
+            const SizedBox(height: 14),
+          ],
         ],
       ),
     );
