@@ -100,8 +100,11 @@ class _UserSearchPageState extends State<UserSearchPage> {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: Column(
-          children: [
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 430),
+            child: Column(
+              children: [
             // ── Header ──────────────────────────────────────────────────
             Padding(
               padding: const EdgeInsets.fromLTRB(8, 8, 16, 0),
@@ -203,9 +206,11 @@ class _UserSearchPageState extends State<UserSearchPage> {
                               },
                             ),
             ),
-          ],
-        ),
-      ),
+              ],
+            ),    // Column
+          ),      // ConstrainedBox
+        ),        // Center
+      ),          // SafeArea
     );
   }
 }

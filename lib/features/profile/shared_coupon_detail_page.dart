@@ -31,6 +31,7 @@ class _SharedCouponDetailPageState extends State<SharedCouponDetailPage> {
   Timer? _timer;
 
   static const _kRefreshInterval = Duration(seconds: 15);
+  static const _kMaxWidth = 430.0;
 
   @override
   void initState() {
@@ -47,7 +48,6 @@ class _SharedCouponDetailPageState extends State<SharedCouponDetailPage> {
     super.dispose();
   }
 
-  /// First load — shows spinner.
   Future<void> _fetchDetail() async {
     setState(() { _fetching = true; _fetchError = null; });
     final d = await SocialService.instance
@@ -60,7 +60,6 @@ class _SharedCouponDetailPageState extends State<SharedCouponDetailPage> {
     });
   }
 
-  /// Subsequent refreshes — updates silently, no full-screen spinner.
   Future<void> _silentRefresh() async {
     if (_silentRefreshing || _fetching) return;
     setState(() => _silentRefreshing = true);
@@ -83,7 +82,8 @@ class _SharedCouponDetailPageState extends State<SharedCouponDetailPage> {
       final dt = DateTime.parse(raw).toLocal();
       const months = ['', 'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
                       'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
-      return '${dt.day} ${months[dt.month]} ${dt.year}, ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+      return '${dt.day} ${months[dt.month]} ${dt.year},'
+          ' ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
     } catch (_) { return raw; }
   }
 
@@ -91,144 +91,157 @@ class _SharedCouponDetailPageState extends State<SharedCouponDetailPage> {
   Widget build(BuildContext context) {
     final sharedCoupon = widget.sharedCoupon;
     final owner = widget.owner;
+    final bottomPad = MediaQuery.paddingOf(context).bottom;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
+        bottom: false,
         child: RefreshIndicator(
           color: AppColors.brand,
           backgroundColor: AppColors.card,
           onRefresh: widget.localCoupon == null ? _silentRefresh : () async {},
-          child: CustomScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          slivers: [
-            // ── Back button + refresh ──────────────────────────────────────
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(8, 8, 16, 0),
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                          size: 18, color: AppColors.textSecondary),
-                      onPressed: () => Navigator.of(context).pop(),
-                    ),
-                    const Spacer(),
-                    if (widget.localCoupon == null)
-                      SizedBox(
-                        width: 36, height: 36,
-                        child: _silentRefreshing
-                            ? const Padding(
-                                padding: EdgeInsets.all(9),
-                                child: CircularProgressIndicator(
-                                    strokeWidth: 1.5,
-                                    color: AppColors.textTertiary),
-                              )
-                            : IconButton(
-                                padding: EdgeInsets.zero,
-                                icon: const Icon(Icons.refresh_rounded,
-                                    size: 18, color: AppColors.textTertiary),
-                                onPressed: _silentRefresh,
-                              ),
-                      ),
-                  ],
-                ),
-              ),
-            ),
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: _kMaxWidth),
+              child: CustomScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                slivers: [
 
-            // ── Header ────────────────────────────────────────────────────
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          width: 48, height: 48,
-                          decoration: BoxDecoration(
-                            color: AppColors.brand.withOpacity(0.12),
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(
-                                color: AppColors.brand.withOpacity(0.25), width: 0.5),
+                  // ── Nav bar ────────────────────────────────────────────────
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(4, 14, 16, 0),
+                      child: Row(
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.arrow_back_ios_new_rounded,
+                                size: 18, color: AppColors.textSecondary),
+                            onPressed: () => Navigator.of(context).maybePop(),
                           ),
-                          child: const Icon(Icons.confirmation_number_outlined,
-                              size: 22, color: AppColors.brand),
-                        ),
-                        const SizedBox(width: 14),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Kupon #$_shortId',
-                              style: const TextStyle(
-                                color: AppColors.textPrimary,
-                                fontSize: 22,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: -0.5,
-                              ),
+                          const Spacer(),
+                          if (widget.localCoupon == null)
+                            SizedBox(
+                              width: 36, height: 36,
+                              child: _silentRefreshing
+                                  ? const Padding(
+                                      padding: EdgeInsets.all(9),
+                                      child: CircularProgressIndicator(
+                                          strokeWidth: 1.5,
+                                          color: AppColors.textTertiary),
+                                    )
+                                  : IconButton(
+                                      padding: EdgeInsets.zero,
+                                      icon: const Icon(Icons.refresh_rounded,
+                                          size: 18, color: AppColors.textTertiary),
+                                      onPressed: _silentRefresh,
+                                    ),
                             ),
-                            const SizedBox(height: 3),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 3),
-                              decoration: BoxDecoration(
-                                color: sharedCoupon.isPublic
-                                    ? AppColors.green.withOpacity(0.12)
-                                    : AppColors.textTertiary.withOpacity(0.10),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Text(
-                                sharedCoupon.isPublic ? 'Herkese Açık' : 'Gizli',
-                                style: TextStyle(
-                                  color: sharedCoupon.isPublic
-                                      ? AppColors.green
-                                      : AppColors.textTertiary,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ],
-                ),
-              ),
-            ),
+                  ),
 
-            // ── Meta section ──────────────────────────────────────────────
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
-                child: _MetaSection(
-                  sharedCoupon: sharedCoupon,
-                  owner: owner,
-                  detail: _detail,
-                  fmtDate: _fmtDate,
-                ),
-              ),
-            ),
+                  // ── Header ─────────────────────────────────────────────────
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Container(
+                            width: 48, height: 48,
+                            decoration: BoxDecoration(
+                              color: AppColors.brand.withOpacity(0.12),
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                  color: AppColors.brand.withOpacity(0.25),
+                                  width: 0.5),
+                            ),
+                            child: const Icon(Icons.confirmation_number_outlined,
+                                size: 22, color: AppColors.brand),
+                          ),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Kupon #$_shortId',
+                                  style: const TextStyle(
+                                    color: AppColors.textPrimary,
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: -0.5,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 3),
+                                  decoration: BoxDecoration(
+                                    color: sharedCoupon.isPublic
+                                        ? AppColors.green.withOpacity(0.12)
+                                        : AppColors.textTertiary
+                                            .withOpacity(0.10),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Text(
+                                    sharedCoupon.isPublic
+                                        ? 'Herkese Açık'
+                                        : 'Gizli',
+                                    style: TextStyle(
+                                      color: sharedCoupon.isPublic
+                                          ? AppColors.green
+                                          : AppColors.textTertiary,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
 
-            // ── Local coupon details or placeholder ───────────────────────
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
-                child: widget.localCoupon != null
-                    ? _LocalDetails(coupon: widget.localCoupon!)
-                    : _fetching
-                        ? const _LoadingDetail()
-                        : _detail != null
-                            ? _FetchedDetails(detail: _detail!)
-                            : _ErrorDetail(
-                                error: _fetchError,
-                                onRetry: _fetchDetail,
-                              ),
+                  // ── Meta card ──────────────────────────────────────────────
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+                      child: _MetaSection(
+                        sharedCoupon: sharedCoupon,
+                        owner: owner,
+                        detail: _detail,
+                        fmtDate: _fmtDate,
+                      ),
+                    ),
+                  ),
+
+                  // ── Coupon detail card ─────────────────────────────────────
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.fromLTRB(
+                          20, 0, 20, 24 + bottomPad),
+                      child: widget.localCoupon != null
+                          ? _LocalDetails(coupon: widget.localCoupon!)
+                          : _fetching
+                              ? const _LoadingDetail()
+                              : _detail != null
+                                  ? _FetchedDetails(detail: _detail!)
+                                  : _ErrorDetail(
+                                      error: _fetchError,
+                                      onRetry: _fetchDetail,
+                                    ),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
         ),
       ),
     );
@@ -255,13 +268,13 @@ class _MetaSection extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFF141416),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(26),
         border: Border.all(color: Colors.white.withOpacity(0.07), width: 0.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.35),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
+            color: Colors.black.withOpacity(0.30),
+            blurRadius: 14,
+            offset: const Offset(0, 5),
             spreadRadius: -4,
           ),
         ],
@@ -285,7 +298,9 @@ class _MetaSection extends StatelessWidget {
           _MetaRow(
             label: 'Durum',
             value: sharedCoupon.isPublic ? 'Herkese Açık' : 'Gizli',
-            valueColor: sharedCoupon.isPublic ? AppColors.green : AppColors.textTertiary,
+            valueColor: sharedCoupon.isPublic
+                ? AppColors.green
+                : AppColors.textTertiary,
           ),
           _Divider(),
           _CopyableRow(
@@ -352,10 +367,12 @@ class _CopyableRow extends StatelessWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text('Kopyalandı',
-                style: TextStyle(color: AppColors.textPrimary, fontSize: 13)),
+                style: TextStyle(
+                    color: AppColors.textPrimary, fontSize: 13)),
             backgroundColor: const Color(0xFF1C1C1E),
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12)),
             duration: const Duration(seconds: 1),
           ),
         );
@@ -388,7 +405,8 @@ class _CopyableRow extends StatelessWidget {
             ),
             const SizedBox(width: 6),
             Icon(Icons.copy_rounded,
-                size: 13, color: AppColors.textTertiary.withOpacity(0.6)),
+                size: 13,
+                color: AppColors.textTertiary.withOpacity(0.6)),
           ],
         ),
       ),
@@ -400,7 +418,8 @@ class _Divider extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Padding(
         padding: const EdgeInsets.only(left: 16),
-        child: Container(height: 0.5, color: Colors.white.withOpacity(0.06)),
+        child: Container(
+            height: 0.5, color: Colors.white.withOpacity(0.06)),
       );
 }
 
@@ -425,13 +444,13 @@ class _LocalDetails extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFF141416),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(26),
         border: Border.all(color: Colors.white.withOpacity(0.07), width: 0.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.35),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
+            color: Colors.black.withOpacity(0.30),
+            blurRadius: 14,
+            offset: const Offset(0, 5),
             spreadRadius: -4,
           ),
         ],
@@ -439,7 +458,6 @@ class _LocalDetails extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Title + site
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
             child: Row(
@@ -454,7 +472,8 @@ class _LocalDetails extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.06),
                     borderRadius: BorderRadius.circular(7),
@@ -470,30 +489,30 @@ class _LocalDetails extends StatelessWidget {
               ],
             ),
           ),
-          // Stats row
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
             child: Row(
               children: [
-                _MiniStat(label: 'Bahis',    value: coupon.stake),
-                const SizedBox(width: 20),
-                _MiniStat(label: 'Oran',     value: _oddsDisplay),
-                const SizedBox(width: 20),
+                _MiniStat(label: 'Bahis', value: coupon.stake),
+                const SizedBox(width: 24),
+                _MiniStat(label: 'Oran', value: _oddsDisplay),
+                const SizedBox(width: 24),
                 _MiniStat(label: 'Beklenti', value: coupon.potential),
               ],
             ),
           ),
-          // Selections
           if (coupon.matches.isNotEmpty) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: 14),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-              child: Divider(height: 1, thickness: 0.5,
+              child: Divider(
+                  height: 1,
+                  thickness: 0.5,
                   color: Colors.white.withOpacity(0.06)),
             ),
             ...coupon.matches.map(
               (m) => Padding(
-                padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
                 child: Row(
                   children: [
                     Expanded(
@@ -516,7 +535,7 @@ class _LocalDetails extends StatelessWidget {
               ),
             ),
           ],
-          const SizedBox(height: 16),
+          const SizedBox(height: 18),
         ],
       ),
     );
@@ -538,7 +557,7 @@ class _MiniStat extends StatelessWidget {
                 color: AppColors.textTertiary,
                 fontSize: 10,
                 fontWeight: FontWeight.w500)),
-        const SizedBox(height: 2),
+        const SizedBox(height: 3),
         Text(value,
             style: const TextStyle(
                 color: AppColors.textPrimary,
@@ -557,10 +576,10 @@ class _FetchedDetails extends StatelessWidget {
 
   Color _statusColor(String s) {
     switch (s) {
-      case 'winning':  return AppColors.green;
-      case 'risk':     return AppColors.red;
+      case 'winning':   return AppColors.green;
+      case 'risk':      return AppColors.red;
       case 'cancelled': return AppColors.textTertiary;
-      default:         return AppColors.brand;
+      default:          return AppColors.brand;
     }
   }
 
@@ -579,13 +598,13 @@ class _FetchedDetails extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFF141416),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(26),
         border: Border.all(color: Colors.white.withOpacity(0.07), width: 0.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.35),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
+            color: Colors.black.withOpacity(0.30),
+            blurRadius: 14,
+            offset: const Offset(0, 5),
             spreadRadius: -4,
           ),
         ],
@@ -593,10 +612,11 @@ class _FetchedDetails extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Title + site + status
+          // Title + site badge
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
                   child: Text(
@@ -607,10 +627,11 @@ class _FetchedDetails extends StatelessWidget {
                         fontWeight: FontWeight.w700),
                   ),
                 ),
-                if (detail.siteName.isNotEmpty)
+                if (detail.siteName.isNotEmpty) ...[
+                  const SizedBox(width: 8),
                   Container(
-                    margin: const EdgeInsets.only(left: 8),
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.06),
                       borderRadius: BorderRadius.circular(7),
@@ -623,6 +644,7 @@ class _FetchedDetails extends StatelessWidget {
                           fontWeight: FontWeight.w600),
                     ),
                   ),
+                ],
               ],
             ),
           ),
@@ -645,18 +667,20 @@ class _FetchedDetails extends StatelessWidget {
             ),
           ),
           // Stats row
-          if (detail.stake.isNotEmpty || detail.odds.isNotEmpty || detail.potential.isNotEmpty)
+          if (detail.stake.isNotEmpty ||
+              detail.odds.isNotEmpty ||
+              detail.potential.isNotEmpty)
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
               child: Row(
                 children: [
                   if (detail.stake.isNotEmpty) ...[
                     _MiniStat(label: 'Bahis', value: detail.stake),
-                    const SizedBox(width: 20),
+                    const SizedBox(width: 24),
                   ],
                   if (detail.odds.isNotEmpty) ...[
                     _MiniStat(label: 'Oran', value: detail.odds),
-                    const SizedBox(width: 20),
+                    const SizedBox(width: 24),
                   ],
                   if (detail.potential.isNotEmpty)
                     _MiniStat(label: 'Beklenti', value: detail.potential),
@@ -665,15 +689,17 @@ class _FetchedDetails extends StatelessWidget {
             ),
           // Selections
           if (detail.selections.isNotEmpty) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: 14),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-              child: Divider(height: 1, thickness: 0.5,
+              child: Divider(
+                  height: 1,
+                  thickness: 0.5,
                   color: Colors.white.withOpacity(0.06)),
             ),
             ...detail.selections.map((s) => _SelectionCard(sel: s)),
           ],
-          const SizedBox(height: 16),
+          const SizedBox(height: 18),
         ],
       ),
     );
@@ -708,11 +734,10 @@ class _SelectionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Match name + status
           Row(
             children: [
               Expanded(
@@ -729,7 +754,8 @@ class _SelectionCard extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
                   color: _statusColor(sel.status).withOpacity(0.12),
                   borderRadius: BorderRadius.circular(5),
@@ -745,7 +771,6 @@ class _SelectionCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 3),
-          // Bet type + score
           Row(
             children: [
               Text(
@@ -760,8 +785,7 @@ class _SelectionCard extends StatelessWidget {
                 Text(
                   'Skor: ${sel.lastScore}',
                   style: const TextStyle(
-                      color: AppColors.textTertiary,
-                      fontSize: 11),
+                      color: AppColors.textTertiary, fontSize: 11),
                 ),
               ],
             ],
@@ -780,15 +804,14 @@ class _LoadingDetail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 36),
+      padding: const EdgeInsets.symmetric(vertical: 40),
       decoration: BoxDecoration(
         color: const Color(0xFF141416),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(26),
         border: Border.all(color: Colors.white.withOpacity(0.07), width: 0.5),
       ),
       child: const Center(
-
-        child: const CircularProgressIndicator(
+        child: CircularProgressIndicator(
             color: AppColors.brand, strokeWidth: 2),
       ),
     );
@@ -803,10 +826,10 @@ class _ErrorDetail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 28),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 32),
       decoration: BoxDecoration(
         color: const Color(0xFF141416),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(26),
         border: Border.all(color: Colors.white.withOpacity(0.07), width: 0.5),
       ),
       child: Column(
@@ -823,11 +846,12 @@ class _ErrorDetail extends StatelessWidget {
                 fontSize: 13,
                 fontWeight: FontWeight.w500),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 18),
           GestureDetector(
             onTap: onRetry,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 9),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 22, vertical: 10),
               decoration: BoxDecoration(
                 color: AppColors.brand.withOpacity(0.15),
                 borderRadius: BorderRadius.circular(10),

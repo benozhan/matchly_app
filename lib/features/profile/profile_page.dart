@@ -152,7 +152,7 @@ class _ProfilePageState extends State<ProfilePage> {
         child: Align(
           alignment: Alignment.topCenter,
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 800),
+            constraints: const BoxConstraints(maxWidth: 430),
             child: _loading
                 ? const Center(
                     child: CircularProgressIndicator(
@@ -262,7 +262,8 @@ class _ProfilePageState extends State<ProfilePage> {
                                               context,
                                               MaterialPageRoute(
                                                 builder: (_) => FeedPage(
-                                                    username: widget.username),
+                                                    username: widget.username,
+                                                    showBack: true),
                                               ),
                                             ),
                                           ),
