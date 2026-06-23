@@ -14,6 +14,10 @@ import 'bottom_nav.dart';
 import 'coupon_card.dart';
 import 'section_header.dart';
 
+// ─── Current user ─────────────────────────────────────────────────────────────
+// Replace with real auth session once authentication is implemented.
+const _kCurrentUsername = 'ozhan';
+
 // ─── Models ───────────────────────────────────────────────────────────────────
 
 enum _FilterTab { all, active, winning, losing }
@@ -283,7 +287,7 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
 
   /// Fire-and-forget: register the shared coupon and upload its full detail.
   void _pushCouponToBackend(Coupon coupon, String id) {
-    const owner = 'ozhan';
+    const owner = _kCurrentUsername;
     SocialService.instance.createOrUpdateSharedCoupon(
       couponId: id,
       ownerUsername: owner,
@@ -421,7 +425,7 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
               children: [
                 Expanded(
                   child: _navIndex == 1
-                      ? FeedPage(username: 'ozhan')
+                      ? FeedPage(username: _kCurrentUsername)
                       : _navIndex == 2
                           ? IstatistikPage(
                               allCoupons: _allCoupons,
