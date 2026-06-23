@@ -14,13 +14,13 @@ class MatchlyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Matchly',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.darkTheme,
-      home: const MatchlyHomePage(),
-      onGenerateRoute: _onGenerateRoute,
-    );
+return MaterialApp(
+  title: 'Matchly',
+  debugShowCheckedModeBanner: false,
+  theme: AppTheme.darkTheme,
+home: const MatchlyHomePage(),
+  onGenerateRoute: _onGenerateRoute,
+);
   }
 
   /// Named route handler — enables Flutter Web URL persistence.
