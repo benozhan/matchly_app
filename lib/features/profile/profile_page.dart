@@ -704,6 +704,60 @@ class _VertDivider extends StatelessWidget {
 }
 
 
+class _EmptySharedCoupons extends StatelessWidget {
+  const _EmptySharedCoupons();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.fromLTRB(24, 8, 24, 0),
+      child: Text(
+        'Henüz paylaşılan kupon yok.',
+        style: TextStyle(
+          color: AppColors.textTertiary,
+          fontSize: 12,
+        ),
+      ),
+    );
+  }
+}
+
+class _SharedCouponRow extends StatelessWidget {
+  final SharedCoupon coupon;
+  const _SharedCouponRow({required this.coupon});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              'Kupon #${coupon.couponId}',
+              style: const TextStyle(
+                color: AppColors.textPrimary,
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          const Icon(
+            Icons.chevron_right,
+            color: AppColors.textTertiary,
+            size: 18,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
 // ── Local coupon card (rich display when matched) ─────────────────────────────
 
 class _LocalCouponCard extends StatelessWidget {
@@ -814,4 +868,82 @@ class _LocalCouponCard extends StatelessWidget {
               padding: EdgeInsets.fromLTRB(16, 0, 16, 0),
               child: Divider(height: 1, thickness: 0.5, color: Color(0x0DFFFFFF)),
             ),
-            ...coupon.matche
+            ...coupon.matches.map((match) => _CouponMatchRow(match: match)),
+            const SizedBox(height: 12),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _CouponMatchRow extends StatelessWidget {
+  final MatchItem match;
+  const _CouponMatchRow({required this.match});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              match.teams,
+              style: const TextStyle(
+                color: AppColors.textPrimary,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            match.selection,
+            style: const TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 11,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MiniStat extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _MiniStat({
+    required this.label,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              color: AppColors.textTertiary,
+              fontSize: 10,
+            ),
+          ),
+          const SizedBox(height: 3),
+          Text(
+            value,
+            style: const TextStyle(
+              color: AppColors.textPrimary,
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
