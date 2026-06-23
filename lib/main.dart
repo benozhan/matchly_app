@@ -1,11 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/app_theme.dart';
 import 'features/home/home_page.dart';
 import 'features/profile/shared_coupon_detail_page.dart';
 import 'services/social_service.dart';
 
-void main() {
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Supabase.initialize(
+    url: 'https://npesbmrndcxyhygsqrro.supabase.co',
+    anonKey: 'sb_publishable_WWEq0ERvj1vNjj321jRROQ_t9I4SCEP',
+  );
+
   runApp(const MatchlyApp());
 }
 
@@ -14,13 +23,13 @@ class MatchlyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-return MaterialApp(
-  title: 'Matchly',
-  debugShowCheckedModeBanner: false,
-  theme: AppTheme.darkTheme,
-home: const MatchlyHomePage(),
-  onGenerateRoute: _onGenerateRoute,
-);
+    return MaterialApp(
+      title: 'Matchly',
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.darkTheme,
+      home: const MatchlyHomePage(),
+      onGenerateRoute: _onGenerateRoute,
+    );
   }
 
   /// Named route handler — enables Flutter Web URL persistence.
