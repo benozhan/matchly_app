@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/app_colors.dart';
 import '../../models/coupon.dart';
+import '../../services/auth_service.dart';
 import '../coupon/coupon_detail_page.dart';
 import '../gecmis/gecmis_page.dart';
 import '../profile/profile_page.dart';
@@ -18,6 +19,20 @@ class _AyarlarPageState extends State<AyarlarPage> {
   bool _bildirimler         = true;
   bool _karanlikTema        = true;
   bool _otomatikGuncelleme  = false;
+
+  AppUser? _user;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUser();
+  }
+
+  Future<void> _loadUser() async {
+    final user = await AuthService.instance.getCurrentUser();
+    if (!mounted) return;
+    setState(() => _user = user);
+  }
 
   static BoxDecoration _sectionDeco() => BoxDecoration(
         color: const Color(0xFF141416),
@@ -94,9 +109,12 @@ class _AyarlarPageState extends State<AyarlarPage> {
                     ),
                   ),
                   alignment: Alignment.center,
-                  child: const Text(
-                    'Ö',
-                    style: TextStyle(
+                  child: Text(
+                    (_user?.displayName.isNotEmpty == true
+                            ? _user!.displayName[0]
+                            : 'U')
+                        .toUpperCase(),
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 18,
                       fontWeight: FontWeight.w800,
@@ -104,22 +122,22 @@ class _AyarlarPageState extends State<AyarlarPage> {
                   ),
                 ),
                 const SizedBox(width: 14),
-                const Expanded(
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Özhan',
-                        style: TextStyle(
+                        _user?.displayName ?? 'Kullanıcı',
+                        style: const TextStyle(
                           color: AppColors.textPrimary,
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
-                      SizedBox(height: 2),
+                      const SizedBox(height: 2),
                       Text(
-                        '@ozhan',
-                        style: TextStyle(
+                        '@${_user?.username ?? 'user'}',
+                        style: const TextStyle(
                           color: AppColors.textTertiary,
                           fontSize: 12,
                           fontWeight: FontWeight.w500,

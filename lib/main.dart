@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/app_theme.dart';
+import 'features/auth/auth_page.dart';
 import 'features/home/home_page.dart';
 import 'features/profile/shared_coupon_detail_page.dart';
 import 'services/social_service.dart';
@@ -18,8 +20,40 @@ Future<void> main() async {
   runApp(const MatchlyApp());
 }
 
-class MatchlyApp extends StatelessWidget {
+class MatchlyApp extends StatefulWidget {
   const MatchlyApp({super.key});
+
+  @override
+  State<MatchlyApp> createState() => _MatchlyAppState();
+}
+
+class _MatchlyAppState extends State<MatchlyApp> {
+  late bool _signedIn;
+  StreamSubscription<AuthState>? _authSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _signedIn = Supabase.instance.client.auth.currentSession != null;
+
+    _authSubscription =
+        Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+      if (!mounted) return;
+      setState(() {
+        _signedIn = data.session != null;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _authSubscription?.cancel();
+    super.dispose();
+  }
+
+  void _handleSignedIn() {
+    setState(() => _signedIn = true);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +61,9 @@ class MatchlyApp extends StatelessWidget {
       title: 'Matchly',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.darkTheme,
-      home: const MatchlyHomePage(),
+      home: _signedIn
+          ? const MatchlyHomePage()
+          : AuthPage(onSignedIn: _handleSignedIn),
       onGenerateRoute: _onGenerateRoute,
     );
   }
