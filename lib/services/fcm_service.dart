@@ -24,10 +24,23 @@ class FcmService {
       String? token;
 
       if (kIsWeb) {
-        // Firebase Console → Project Settings → Cloud Messaging → Web Push certificates
-        const vapidKey = 'BMp8YoKQRlvT29myjX9kBWkwOD1InqWwFNPMXSMMjgEM_wqRmuentameirrQEdijzdLsnfb7ll3vrpfKUXfNIlk';
+        // Web: VAPID key ile token al
+        const vapidKey =
+            'BMp8YoKQRlvT29myjX9kBWkwOD1InqWwFNPMXSMMjgEM_wqRmuentameirrQEdijzdLsnfb7ll3vrpfKUXfNIlk';
         token = await messaging.getToken(vapidKey: vapidKey);
+      } else if (defaultTargetPlatform == TargetPlatform.iOS ||
+          defaultTargetPlatform == TargetPlatform.macOS) {
+        // iOS / macOS: APNs token olmadan getToken() çağrılamaz.
+        // Önce APNs token beklenir, gelmezse FCM token istenmez.
+        final apnsToken = await _waitForApnsToken(messaging);
+        if (apnsToken == null) {
+          debugPrint('FCM: 10 denemede APNs token alınamadı, FCM token atlandı');
+          return;
+        }
+        debugPrint('FCM: APNs token hazır, FCM token isteniyor');
+        token = await messaging.getToken();
       } else {
+        // Android ve diğer platformlar
         token = await messaging.getToken();
       }
 
@@ -61,6 +74,26 @@ class FcmService {
       debugPrint('FCM: Token kaydedilemedi — $e');
       debugPrint('$st');
     }
+  }
+
+  /// iOS / macOS için APNs token gelene kadar 1 saniye arayla 10 kez dener.
+  /// getAPNSToken() exception atarsa yakalar, bir sonraki denemeye geçer.
+  /// 10 denemede de null / exception ise null döner → getToken() çağrılmaz.
+  Future<String?> _waitForApnsToken(FirebaseMessaging messaging) async {
+    for (var attempt = 1; attempt <= 10; attempt++) {
+      try {
+        final apnsToken = await messaging.getAPNSToken();
+        if (apnsToken != null) {
+          debugPrint('FCM: APNs token alındı (deneme $attempt/10)');
+          return apnsToken;
+        }
+      } catch (e) {
+        debugPrint('FCM: getAPNSToken() deneme $attempt/10 hata — $e');
+      }
+      debugPrint('FCM: APNs token bekleniyor (deneme $attempt/10)...');
+      await Future.delayed(const Duration(seconds: 1));
+    }
+    return null;
   }
 
   String _resolvePlatform() {
