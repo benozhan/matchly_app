@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import '../../core/app_colors.dart';
 import '../../models/coupon.dart';
 import '../../services/auth_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../coupon/coupon_detail_page.dart';
 import '../gecmis/gecmis_page.dart';
 import '../profile/profile_page.dart';
+import '../auth/auth_page.dart';
 
 class AyarlarPage extends StatefulWidget {
   final List<Coupon> coupons;
@@ -32,6 +34,21 @@ class _AyarlarPageState extends State<AyarlarPage> {
     final user = await AuthService.instance.getCurrentUser();
     if (!mounted) return;
     setState(() => _user = user);
+  }
+
+  Future<void> _signOut() async {
+    await Supabase.instance.client.auth.signOut();
+
+    if (!mounted) return;
+
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(
+        builder: (_) => AuthPage(
+          onSignedIn: () {},
+        ),
+      ),
+      (_) => false,
+    );
   }
 
   static BoxDecoration _sectionDeco() => BoxDecoration(
@@ -283,10 +300,11 @@ class _AyarlarPageState extends State<AyarlarPage> {
               ),
               _RowDivider(),
               _ActionRow(
-                icon: Icons.restore_rounded,
-                title: 'Demo Verileri Sıfırla',
-                subtitle: 'Örnek verileri geri yükle',
-                onTap: () => _showComingSoon(context),
+                icon: Icons.logout_rounded,
+                title: 'Çıkış Yap',
+                subtitle: 'Hesabından çıkış yap',
+                destructive: true,
+                onTap: _signOut,
               ),
             ],
           ),
