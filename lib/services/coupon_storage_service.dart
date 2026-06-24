@@ -46,4 +46,59 @@ class CouponStorageService {
       await _client.from('coupon_matches').insert(rows);
     }
   }
+
+  Future<List<Coupon>> loadCoupons() async {
+    final user = _client.auth.currentUser;
+    if (user == null) return [];
+
+    final couponRows = await _client
+        .from('coupons')
+        .select()
+        .eq('user_id', user.id)
+        .order('created_at', ascending: false);
+
+    final coupons = <Coupon>[];
+
+    for (final row in couponRows) {
+      final matchRows = await _client
+          .from('coupon_matches')
+          .select()
+          .eq('coupon_id', row['id'])
+          .order('sort_order');
+
+      final matches = matchRows.map<MatchItem>((m) {
+        final status = CouponStatus.values.firstWhere(
+          (s) => s.name == m['status'],
+          orElse: () => CouponStatus.pending,
+        );
+
+        return MatchItem(
+          teams: m['teams'] as String? ?? '',
+          selection: m['selection'] as String? ?? '',
+          score: m['score'] as String? ?? '',
+          minute: m['minute'] as String? ?? '',
+          status: status,
+        );
+      }).toList();
+
+      final status = CouponStatus.values.firstWhere(
+        (s) => s.name == row['status'],
+        orElse: () => CouponStatus.pending,
+      );
+
+      coupons.add(
+        Coupon(
+          title: row['title'] as String? ?? '',
+          meta: row['meta'] as String? ?? '',
+          status: status,
+          stake: row['stake'] as String? ?? '',
+          potential: row['potential'] as String? ?? '',
+          progress: matches.map((m) => m.status).toList(),
+          matches: matches,
+        ),
+      );
+    }
+
+    return coupons;
+  }
 }

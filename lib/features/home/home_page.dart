@@ -165,8 +165,18 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
 
   Future<void> _loadUser() async {
     final user = await AuthService.instance.getCurrentUser();
+    final coupons = await CouponStorageService.instance.loadCoupons();
+
     if (!mounted) return;
-    setState(() => _user = user);
+
+    setState(() {
+      _user = user;
+      if (coupons.isNotEmpty) {
+        _entries
+          ..clear()
+          ..addAll(coupons.map((c) => _CouponEntry(coupon: c)));
+      }
+    });
   }
 
   @override
