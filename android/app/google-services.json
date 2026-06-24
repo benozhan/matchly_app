@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "911799540941",
+    "project_id": "matchly-app-a09a2",
+    "storage_bucket": "matchly-app-a09a2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:911799540941:android:28c50638d8e3959d845d84",
+        "android_client_info": {
+          "package_name": "com.example.matchly_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDuy7l8onDYkQZ8Rs7a3YXbZSxwDtzRXQI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
