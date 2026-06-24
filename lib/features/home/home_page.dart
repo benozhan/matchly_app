@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/app_colors.dart';
 import '../../core/coupon_share.dart';
 import '../../services/social_service.dart';
+import '../../services/auth_service.dart';
 import '../../models/coupon.dart';
 import '../add_coupon/add_coupon_sheet.dart';
 import '../coupon/coupon_detail_page.dart';
@@ -13,10 +14,6 @@ import '../shared_coupon/shared_coupon_preview_page.dart';
 import 'bottom_nav.dart';
 import 'coupon_card.dart';
 import 'section_header.dart';
-
-// ─── Current user ─────────────────────────────────────────────────────────────
-// Replace with real auth session once authentication is implemented.
-const _kCurrentUsername = 'ozhan';
 
 // ─── Models ───────────────────────────────────────────────────────────────────
 
@@ -149,6 +146,10 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
   String _siteFilter   = 'Tümü';
   String _leagueFilter = 'Tümü';
 
+  AppUser? _user;
+
+  String get _currentUsername => _user?.username ?? 'ozhan';
+
   late TextEditingController _searchController;
 
   static const _siteOptions   = ['Tümü', 'Bilyoner', 'Misli', 'Nesine', 'Betano'];
@@ -158,6 +159,13 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
   void initState() {
     super.initState();
     _searchController = TextEditingController();
+    _loadUser();
+  }
+
+  Future<void> _loadUser() async {
+    final user = await AuthService.instance.getCurrentUser();
+    if (!mounted) return;
+    setState(() => _user = user);
   }
 
   @override
@@ -287,7 +295,7 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
 
   /// Fire-and-forget: register the shared coupon and upload its full detail.
   void _pushCouponToBackend(Coupon coupon, String id) {
-    const owner = _kCurrentUsername;
+    final owner = _currentUsername;
     SocialService.instance.createOrUpdateSharedCoupon(
       couponId: id,
       ownerUsername: owner,
@@ -425,7 +433,7 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
               children: [
                 Expanded(
                   child: _navIndex == 1
-                      ? FeedPage(username: _kCurrentUsername)
+                      ? FeedPage(username: _currentUsername)
                       : _navIndex == 2
                           ? IstatistikPage(
                               allCoupons: _allCoupons,
