@@ -4,6 +4,7 @@ import '../../core/app_colors.dart';
 import '../../core/coupon_share.dart';
 import '../../services/social_service.dart';
 import '../../services/auth_service.dart';
+import '../../services/coupon_storage_service.dart';
 import '../../models/coupon.dart';
 import '../add_coupon/add_coupon_sheet.dart';
 import '../coupon/coupon_detail_page.dart';
@@ -361,6 +362,7 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
     );
     if (newCoupon == null) return;
     setState(() => _entries.insert(0, _CouponEntry(coupon: newCoupon)));
+    await CouponStorageService.instance.saveCoupon(newCoupon);
   }
 
   Future<void> _editEntry(_CouponEntry entry) async {
