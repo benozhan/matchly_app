@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -6,11 +7,17 @@ import 'core/app_theme.dart';
 import 'features/auth/auth_page.dart';
 import 'features/home/home_page.dart';
 import 'features/profile/shared_coupon_detail_page.dart';
+import 'firebase_options.dart';
+import 'services/fcm_service.dart';
 import 'services/social_service.dart';
 
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
   await Supabase.initialize(
     url: 'https://npesbmrndcxyhygsqrro.supabase.co',
@@ -36,12 +43,22 @@ class _MatchlyAppState extends State<MatchlyApp> {
     super.initState();
     _signedIn = Supabase.instance.client.auth.currentSession != null;
 
+    // Uygulama açıldığında zaten giriş yapılmışsa token al
+    if (_signedIn) {
+      FcmService.instance.registerToken();
+    }
+
     _authSubscription =
         Supabase.instance.client.auth.onAuthStateChange.listen((data) {
       if (!mounted) return;
+      final wasSignedIn = _signedIn;
       setState(() {
         _signedIn = data.session != null;
       });
+      // Yeni oturum açıldığında token al
+      if (!wasSignedIn && _signedIn) {
+        FcmService.instance.registerToken();
+      }
     });
   }
 
@@ -53,6 +70,7 @@ class _MatchlyAppState extends State<MatchlyApp> {
 
   void _handleSignedIn() {
     setState(() => _signedIn = true);
+    FcmService.instance.registerToken();
   }
 
   @override
