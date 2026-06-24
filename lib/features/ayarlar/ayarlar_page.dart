@@ -92,6 +92,7 @@ class _AyarlarPageState extends State<AyarlarPage> {
             MaterialPageRoute(
               builder: (_) => MyProfilePage(
                 user: _user,
+                coupons: widget.coupons,
               ),
             ),
           ),

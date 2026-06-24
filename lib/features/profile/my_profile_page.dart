@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 
 import '../../core/app_colors.dart';
+import '../../models/coupon.dart';
 import '../../services/auth_service.dart';
 
 class MyProfilePage extends StatelessWidget {
   final AppUser? user;
+  final List<Coupon> coupons;
 
   const MyProfilePage({
     super.key,
     required this.user,
+    required this.coupons,
   });
 
   @override
@@ -16,6 +19,30 @@ class MyProfilePage extends StatelessWidget {
     final username = user?.username ?? 'user';
     final displayName = user?.displayName ?? username;
     final initial = displayName.isNotEmpty ? displayName[0].toUpperCase() : 'U';
+
+    final totalCoupons = coupons.length;
+    final activeCoupons =
+        coupons.where((c) => c.status == CouponStatus.pending).length;
+
+    var totalStake = 0.0;
+    var totalPotential = 0.0;
+
+    for (final coupon in coupons) {
+      final stakeMatch =
+          RegExp(r'₺(\d+(?:[.,]\d+)?)').firstMatch(coupon.stake);
+      final potentialMatch =
+          RegExp(r'₺(\d+(?:[.,]\d+)?)').firstMatch(coupon.potential);
+
+      if (stakeMatch != null) {
+        totalStake +=
+            double.tryParse(stakeMatch.group(1)!.replaceAll(',', '.')) ?? 0;
+      }
+
+      if (potentialMatch != null) {
+        totalPotential +=
+            double.tryParse(potentialMatch.group(1)!.replaceAll(',', '.')) ?? 0;
+      }
+    }
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -82,6 +109,42 @@ class MyProfilePage extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
+                const SizedBox(height: 28),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _ProfileStatCard(
+                        label: 'Kupon',
+                        value: '$totalCoupons',
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: _ProfileStatCard(
+                        label: 'Aktif',
+                        value: '$activeCoupons',
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _ProfileStatCard(
+                        label: 'Toplam Bahis',
+                        value: '₺${totalStake.toInt()}',
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: _ProfileStatCard(
+                        label: 'Beklenti',
+                        value: '₺${totalPotential.toInt()}',
+                      ),
+                    ),
+                  ],
+                ),
                 const SizedBox(height: 32),
                 const Text(
                   'Profil sistemi Supabase’e taşınıyor.',
@@ -96,6 +159,49 @@ class MyProfilePage extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _ProfileStatCard extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _ProfileStatCard({
+    required this.label,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: Colors.white.withOpacity(0.07), width: 0.5),
+      ),
+      child: Column(
+        children: [
+          Text(
+            value,
+            style: const TextStyle(
+              color: AppColors.textPrimary,
+              fontSize: 20,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: const TextStyle(
+              color: AppColors.textTertiary,
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
       ),
     );
   }
