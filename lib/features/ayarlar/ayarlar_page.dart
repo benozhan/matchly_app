@@ -4,10 +4,11 @@ import '../../core/app_colors.dart';
 import '../../models/coupon.dart';
 import '../../services/auth_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../auth/auth_page.dart';
 import '../coupon/coupon_detail_page.dart';
 import '../gecmis/gecmis_page.dart';
-import '../profile/profile_page.dart';
-import '../auth/auth_page.dart';
+import '../profile/my_profile_page.dart';
 
 class AyarlarPage extends StatefulWidget {
   final List<Coupon> coupons;
@@ -18,11 +19,10 @@ class AyarlarPage extends StatefulWidget {
 }
 
 class _AyarlarPageState extends State<AyarlarPage> {
+  AppUser? _user;
   bool _bildirimler         = true;
   bool _karanlikTema        = true;
   bool _otomatikGuncelleme  = false;
-
-  AppUser? _user;
 
   @override
   void initState() {
@@ -90,9 +90,8 @@ class _AyarlarPageState extends State<AyarlarPage> {
         GestureDetector(
           onTap: () => Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (_) => ProfilePage(
-                username: 'ozhan',
-                localCoupons: widget.coupons,
+              builder: (_) => MyProfilePage(
+                user: _user,
               ),
             ),
           ),
