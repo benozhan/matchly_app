@@ -39,104 +39,11 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
 
   // ── active coupons ─────────────────────────────────────────────────────────
 
-  final List<_CouponEntry> _entries = [
-    _CouponEntry(
-      coupon: const Coupon(
-        id: 1,
-        title: 'Akşam Kuponu',
-        meta: 'Bilyoner · 3 seçim · ×4.20',
-        status: CouponStatus.winning,
-        stake: '₺120 bahis',
-        potential: '₺504 beklenti',
-        progress: [
-          CouponStatus.winning,
-          CouponStatus.winning,
-          CouponStatus.pending,
-        ],
-        matches: [
-          MatchItem(teams: 'GS – FB',   selection: 'MS 1',    score: '2–0', minute: '78′', status: CouponStatus.winning),
-          MatchItem(teams: 'BJK – TRB', selection: 'KG Var',  score: '1–1', minute: '55′', status: CouponStatus.winning),
-          MatchItem(teams: 'ATA – ANK', selection: 'Üst 2.5', score: '–:–', minute: '21:00', status: CouponStatus.pending),
-        ],
-      ),
-    ),
-    _CouponEntry(
-      coupon: const Coupon(
-        id: 2,
-        title: 'Dünya Kupası',
-        meta: 'Misli · 5 seçim · ×12.50',
-        status: CouponStatus.pending,
-        stake: '₺50 bahis',
-        potential: '₺625 beklenti',
-        progress: [
-          CouponStatus.pending,
-          CouponStatus.pending,
-          CouponStatus.pending,
-        ],
-        matches: [
-          MatchItem(teams: 'Türkiye – Paraguay', selection: 'İY 1', score: '–:–', minute: '03:00', status: CouponStatus.pending),
-        ],
-      ),
-    ),
-  ];
+  final List<_CouponEntry> _entries = [];
 
   // ── history coupons ────────────────────────────────────────────────────────
 
-  final List<_CouponEntry> _historyEntries = [
-    _CouponEntry(
-      coupon: const Coupon(
-        id: 3,
-        title: 'Cumartesi Kuponu',
-        meta: 'Bilyoner · 4 seçim · ×8.40',
-        status: CouponStatus.winning,
-        stake: '₺100 bahis',
-        potential: '₺840 beklenti',
-        progress: [
-          CouponStatus.winning, CouponStatus.winning,
-          CouponStatus.winning, CouponStatus.winning,
-        ],
-        matches: [
-          MatchItem(teams: 'GS – FB',   selection: 'MS 1',    score: '2–0', minute: 'Bitti', status: CouponStatus.winning),
-          MatchItem(teams: 'BJK – TRB', selection: 'KG Var',  score: '1–1', minute: 'Bitti', status: CouponStatus.winning),
-          MatchItem(teams: 'ATA – GZT', selection: 'İY 1',    score: '1–0', minute: 'Bitti', status: CouponStatus.winning),
-          MatchItem(teams: 'SMP – KNY', selection: 'Üst 2.5', score: '3–1', minute: 'Bitti', status: CouponStatus.winning),
-        ],
-      ),
-    ),
-    _CouponEntry(
-      coupon: const Coupon(
-        id: 4,
-        title: 'Şampiyonlar Ligi',
-        meta: 'Misli · 3 seçim · ×5.60',
-        status: CouponStatus.risk,
-        stake: '₺75 bahis',
-        potential: '₺420 beklenti',
-        progress: [
-          CouponStatus.winning, CouponStatus.winning, CouponStatus.risk,
-        ],
-        matches: [
-          MatchItem(teams: 'Real Madrid – Bayern', selection: 'MS 1',    score: '2–1', minute: 'Bitti', status: CouponStatus.winning),
-          MatchItem(teams: 'PSG – Arsenal',         selection: 'KG Var',  score: '1–2', minute: 'Bitti', status: CouponStatus.winning),
-          MatchItem(teams: 'Inter – Liverpool',     selection: 'Üst 2.5', score: '1–1', minute: 'Bitti', status: CouponStatus.risk),
-        ],
-      ),
-    ),
-    _CouponEntry(
-      coupon: const Coupon(
-        id: 5,
-        title: 'Hafta Sonu Kuponu',
-        meta: 'Nesine · 2 seçim · ×3.20',
-        status: CouponStatus.cancelled,
-        stake: '₺200 bahis',
-        potential: '₺640 beklenti',
-        progress: [CouponStatus.cancelled, CouponStatus.cancelled],
-        matches: [
-          MatchItem(teams: 'Man City – Chelsea',  selection: 'MS 1',   score: '–:–', minute: 'İptal', status: CouponStatus.cancelled),
-          MatchItem(teams: 'Arsenal – Tottenham', selection: 'KG Var', score: '–:–', minute: 'İptal', status: CouponStatus.cancelled),
-        ],
-      ),
-    ),
-  ];
+  final List<_CouponEntry> _historyEntries = [];
 
   // ── UI state ───────────────────────────────────────────────────────────────
 
