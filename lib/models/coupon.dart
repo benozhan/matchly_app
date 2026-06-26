@@ -3,6 +3,7 @@ enum CouponStatus {
   risk,
   pending,
   cancelled,
+  void_,
 }
 
 class Coupon {

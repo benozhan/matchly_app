@@ -90,7 +90,7 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
                   );
                   final matches = (matchRows as List).map<MatchItem>((m) {
                     final mStatus = CouponStatus.values.firstWhere(
-                      (s) => s.name == (m['status'] ?? 'pending'),
+                      (s) => s.name == ((m['status'] ?? 'pending') == 'void' ? 'void_' : (m['status'] ?? 'pending')),
                       orElse: () => CouponStatus.pending,
                     );
                     return MatchItem(

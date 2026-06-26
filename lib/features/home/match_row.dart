@@ -22,6 +22,7 @@ class MatchRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isPending = match.status == CouponStatus.pending;
+    final isVoid = match.status == CouponStatus.void_;
 
     final parts = match.teams.split(' – ');
     final homeName   = parts.isNotEmpty ? parts[0].trim() : match.teams;
