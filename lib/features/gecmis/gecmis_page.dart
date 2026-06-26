@@ -296,7 +296,8 @@ class _HistoryCard extends StatelessWidget {
       case CouponStatus.winning:   return AppColors.green;
       case CouponStatus.risk:      return AppColors.red;
       case CouponStatus.pending:   return AppColors.textSecondary;
-      case CouponStatus.cancelled: return AppColors.textTertiary;
+      case CouponStatus.cancelled:
+      case CouponStatus.void_: return AppColors.textTertiary;
     }
   }
 

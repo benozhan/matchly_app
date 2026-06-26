@@ -49,7 +49,8 @@ class _CouponDetailPageState extends State<CouponDetailPage> {
       case CouponStatus.winning:   return AppColors.green;
       case CouponStatus.risk:      return AppColors.red;
       case CouponStatus.pending:   return AppColors.textPrimary;
-      case CouponStatus.cancelled: return AppColors.textTertiary;
+      case CouponStatus.cancelled:
+      case CouponStatus.void_: return AppColors.textTertiary;
     }
   }
 
