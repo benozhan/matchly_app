@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../core/app_colors.dart';
-import '../../main.dart';
-import '../../main.dart';
+import '../../core/app_state.dart';
+import '../../core/app_state.dart';
 import '../../models/coupon.dart';
 import '../../services/auth_service.dart';
 
@@ -66,7 +66,7 @@ class MyProfilePage extends StatelessWidget {
                     ),
                     const Spacer(),
                     IconButton(
-                      onPressed: () => MatchlyApp.of(context)?.toggleLocale(),
+                      onPressed: () => AppState.instance.toggleLocale(),
                       icon: Text(
                         Localizations.localeOf(context).languageCode == 'tr' ? 'EN' : 'TR',
                         style: const TextStyle(
@@ -77,7 +77,7 @@ class MyProfilePage extends StatelessWidget {
                       ),
                     ),
                     IconButton(
-                      onPressed: () => MatchlyApp.of(context)?.toggleTheme(),
+                      onPressed: () => AppState.instance.toggleTheme(),
                       icon: Icon(
                         Theme.of(context).brightness == Brightness.dark
                             ? Icons.light_mode_rounded

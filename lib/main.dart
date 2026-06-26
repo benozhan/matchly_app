@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'l10n/app_localizations.dart';
 import 'core/app_theme.dart';
+import 'core/app_state.dart';
 import 'features/auth/auth_page.dart';
 import 'features/home/home_page.dart';
 import 'features/profile/shared_coupon_detail_page.dart';
@@ -56,7 +57,8 @@ class _MatchlyAppState extends State<MatchlyApp> {
     super.initState();
     _signedIn = Supabase.instance.client.auth.currentSession != null;
     if (_signedIn) NotificationService.instance.initialize();
-    _loadTheme();
+    AppState.instance.init();
+    AppState.instance.addListener(() => setState(() {}));
     _authSubscription =
         Supabase.instance.client.auth.onAuthStateChange.listen((data) {
       if (!mounted) return;
@@ -106,7 +108,7 @@ class _MatchlyAppState extends State<MatchlyApp> {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      locale: _locale,
+      locale: AppState.instance.locale,
       supportedLocales: const [Locale('tr'), Locale('en')],
       localizationsDelegates: const [
         AppLocalizations.delegate,
@@ -114,7 +116,7 @@ class _MatchlyAppState extends State<MatchlyApp> {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      themeMode: _themeMode,
+      themeMode: AppState.instance.themeMode,
       home: _signedIn
           ? const MatchlyHomePage()
           : AuthPage(onSignedIn: _handleSignedIn),
