@@ -64,3 +64,17 @@ class MatchItem {
     required this.status,
   });
 }
+
+extension CouponX on Coupon {
+  Coupon copyWithMatches(List<MatchItem> matches) => Coupon(
+    id: id,
+    title: title,
+    meta: meta,
+    status: status,
+    stake: stake,
+    potential: potential,
+    progress: progress,
+    matches: matches,
+    sharedId: sharedId,
+  );
+}

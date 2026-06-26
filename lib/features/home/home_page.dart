@@ -6,6 +6,8 @@ import '../../services/social_service.dart';
 import '../../services/auth_service.dart';
 import '../../services/coupon_storage_service.dart';
 import '../../models/coupon.dart';
+import '../../services/match_search_service.dart';
+import 'dart:async';
 import '../add_coupon/add_coupon_sheet.dart';
 import '../coupon/coupon_detail_page.dart';
 import '../ayarlar/ayarlar_page.dart';
@@ -13,6 +15,8 @@ import '../profile/feed_page.dart';
 import '../istatistik/istatistik_page.dart';
 import '../shared_coupon/shared_coupon_preview_page.dart';
 import 'bottom_nav.dart';
+import 'notification_bell.dart';
+import '../../services/notification_service.dart';
 import 'coupon_card.dart';
 import 'section_header.dart';
 
@@ -50,6 +54,10 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
   _FilterTab _activeTab   = _FilterTab.all;
   int        _navIndex    = 0;
 
+  // ── live scores ────────────────────────────────────────────────────────────
+  Timer? _liveTimer;
+  Map<String, LiveMatch> _liveMatches = {};
+
   String _searchQuery  = '';
   String _siteFilter   = 'Tümü';
   String _leagueFilter = 'Tümü';
@@ -68,6 +76,7 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
     super.initState();
     _searchController = TextEditingController();
     _loadUser();
+    _startLiveScoreTimer();
   }
 
   Future<void> _loadUser() async {
@@ -88,8 +97,45 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
 
   @override
   void dispose() {
+    _liveTimer?.cancel();
     _searchController.dispose();
     super.dispose();
+  }
+
+  // ── live scores ────────────────────────────────────────────────────────────
+
+  void _startLiveScoreTimer() {
+    _fetchLiveScores();
+    _liveTimer = Timer.periodic(const Duration(seconds: 30), (_) => _fetchLiveScores());
+  }
+
+  Future<void> _fetchLiveScores() async {
+    try {
+      final matches = await MatchSearchService.instance.getLiveMatches();
+      if (!mounted) return;
+      final map = <String, LiveMatch>{};
+      for (final m in matches) {
+        final key = '${m.home} – ${m.away}';
+        map[key] = m;
+        // Ters sıra da ekle
+        map['${m.away} – ${m.home}'] = m;
+      }
+      setState(() => _liveMatches = map);
+    } catch (_) {}
+  }
+
+  List<MatchItem> _enrichMatches(List<MatchItem> matches) {
+    return matches.map((m) {
+      final live = _liveMatches[m.teams];
+      if (live == null) return m;
+      return MatchItem(
+        teams: m.teams,
+        selection: m.selection,
+        score: live.scoreText,
+        minute: live.isLive ? live.minute : m.minute,
+        status: m.status,
+      );
+    }).toList();
   }
 
   // ── helpers ────────────────────────────────────────────────────────────────
@@ -363,6 +409,24 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
                                   padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
                                   children: [
 
+                                    // ── Header row ──────────────────────────
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        const Text(
+                                          'Matchly',
+                                          style: TextStyle(
+                                            color: AppColors.textPrimary,
+                                            fontSize: 22,
+                                            fontWeight: FontWeight.w900,
+                                            letterSpacing: -0.5,
+                                          ),
+                                        ),
+                                        const NotificationBell(),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 16),
+
                                     // ── Hero card ────────────────────────────
                                     _HeroCard(
                                       totalPotential: _totalPotentialText,
@@ -414,13 +478,13 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
                                           padding:
                                               const EdgeInsets.only(bottom: 18),
                                           child: CouponCard(
-                                            coupon: entry.coupon,
+                                            coupon: entry.coupon.copyWithMatches(_enrichMatches(entry.coupon.matches)),
                                             isFavorite: entry.isFavorite,
                                             onTap: () =>
                                                 Navigator.of(context).push(
                                               MaterialPageRoute(
                                                 builder: (_) => CouponDetailPage(
-                                                  coupon: entry.coupon,
+                                                  coupon: entry.coupon.copyWithMatches(_enrichMatches(entry.coupon.matches)),
                                                   onSharedIdGenerated: (id) =>
                                                       _saveActiveSharedId(
                                                           entry, id),

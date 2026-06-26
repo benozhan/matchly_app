@@ -100,3 +100,60 @@ class MatchSearchException implements Exception {
   @override
   String toString() => 'MatchSearchException: $message';
 }
+
+// ── Live Match Model ──────────────────────────────────────────────────────────
+
+class LiveMatch {
+  final String id;
+  final String home;
+  final String away;
+  final String homeScore;
+  final String awayScore;
+  final String minute;
+  final String status;
+  final String league;
+
+  const LiveMatch({
+    required this.id,
+    required this.home,
+    required this.away,
+    required this.homeScore,
+    required this.awayScore,
+    required this.minute,
+    required this.status,
+    required this.league,
+  });
+
+  factory LiveMatch.fromJson(Map<String, dynamic> json) => LiveMatch(
+        id: json['id'] as String? ?? '',
+        home: json['home'] as String? ?? '',
+        away: json['away'] as String? ?? '',
+        homeScore: json['home_score'] as String? ?? '-',
+        awayScore: json['away_score'] as String? ?? '-',
+        minute: json['minute'] as String? ?? '',
+        status: json['status'] as String? ?? '',
+        league: json['league'] as String? ?? '',
+      );
+
+  bool get isLive => status == 'live';
+  bool get isPre => status == 'pre';
+  bool get isPost => status == 'post';
+
+  String get scoreText => isLive || isPost ? '$homeScore - $awayScore' : 'vs';
+}
+
+// ── Live Match Service ────────────────────────────────────────────────────────
+
+extension LiveMatchService on MatchSearchService {
+  Future<List<LiveMatch>> getLiveMatches() async {
+    final uri = Uri.parse('$_kBaseUrl/api/matches/live');
+    try {
+      final response = await _client.get(uri).timeout(_kTimeout);
+      if (response.statusCode != 200) return [];
+      final List<dynamic> body = jsonDecode(response.body) as List<dynamic>;
+      return body.cast<Map<String, dynamic>>().map(LiveMatch.fromJson).toList();
+    } catch (e) {
+      return [];
+    }
+  }
+}

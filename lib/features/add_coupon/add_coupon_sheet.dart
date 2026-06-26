@@ -683,23 +683,53 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
         : const Duration(milliseconds: 350);
     _searchDebounce = Timer(delay, () async {
       try {
-        debugPrint('[MatchSearch] query="${q.trim()}"');
-        final results = await MatchSearchService.instance.search(q.trim());
-        debugPrint('[MatchSearch] ${results.length} result(s)');
-        for (final r in results) {
-          debugPrint('[MatchSearch]   ${r.home} – ${r.away} | ${r.league} | ${r.time}');
+        if (q.trim().isEmpty) {
+          // Boş arama: canlı + yaklaşan maçları getir
+          final liveMatches = await MatchSearchService.instance.getLiveMatches();
+          if (!mounted) return;
+          final filtered = liveMatches.where((m) => m.home.isNotEmpty && m.away.isNotEmpty).toList();
+          setState(() {
+            _apiResults = filtered.map((m) {
+              final statusLabel = m.isLive ? '🔴 Canlı ${m.minute}' : m.isPost ? 'Bitti' : '';
+              return _MatchDisplay(
+                teams: '${m.home} – ${m.away}',
+                league: statusLabel,
+                time: m.isLive || m.isPost ? '${m.homeScore} - ${m.awayScore}' : '',
+              );
+            }).toList();
+            _searchState = _SearchState.success;
+          });
+        } else {
+          // Yazılı arama: VPS search endpoint
+          final results = await MatchSearchService.instance.search(q.trim());
+          if (!mounted) return;
+          // Eğer VPS'ten sonuç gelmediyse canlı maçlarda filtrele
+          if (results.isEmpty) {
+            final liveMatches = await MatchSearchService.instance.getLiveMatches();
+            final ql = q.toLowerCase();
+            final filtered = liveMatches.where((m) =>
+              m.home.toLowerCase().contains(ql) ||
+              m.away.toLowerCase().contains(ql)
+            ).toList();
+            setState(() {
+              _apiResults = filtered.map((m) => _MatchDisplay(
+                teams: '${m.home} – ${m.away}',
+                league: m.isLive ? '🔴 Canlı' : '',
+                time: m.isLive || m.isPost ? '${m.homeScore} - ${m.awayScore}' : '',
+              )).toList();
+              _searchState = _SearchState.success;
+            });
+          } else {
+            setState(() {
+              _apiResults = results.map((r) => _MatchDisplay(
+                teams: '${_trTeam(r.home)} – ${_trTeam(r.away)}',
+                league: _trLeague(r.league),
+                time: _trDate(r.time),
+              )).toList();
+              _searchState = _SearchState.success;
+            });
+          }
         }
-        if (!mounted) return;
-        setState(() {
-          _apiResults = results
-              .map((r) => _MatchDisplay(
-                    teams:  '${_trTeam(r.home)} – ${_trTeam(r.away)}',
-                    league: _trLeague(r.league),
-                    time:   _trDate(r.time),
-                  ))
-              .toList();
-          _searchState = _SearchState.success;
-        });
       } catch (e) {
         debugPrint('[MatchSearch] error: $e');
         if (!mounted) return;
