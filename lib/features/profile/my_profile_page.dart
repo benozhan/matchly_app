@@ -65,26 +65,8 @@ class MyProfilePage extends StatelessWidget {
                       ),
                     ),
                     const Spacer(),
-                    IconButton(
-                      onPressed: () => AppState.instance.toggleLocale(),
-                      icon: Text(
-                        Localizations.localeOf(context).languageCode == 'tr' ? 'EN' : 'TR',
-                        style: const TextStyle(
-                          color: AppColors.brand,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: () => AppState.instance.toggleTheme(),
-                      icon: Icon(
-                        Theme.of(context).brightness == Brightness.dark
-                            ? Icons.light_mode_rounded
-                            : Icons.dark_mode_rounded,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
+
+
                   ],
                 ),
                 const SizedBox(height: 20),
