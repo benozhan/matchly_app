@@ -67,8 +67,12 @@ class CouponStorageService {
           .order('sort_order');
 
       final matches = matchRows.map<MatchItem>((m) {
+        final rawMStatus = m['status'] as String? ?? 'pending';
+        final mappedMStatus = rawMStatus == 'lost' ? 'risk'
+            : rawMStatus == 'won' ? 'winning'
+            : rawMStatus;
         final status = CouponStatus.values.firstWhere(
-          (s) => s.name == m['status'],
+          (s) => s.name == mappedMStatus,
           orElse: () => CouponStatus.pending,
         );
 
@@ -81,13 +85,19 @@ class CouponStorageService {
         );
       }).toList();
 
+      final rawStatus = row['status'] as String? ?? 'pending';
+      final mappedStatus = rawStatus == 'lost' ? 'risk'
+          : rawStatus == 'won' ? 'winning'
+          : rawStatus == 'active' ? 'pending'
+          : rawStatus;
       final status = CouponStatus.values.firstWhere(
-        (s) => s.name == row['status'],
+        (s) => s.name == mappedStatus,
         orElse: () => CouponStatus.pending,
       );
 
       coupons.add(
         Coupon(
+          id: int.tryParse(row['id'].toString()),
           title: row['title'] as String? ?? '',
           meta: row['meta'] as String? ?? '',
           status: status,

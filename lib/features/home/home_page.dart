@@ -5,6 +5,7 @@ import '../../core/coupon_share.dart';
 import '../../services/social_service.dart';
 import '../../services/auth_service.dart';
 import '../../services/coupon_storage_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../models/coupon.dart';
 import '../../services/match_search_service.dart';
 import 'dart:async';
@@ -54,9 +55,65 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
   _FilterTab _activeTab   = _FilterTab.all;
   int        _navIndex    = 0;
 
+  // ── supabase realtime ─────────────────────────────────────────────────────
+
+  void _subscribeToSupabaseCoupons() {
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+    if (userId == null) return;
+
+    _couponChannel = Supabase.instance.client
+        .channel('coupons:$userId')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.update,
+          schema: 'public',
+          table: 'coupons',
+          callback: (payload) async {
+            final updated = payload.newRecord;
+            final couponId = updated['id'];
+            final newStatus = updated['status'] as String? ?? 'pending';
+
+            // coupon_matches de güncelle
+            final matchRows = await Supabase.instance.client
+                .from('coupon_matches')
+                .select()
+                .eq('coupon_id', couponId)
+                .order('sort_order');
+
+            if (!mounted) return;
+            setState(() {
+              for (final entry in _entries) {
+                // ID ile eşleştir
+                if (entry.coupon.id.toString() == couponId.toString()) {
+                  final status = CouponStatus.values.firstWhere(
+                    (s) => s.name == newStatus,
+                    orElse: () => CouponStatus.pending,
+                  );
+                  final matches = (matchRows as List).map<MatchItem>((m) {
+                    final mStatus = CouponStatus.values.firstWhere(
+                      (s) => s.name == (m['status'] ?? 'pending'),
+                      orElse: () => CouponStatus.pending,
+                    );
+                    return MatchItem(
+                      teams: m['teams'] ?? '',
+                      selection: m['selection'] ?? '',
+                      score: m['score'] ?? '',
+                      minute: m['minute'] ?? '',
+                      status: mStatus,
+                    );
+                  }).toList();
+                  entry.coupon = entry.coupon.copyWithMatches(matches).copyWith(status: status);
+                }
+              }
+            });
+          },
+        )
+        .subscribe();
+  }
+
   // ── live scores ────────────────────────────────────────────────────────────
   Timer? _liveTimer;
   Map<String, LiveMatch> _liveMatches = {};
+  RealtimeChannel? _couponChannel;
 
   String _searchQuery  = '';
   String _siteFilter   = 'Tümü';
@@ -77,6 +134,7 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
     _searchController = TextEditingController();
     _loadUser();
     _startLiveScoreTimer();
+    _subscribeToSupabaseCoupons();
   }
 
   Future<void> _loadUser() async {
@@ -87,17 +145,16 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
 
     setState(() {
       _user = user;
-      if (coupons.isNotEmpty) {
-        _entries
-          ..clear()
-          ..addAll(coupons.map((c) => _CouponEntry(coupon: c)));
-      }
+      _entries
+        ..clear()
+        ..addAll(coupons.map((c) => _CouponEntry(coupon: c)));
     });
   }
 
   @override
   void dispose() {
     _liveTimer?.cancel();
+    _couponChannel?.unsubscribe();
     _searchController.dispose();
     super.dispose();
   }
