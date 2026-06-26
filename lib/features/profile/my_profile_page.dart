@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../core/app_colors.dart';
+import '../../main.dart';
+import '../../main.dart';
 import '../../models/coupon.dart';
 import '../../services/auth_service.dart';
 
@@ -59,6 +61,16 @@ class MyProfilePage extends StatelessWidget {
                       onPressed: () => Navigator.pop(context),
                       icon: const Icon(
                         Icons.arrow_back_rounded,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const Spacer(),
+                    IconButton(
+                      onPressed: () => MatchlyApp.of(context)?.toggleTheme(),
+                      icon: Icon(
+                        Theme.of(context).brightness == Brightness.dark
+                            ? Icons.light_mode_rounded
+                            : Icons.dark_mode_rounded,
                         color: AppColors.textPrimary,
                       ),
                     ),
