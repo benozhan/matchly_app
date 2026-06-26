@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'core/app_theme.dart';
 import 'features/auth/auth_page.dart';
 import 'features/home/home_page.dart';
@@ -11,6 +12,9 @@ import 'services/social_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  OneSignal.initialize('74407b16-edac-4633-8b50-a9684cf8e838');
+  OneSignal.Notifications.requestPermission(true);
 
   try {
     await Supabase.initialize(
