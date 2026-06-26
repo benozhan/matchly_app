@@ -7,11 +7,15 @@ import 'features/auth/auth_page.dart';
 import 'features/home/home_page.dart';
 import 'features/profile/shared_coupon_detail_page.dart';
 import 'services/fcm_service.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'services/notification_service.dart';
 import 'services/social_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  OneSignal.initialize('74407b16-edac-4633-8b50-a9684cf8e838');
+  OneSignal.Notifications.requestPermission(true);
 
   await Supabase.initialize(
     url: 'https://npesbmrndcxyhygsqrro.supabase.co',
