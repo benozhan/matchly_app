@@ -828,8 +828,8 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
             const SizedBox(height: 10),
             MatchlyInput(
                 controller: siteController,
-                label: 'Site',
-                hint: 'Bilyoner, Misli, Nesine'),
+                label: 'Lig',
+                hint: 'Süper Lig, Premier Lig, La Liga...'),
             const SizedBox(height: 10),
             Row(
               children: [

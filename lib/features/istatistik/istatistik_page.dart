@@ -60,6 +60,29 @@ class IstatistikPage extends StatelessWidget {
         .take(5)
         .toList();
 
+    // Lig bazlı istatistik
+    final ligStats = <String, Map<String, dynamic>>{};
+    for (final c in allCoupons) {
+      final lig = c.meta.split('·').first.trim().isEmpty ? 'Diğer' : c.meta.split('·').first.trim();
+      ligStats.putIfAbsent(lig, () => {'kupon': 0, 'kazanan': 0, 'kaybeden': 0, 'bahis': 0.0, 'kazanc': 0.0});
+      ligStats[lig]!['kupon'] = (ligStats[lig]!['kupon'] as int) + 1;
+      if (c.status == CouponStatus.winning) {
+        ligStats[lig]!['kazanan'] = (ligStats[lig]!['kazanan'] as int) + 1;
+        ligStats[lig]!['kazanc'] = (ligStats[lig]!['kazanc'] as double) + _parseAmount(c.potential);
+      }
+      if (c.status == CouponStatus.risk) {
+        ligStats[lig]!['kaybeden'] = (ligStats[lig]!['kaybeden'] as int) + 1;
+      }
+      ligStats[lig]!['bahis'] = (ligStats[lig]!['bahis'] as double) + _parseAmount(c.stake);
+    }
+    final ligList = ligStats.entries.toList()
+      ..sort((a, b) => (b.value['kupon'] as int).compareTo(a.value['kupon'] as int));
+
+    // Net kar/zarar
+    final toplamKazanc = allCoupons.where((c) => c.status == CouponStatus.winning).fold(0.0, (s, c) => s + _parseAmount(c.potential));
+    final toplamKayip = allCoupons.where((c) => c.status == CouponStatus.risk).fold(0.0, (s, c) => s + _parseAmount(c.stake));
+    final netKarZarar = toplamKazanc - toplamKayip;
+
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
       children: [
@@ -192,6 +215,69 @@ class IstatistikPage extends StatelessWidget {
               ],
             ),
           ),
+
+          // ── Net Kar/Zarar ─────────────────────────────────────────────
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+            decoration: _cardDeco(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Net Kar / Zarar', style: TextStyle(color: AppColors.textSecondary, fontSize: 12, fontWeight: FontWeight.w600, letterSpacing: 0.5)),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(child: _NetStat(label: 'Toplam Kazanç', value: _fmt(toplamKazanc), color: AppColors.green)),
+                    const SizedBox(width: 8),
+                    Expanded(child: _NetStat(label: 'Toplam Kayıp', value: _fmt(toplamKayip), color: AppColors.red)),
+                    const SizedBox(width: 8),
+                    Expanded(child: _NetStat(label: 'Net', value: (netKarZarar >= 0 ? '+' : '') + _fmt(netKarZarar.abs()), color: netKarZarar >= 0 ? AppColors.green : AppColors.red)),
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+          // ── Lig Bazlı İstatistik ──────────────────────────────────────────
+          if (ligList.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Container(
+              decoration: _cardDeco(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.fromLTRB(16, 14, 16, 0),
+                    child: Text('Lig Bazlı', style: TextStyle(color: AppColors.textSecondary, fontSize: 12, fontWeight: FontWeight.w600, letterSpacing: 0.5)),
+                  ),
+                  const SizedBox(height: 8),
+                  ...ligList.map((e) {
+                    final lig = e.key;
+                    final s = e.value;
+                    final kupon = s['kupon'] as int;
+                    final kazanan = s['kazanan'] as int;
+                    final kaybeden = s['kaybeden'] as int;
+                    final bahis = s['bahis'] as double;
+                    final kazanc = s['kazanc'] as double;
+                    final net = kazanc - bahis;
+                    return Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
+                      child: Row(
+                        children: [
+                          Expanded(flex: 3, child: Text(lig, style: const TextStyle(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w600))),
+                          Expanded(child: Text('\$kupon kupon', style: const TextStyle(color: AppColors.textSecondary, fontSize: 11))),
+                          Expanded(child: Text('\$kazanan✅ \$kaybeden❌', style: const TextStyle(fontSize: 11, color: AppColors.textSecondary))),
+                          Expanded(child: Text((net >= 0 ? '+' : '') + _fmt(net.abs()), style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: net >= 0 ? AppColors.green : AppColors.red))),
+                        ],
+                      ),
+                    );
+                  }),
+                  const SizedBox(height: 8),
+                ],
+              ),
+            ),
+          ],
 
           if (recent.isNotEmpty) ...[
             const SizedBox(height: 12),
@@ -496,6 +582,34 @@ class _EmptyState extends StatelessWidget {
             textAlign: TextAlign.center,
             style: TextStyle(color: AppColors.textTertiary, fontSize: 12),
           ),
+        ],
+      ),
+    );
+  }
+
+}
+class _NetStat extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color color;
+
+  const _NetStat({required this.label, required this.value, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withOpacity(0.2), width: 0.5),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: TextStyle(color: color.withOpacity(0.7), fontSize: 10, fontWeight: FontWeight.w600)),
+          const SizedBox(height: 4),
+          Text(value, style: TextStyle(color: color, fontSize: 15, fontWeight: FontWeight.w800)),
         ],
       ),
     );
