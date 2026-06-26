@@ -66,6 +66,17 @@ class MyProfilePage extends StatelessWidget {
                     ),
                     const Spacer(),
                     IconButton(
+                      onPressed: () => MatchlyApp.of(context)?.toggleLocale(),
+                      icon: Text(
+                        Localizations.localeOf(context).languageCode == 'tr' ? 'EN' : 'TR',
+                        style: const TextStyle(
+                          color: AppColors.brand,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    IconButton(
                       onPressed: () => MatchlyApp.of(context)?.toggleTheme(),
                       icon: Icon(
                         Theme.of(context).brightness == Brightness.dark
