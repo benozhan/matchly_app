@@ -31,6 +31,7 @@ class _UserSearchPageState extends State<UserSearchPage> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _focusNode.requestFocus());
     _loadInitialFollowState();
   }
 
@@ -54,6 +55,7 @@ class _UserSearchPageState extends State<UserSearchPage> {
   @override
   void dispose() {
     _controller.dispose();
+    _focusNode.dispose();
     _debounce?.cancel();
     super.dispose();
   }
@@ -143,6 +145,7 @@ class _UserSearchPageState extends State<UserSearchPage> {
                   controller: _controller,
                   onChanged: _onChanged,
                   autofocus: true,
+                  focusNode: _focusNode,
                   style: const TextStyle(
                       color: AppColors.textPrimary, fontSize: 15),
                   decoration: InputDecoration(

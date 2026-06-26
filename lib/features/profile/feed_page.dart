@@ -38,10 +38,12 @@ class _FeedPageState extends State<FeedPage> {
   }
 
   Future<void> _load() async {
-    setState(() {
-      _loading = true;
-      _error = null;
-    });
+    if (_items.isEmpty) {
+      setState(() {
+        _loading = true;
+        _error = null;
+      });
+    }
     try {
       try {
         _currentUser = await SocialService.instance.getUser(widget.username);
