@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'core/app_theme.dart';
 import 'features/auth/auth_page.dart';
 import 'features/home/home_page.dart';
@@ -13,8 +14,12 @@ import 'services/social_service.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  OneSignal.initialize('74407b16-edac-4633-8b50-a9684cf8e838');
-  OneSignal.Notifications.requestPermission(true);
+  try {
+    OneSignal.initialize('74407b16-edac-4633-8b50-a9684cf8e838');
+    OneSignal.Notifications.requestPermission(true);
+  } catch (e) {
+    debugPrint('OneSignal error: $e');
+  }
 
   try {
     await Supabase.initialize(
@@ -31,6 +36,9 @@ Future<void> main() async {
 class MatchlyApp extends StatefulWidget {
   const MatchlyApp({super.key});
 
+  static _MatchlyAppState? of(BuildContext context) =>
+      context.findAncestorStateOfType<_MatchlyAppState>();
+
   @override
   State<MatchlyApp> createState() => _MatchlyAppState();
 }
@@ -38,22 +46,33 @@ class MatchlyApp extends StatefulWidget {
 class _MatchlyAppState extends State<MatchlyApp> {
   late bool _signedIn;
   StreamSubscription<AuthState>? _authSubscription;
+  ThemeMode _themeMode = ThemeMode.dark;
 
   @override
   void initState() {
     super.initState();
     _signedIn = Supabase.instance.client.auth.currentSession != null;
-    if (_signedIn) {
-      NotificationService.instance.initialize();
-    }
+    if (_signedIn) NotificationService.instance.initialize();
+    _loadTheme();
     _authSubscription =
         Supabase.instance.client.auth.onAuthStateChange.listen((data) {
       if (!mounted) return;
       final signedIn = data.session != null;
-      if (_signedIn != signedIn) {
-        setState(() => _signedIn = signedIn);
-      }
+      if (_signedIn != signedIn) setState(() => _signedIn = signedIn);
     });
+  }
+
+  Future<void> _loadTheme() async {
+    final prefs = await SharedPreferences.getInstance();
+    final isDark = prefs.getBool('isDarkTheme') ?? true;
+    setState(() => _themeMode = isDark ? ThemeMode.dark : ThemeMode.light);
+  }
+
+  Future<void> toggleTheme() async {
+    final prefs = await SharedPreferences.getInstance();
+    final isDark = _themeMode == ThemeMode.dark;
+    await prefs.setBool('isDarkTheme', !isDark);
+    setState(() => _themeMode = isDark ? ThemeMode.light : ThemeMode.dark);
   }
 
   @override
@@ -73,7 +92,9 @@ class _MatchlyAppState extends State<MatchlyApp> {
     return MaterialApp(
       title: 'Matchly',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.darkTheme,
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: _themeMode,
       home: _signedIn
           ? const MatchlyHomePage()
           : AuthPage(onSignedIn: _handleSignedIn),
