@@ -12,17 +12,29 @@ import 'services/notification_service.dart';
 import 'services/social_service.dart';
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  runZonedGuarded(() async {
+    WidgetsFlutterBinding.ensureInitialized();
 
-  OneSignal.initialize('74407b16-edac-4633-8b50-a9684cf8e838');
-  OneSignal.Notifications.requestPermission(true);
+    try {
+      OneSignal.initialize('74407b16-edac-4633-8b50-a9684cf8e838');
+      OneSignal.Notifications.requestPermission(true);
+    } catch (e) {
+      debugPrint('OneSignal error: $e');
+    }
 
-  await Supabase.initialize(
-    url: 'https://npesbmrndcxyhygsqrro.supabase.co',
-    anonKey: 'sb_publishable_WWEq0ERvj1vNjj321jRROQ_t9I4SCEP',
-  );
+    try {
+      await Supabase.initialize(
+        url: 'https://npesbmrndcxyhygsqrro.supabase.co',
+        anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5wZXNibXJuZGN4eWh5Z3NxcnJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyNDk5ODgsImV4cCI6MjA5NzgyNTk4OH0.8ig30ARWHSW1PSZ7JpK3B38wW1pJhUSep5nICs6PHEc',
+      );
+    } catch (e) {
+      debugPrint('Supabase error: $e');
+    }
 
-  runApp(const MatchlyApp());
+    runApp(const MatchlyApp());
+  }, (error, stack) {
+    debugPrint('FATAL: $error\n$stack');
+  });
 }
 
 class MatchlyApp extends StatefulWidget {
