@@ -83,7 +83,7 @@ class _AuthPageState extends State<AuthPage> {
     final title = _isLogin ? 'Giriş yap' : 'Hesap oluştur';
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.red,
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 430),
