@@ -9,7 +9,7 @@ workflows:
         distribution_type: app_store
         bundle_identifier: com.ozhan.matchly
       flutter: stable
-      xcode: 16.2
+      xcode: latest
     scripts:
       - name: Get Flutter packages
         script: flutter packages pub get
