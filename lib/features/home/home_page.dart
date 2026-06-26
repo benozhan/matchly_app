@@ -108,12 +108,55 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
           },
         )
         .subscribe();
+
+    // coupon_matches realtime
+    _matchChannel = Supabase.instance.client
+        .channel('coupon_matches:\$userId')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.update,
+          schema: 'public',
+          table: 'coupon_matches',
+          callback: (payload) async {
+            final updated = payload.newRecord;
+            final couponId = updated['coupon_id'];
+            if (!mounted) return;
+
+            final matchRows = await Supabase.instance.client
+                .from('coupon_matches')
+                .select()
+                .eq('coupon_id', couponId)
+                .order('sort_order');
+
+            setState(() {
+              for (final entry in _entries) {
+                if (entry.coupon.id.toString() == couponId.toString()) {
+                  final matches = (matchRows as List).map<MatchItem>((m) {
+                    final mStatus = CouponStatus.values.firstWhere(
+                      (s) => s.name == ((m['status'] ?? 'pending') == 'void' ? 'void_' : (m['status'] ?? 'pending')),
+                      orElse: () => CouponStatus.pending,
+                    );
+                    return MatchItem(
+                      teams: m['teams'] ?? '',
+                      selection: m['selection'] ?? '',
+                      score: m['score'] ?? '',
+                      minute: m['minute'] ?? '',
+                      status: mStatus,
+                    );
+                  }).toList();
+                  entry.coupon = entry.coupon.copyWithMatches(matches);
+                }
+              }
+            });
+          },
+        )
+        .subscribe();
   }
 
   // ── live scores ────────────────────────────────────────────────────────────
   Timer? _liveTimer;
   Map<String, LiveMatch> _liveMatches = {};
   RealtimeChannel? _couponChannel;
+  RealtimeChannel? _matchChannel;
 
   String _searchQuery  = '';
   String _siteFilter   = 'Tümü';
@@ -155,6 +198,7 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
   void dispose() {
     _liveTimer?.cancel();
     _couponChannel?.unsubscribe();
+    _matchChannel?.unsubscribe();
     _searchController.dispose();
     super.dispose();
   }
