@@ -210,13 +210,14 @@ class _AyarlarPageState extends State<AyarlarPage> {
                   backgroundColor: AppColors.background,
                   appBar: AppBar(
                     backgroundColor: AppColors.background,
+                    foregroundColor: AppColors.textPrimary,
                     elevation: 0,
+                    titleTextStyle: const TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.w700, decoration: TextDecoration.none),
                     leading: IconButton(
                       icon: const Icon(Icons.arrow_back_rounded, color: AppColors.textPrimary),
                       onPressed: () => Navigator.of(ctx).pop(),
                     ),
-                    title: const Text('Kupon Geçmişi',
-                      style: TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.w700)),
+                    title: const Text('Kupon Geçmişi'),
                   ),
                   body: GecmisPage(
                   coupons: widget.coupons,
