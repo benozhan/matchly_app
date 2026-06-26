@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'core/app_theme.dart';
 import 'features/auth/auth_page.dart';
 import 'features/home/home_page.dart';
@@ -47,6 +49,7 @@ class _MatchlyAppState extends State<MatchlyApp> {
   late bool _signedIn;
   StreamSubscription<AuthState>? _authSubscription;
   ThemeMode _themeMode = ThemeMode.dark;
+  Locale _locale = const Locale('tr');
 
   @override
   void initState() {
@@ -66,6 +69,15 @@ class _MatchlyAppState extends State<MatchlyApp> {
     final prefs = await SharedPreferences.getInstance();
     final isDark = prefs.getBool('isDarkTheme') ?? true;
     setState(() => _themeMode = isDark ? ThemeMode.dark : ThemeMode.light);
+    final lang = prefs.getString('locale') ?? 'tr';
+    setState(() => _locale = Locale(lang));
+  }
+
+  Future<void> toggleLocale() async {
+    final prefs = await SharedPreferences.getInstance();
+    final isEn = _locale.languageCode == 'en';
+    await prefs.setString('locale', isEn ? 'tr' : 'en');
+    setState(() => _locale = Locale(isEn ? 'tr' : 'en'));
   }
 
   Future<void> toggleTheme() async {
@@ -94,6 +106,14 @@ class _MatchlyAppState extends State<MatchlyApp> {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
+      locale: _locale,
+      supportedLocales: const [Locale('tr'), Locale('en')],
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
       themeMode: _themeMode,
       home: _signedIn
           ? const MatchlyHomePage()
