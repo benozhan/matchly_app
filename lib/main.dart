@@ -49,8 +49,7 @@ class MatchlyApp extends StatefulWidget {
 class _MatchlyAppState extends State<MatchlyApp> {
   late bool _signedIn;
   StreamSubscription<AuthState>? _authSubscription;
-  ThemeMode _themeMode = ThemeMode.dark;
-  Locale _locale = const Locale('tr');
+
 
   @override
   void initState() {
@@ -67,27 +66,7 @@ class _MatchlyAppState extends State<MatchlyApp> {
     });
   }
 
-  Future<void> _loadTheme() async {
-    final prefs = await SharedPreferences.getInstance();
-    final isDark = prefs.getBool('isDarkTheme') ?? true;
-    setState(() => _themeMode = isDark ? ThemeMode.dark : ThemeMode.light);
-    final lang = prefs.getString('locale') ?? 'tr';
-    setState(() => _locale = Locale(lang));
-  }
 
-  Future<void> toggleLocale() async {
-    final prefs = await SharedPreferences.getInstance();
-    final isEn = _locale.languageCode == 'en';
-    await prefs.setString('locale', isEn ? 'tr' : 'en');
-    setState(() => _locale = Locale(isEn ? 'tr' : 'en'));
-  }
-
-  Future<void> toggleTheme() async {
-    final prefs = await SharedPreferences.getInstance();
-    final isDark = _themeMode == ThemeMode.dark;
-    await prefs.setBool('isDarkTheme', !isDark);
-    setState(() => _themeMode = isDark ? ThemeMode.light : ThemeMode.dark);
-  }
 
   @override
   void dispose() {
