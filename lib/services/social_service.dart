@@ -187,6 +187,16 @@ class SocialService {
   }
 
   /// Searches users by username or displayName.
+  Future<void> ensureUser(String username, String displayName) async {
+    try {
+      await _client.post(
+        Uri.parse('\$_kBaseUrl/social/users'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'username': username, 'displayName': displayName, 'avatar': ''}),
+      ).timeout(_kTimeout);
+    } catch (_) {}
+  }
+
   Future<List<SocialUser>> searchUsers(String q) async {
     if (q.trim().isEmpty) return [];
     final res = await _client

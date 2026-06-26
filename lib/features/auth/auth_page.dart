@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../services/social_service.dart';
 
 import '../../core/app_colors.dart';
 
@@ -64,6 +65,10 @@ class _AuthPageState extends State<AuthPage> {
             'displayName': username,
           },
         );
+        // Backend'e kullanıcı kaydı
+        try {
+          await SocialService.instance.ensureUser(username, username);
+        } catch (_) {}
       }
 
       widget.onSignedIn();
