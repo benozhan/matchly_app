@@ -206,7 +206,19 @@ class _AyarlarPageState extends State<AyarlarPage> {
             subtitle: 'Tamamlanan kuponları görüntüle',
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(
-                builder: (ctx) => GecmisPage(
+                builder: (ctx) => Scaffold(
+                  backgroundColor: AppColors.background,
+                  appBar: AppBar(
+                    backgroundColor: AppColors.background,
+                    elevation: 0,
+                    leading: IconButton(
+                      icon: const Icon(Icons.arrow_back_rounded, color: AppColors.textPrimary),
+                      onPressed: () => Navigator.of(ctx).pop(),
+                    ),
+                    title: const Text('Kupon Geçmişi',
+                      style: TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.w700)),
+                  ),
+                  body: GecmisPage(
                   coupons: widget.coupons,
                   onCouponTap: (c) => Navigator.of(ctx).push(
                     MaterialPageRoute(
@@ -217,6 +229,7 @@ class _AyarlarPageState extends State<AyarlarPage> {
                       ),
                     ),
                   ),
+                ),
                 ),
               ),
             ),
