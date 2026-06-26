@@ -57,7 +57,7 @@ Color statusColor(CouponStatus status) {
   switch (status) {
     case CouponStatus.winning:   return AppColors.green;
     case CouponStatus.risk:      return AppColors.red;
-    case CouponStatus.pending:   return const Color(0xFF8E8E93);
+    case CouponStatus.pending:   return const Color(0xFFFF9500);
     case CouponStatus.cancelled: return const Color(0xFF636366);
   }
 }

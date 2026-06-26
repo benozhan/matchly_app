@@ -40,7 +40,7 @@ class _CouponCardState extends State<CouponCard> {
     switch (status) {
       case CouponStatus.winning:   return AppColors.green;
       case CouponStatus.risk:      return AppColors.red;
-      case CouponStatus.pending:   return AppColors.textSecondary;
+      case CouponStatus.pending:   return const Color(0xFFFF9500);
       case CouponStatus.cancelled: return AppColors.textTertiary;
     }
   }
