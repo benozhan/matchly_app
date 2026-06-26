@@ -55,7 +55,9 @@ class _GecmisPageState extends State<GecmisPage> {
     final kaybeden = filtered.where((c) => c.status == CouponStatus.risk).length;
     final iptal    = filtered.where((c) => c.status == CouponStatus.cancelled).length;
 
-    return ListView(
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: ListView(
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
       children: [
         // ── Header ────────────────────────────────────────────────────────────
@@ -520,6 +522,7 @@ class _SearchEmptyState extends StatelessWidget {
           Text('Farklı bir arama terimi deneyin.', textAlign: TextAlign.center, style: TextStyle(color: AppColors.textTertiary, fontSize: 12)),
         ],
       ),
+      );
     );
   }
 }

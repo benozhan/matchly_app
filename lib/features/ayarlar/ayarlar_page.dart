@@ -212,14 +212,17 @@ class _AyarlarPageState extends State<AyarlarPage> {
                     backgroundColor: AppColors.background,
                     foregroundColor: AppColors.textPrimary,
                     elevation: 0,
-                    titleTextStyle: const TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.w700, decoration: TextDecoration.none),
                     leading: IconButton(
                       icon: const Icon(Icons.arrow_back_rounded, color: AppColors.textPrimary),
                       onPressed: () => Navigator.of(ctx).pop(),
                     ),
-                    title: const Text('Kupon Geçmişi'),
+                    title: const Text('Kupon Geçmişi', style: TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.w700)),
                   ),
-                  body: GecmisPage(
+                  body: Theme(
+                    data: Theme.of(ctx).copyWith(
+                      textTheme: Theme.of(ctx).textTheme.apply(decoration: TextDecoration.none),
+                    ),
+                    child: GecmisPage(
                   coupons: widget.coupons,
                   onCouponTap: (c) => Navigator.of(ctx).push(
                     MaterialPageRoute(
@@ -231,6 +234,7 @@ class _AyarlarPageState extends State<AyarlarPage> {
                     ),
                   ),
                 ),
+                  ),
                 ),
               ),
             ),
