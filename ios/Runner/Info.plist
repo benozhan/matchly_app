@@ -54,5 +54,11 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Profil fotoğrafı seçmek için galeri erişimi gerekiyor.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Profil fotoğrafı çekmek için kamera erişimi gerekiyor.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Fotoğraf kaydetmek için galeri erişimi gerekiyor.</string>
 </dict>
 </plist>

@@ -196,6 +196,22 @@ class SocialService {
     } catch (_) {}
   }
 
+  Future<SocialUser?> updateAvatar(String username, String avatarUrl) async {
+    try {
+      final res = await _client
+          .patch(
+            Uri.parse('$_kBaseUrl/social/users/$username'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({'username': username, 'displayName': '', 'avatar': avatarUrl}),
+          )
+          .timeout(_kTimeout);
+      if (res.statusCode == 200) {
+        return SocialUser.fromJson(jsonDecode(res.body) as Map<String, dynamic>);
+      }
+    } catch (_) {}
+    return null;
+  }
+
   Future<List<SocialUser>> searchUsers(String q) async {
     if (q.trim().isEmpty) return [];
     final res = await _client

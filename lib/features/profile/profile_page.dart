@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:image_picker/image_picker.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/app_colors.dart';
 import '../../models/coupon.dart';
 import '../../services/social_service.dart';
@@ -159,7 +161,11 @@ class _ProfilePageState extends State<ProfilePage> {
                         color: AppColors.brand, strokeWidth: 2))
                 : _error != null
                     ? _ErrorState(message: _error!, onRetry: _load)
-                    : CustomScrollView(
+                    : RefreshIndicator(
+                        color: AppColors.brand,
+                        backgroundColor: AppColors.card,
+                        onRefresh: _load,
+                        child: CustomScrollView(
                         controller: _scrollController,
                         slivers: [
                           // ── Top bar ──────────────────────────────────────────
@@ -189,8 +195,24 @@ class _ProfilePageState extends State<ProfilePage> {
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   _Avatar(
-                                      displayName:
-                                          _user?.displayName ?? widget.username),
+                                      displayName: _user?.displayName ?? widget.username,
+                                      username: widget.username,
+                                      avatarUrl: _user?.avatar,
+                                      isOwnProfile: _isOwnProfile,
+                                      onAvatarUpdated: (url) {
+                                        if (_user != null) {
+                                          setState(() => _user = SocialUser(
+                                            id: _user!.id,
+                                            username: _user!.username,
+                                            displayName: _user!.displayName,
+                                            avatar: url,
+                                            createdAt: _user!.createdAt,
+                                            followerCount: _user!.followerCount,
+                                            followingCount: _user!.followingCount,
+                                          ));
+                                        }
+                                      },
+                                    ),
                                   const SizedBox(height: 14),
                                   Text(
                                     _user?.displayName ?? widget.username,
@@ -349,6 +371,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                         ],
                       ),
+                        ),
           ),
         ),
       ),
@@ -534,30 +557,96 @@ class _FollowButton extends StatelessWidget {
 
 // ── Avatar ────────────────────────────────────────────────────────────────────
 
-class _Avatar extends StatelessWidget {
+class _Avatar extends StatefulWidget {
   final String displayName;
-  const _Avatar({required this.displayName});
+  final String? avatarUrl;
+  final bool isOwnProfile;
+  final String username;
+  final void Function(String newUrl)? onAvatarUpdated;
+
+  const _Avatar({
+    required this.displayName,
+    required this.username,
+    this.avatarUrl,
+    this.isOwnProfile = false,
+    this.onAvatarUpdated,
+  });
+
+  @override
+  State<_Avatar> createState() => _AvatarState();
+}
+
+class _AvatarState extends State<_Avatar> {
+  bool _uploading = false;
+  String? _localUrl;
 
   String get _initials {
-    final parts = displayName.trim().split(' ');
-    if (parts.length >= 2) return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
-    return displayName.isNotEmpty
-        ? displayName.substring(0, displayName.length.clamp(0, 2)).toUpperCase()
+    final parts = widget.displayName.trim().split(' ');
+    if (parts.length >= 2) return '\${parts[0][0]}\${parts[1][0]}'.toUpperCase();
+    return widget.displayName.isNotEmpty
+        ? widget.displayName.substring(0, widget.displayName.length.clamp(0, 2)).toUpperCase()
         : '?';
+  }
+
+  Future<void> _pickAndUpload() async {
+    try {
+      final picker = ImagePicker();
+      final picked = await picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 512,
+        maxHeight: 512,
+        imageQuality: 85,
+      );
+      if (picked == null) return;
+      setState(() => _uploading = true);
+
+      final bytes = await picked.readAsBytes();
+      final ext = picked.path.split('.').last.toLowerCase();
+      final fileName = '\${widget.username}_\${DateTime.now().millisecondsSinceEpoch}.\$ext';
+
+      final sb = Supabase.instance.client;
+      await sb.storage.from('avatars').uploadBinary(
+        fileName,
+        bytes,
+        fileOptions: FileOptions(contentType: 'image/\$ext', upsert: true),
+      );
+
+      final url = sb.storage.from('avatars').getPublicUrl(fileName);
+      await SocialService.instance.updateAvatar(widget.username, url);
+
+      if (!mounted) return;
+      setState(() { _localUrl = url; _uploading = false; });
+      widget.onAvatarUpdated?.call(url);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _uploading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Fotoğraf yüklenemedi: \$e'),
+          backgroundColor: AppColors.card,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final url = _localUrl ?? widget.avatarUrl;
+    final circle = Container(
       width: 84,
       height: 84,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        gradient: LinearGradient(
+        gradient: url == null ? LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [AppColors.brand, AppColors.brand.withOpacity(0.60)],
-        ),
+        ) : null,
+        image: url != null ? DecorationImage(
+          image: NetworkImage(url),
+          fit: BoxFit.cover,
+        ) : null,
         boxShadow: [
           BoxShadow(
             color: AppColors.brand.withOpacity(0.35),
@@ -567,7 +656,7 @@ class _Avatar extends StatelessWidget {
         ],
       ),
       alignment: Alignment.center,
-      child: Text(
+      child: url == null ? Text(
         _initials,
         style: const TextStyle(
           color: Colors.white,
@@ -575,6 +664,42 @@ class _Avatar extends StatelessWidget {
           fontWeight: FontWeight.w800,
           letterSpacing: -0.5,
         ),
+      ) : null,
+    );
+
+    if (!widget.isOwnProfile) return circle;
+
+    return GestureDetector(
+      onTap: _uploading ? null : _pickAndUpload,
+      child: Stack(
+        children: [
+          circle,
+          if (_uploading)
+            const Positioned.fill(
+              child: CircleAvatar(
+                backgroundColor: Colors.black45,
+                child: SizedBox(
+                  width: 24, height: 24,
+                  child: CircularProgressIndicator(
+                      strokeWidth: 2, color: Colors.white),
+                ),
+              ),
+            )
+          else if (widget.isOwnProfile)
+            Positioned(
+              bottom: 0, right: 0,
+              child: Container(
+                width: 26, height: 26,
+                decoration: BoxDecoration(
+                  color: AppColors.brand,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: AppColors.background, width: 2),
+                ),
+                child: const Icon(Icons.camera_alt_rounded,
+                    size: 13, color: Colors.white),
+              ),
+            ),
+        ],
       ),
     );
   }

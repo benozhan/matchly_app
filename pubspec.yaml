@@ -39,6 +39,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   intl: ^0.20.2
+  image_picker: ^1.2.2
   # firebase_core_REMOVED: ^3.13.1
   # firebase_messaging_REMOVED: ^15.2.5
   # flutter_local_notifications: ^20.1.0
