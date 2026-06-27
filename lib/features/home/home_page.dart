@@ -34,7 +34,8 @@ class _CouponEntry {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 class MatchlyHomePage extends StatefulWidget {
-  const MatchlyHomePage({super.key});
+  final String? pendingCouponId;
+  const MatchlyHomePage({super.key, this.pendingCouponId});
 
   @override
   State<MatchlyHomePage> createState() => _MatchlyHomePageState();
@@ -178,6 +179,29 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
     _loadUser();
     _startLiveScoreTimer();
     _subscribeToSupabaseCoupons();
+    // Bildirimden gelen kupon ID
+    if (widget.pendingCouponId != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _openCouponById(widget.pendingCouponId!);
+      });
+    }
+  }
+
+  void _openCouponById(String couponId) {
+    final entry = _entries.firstWhere(
+      (e) => e.coupon.id.toString() == couponId,
+      orElse: () => _historyEntries.firstWhere(
+        (e) => e.coupon.id.toString() == couponId,
+        orElse: () => _entries.isNotEmpty ? _entries.first : throw Exception('not found'),
+      ),
+    );
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (_) => CouponDetailPage(
+        coupon: entry.coupon,
+        resolved: entry.coupon.status != CouponStatus.pending,
+        allCoupons: _entries.map((e) => e.coupon).toList(),
+      ),
+    ));
   }
 
   Future<void> _loadUser() async {

@@ -14,6 +14,8 @@ import 'services/fcm_service.dart';
 import 'services/notification_service.dart';
 import 'services/social_service.dart';
 
+String? _pendingCouponId;
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -58,6 +60,15 @@ class _MatchlyAppState extends State<MatchlyApp> {
     if (_signedIn) NotificationService.instance.initialize();
     AppState.instance.init();
     AppState.instance.addListener(() => setState(() {}));
+    // Bildirim tap handler
+    OneSignal.Notifications.addClickListener((event) {
+      final data = event.notification.additionalData;
+      if (data != null && data['coupon_id'] != null) {
+        setState(() {
+          _pendingCouponId = data['coupon_id'].toString();
+        });
+      }
+    });
     _authSubscription =
         Supabase.instance.client.auth.onAuthStateChange.listen((data) {
       if (!mounted) return;
@@ -97,7 +108,7 @@ class _MatchlyAppState extends State<MatchlyApp> {
       ],
       themeMode: AppState.instance.themeMode,
       home: _signedIn
-          ? const MatchlyHomePage()
+          ? MatchlyHomePage(pendingCouponId: _pendingCouponId)
           : AuthPage(onSignedIn: _handleSignedIn),
       onGenerateRoute: _onGenerateRoute,
     );
