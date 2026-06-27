@@ -20,6 +20,80 @@ const _mockMatches = [
   'Uzbekistan - Colombia',
 ];
 
+// ─── League list ─────────────────────────────────────────────────────────────
+
+const _leagues = [
+  // Türkiye
+  'Süper Lig',
+  'TFF 1. Lig',
+  'TFF 2. Lig',
+  'Türkiye Kupası',
+  // İngiltere
+  'Premier Lig',
+  'Championship',
+  'League One',
+  'FA Cup',
+  // İspanya
+  'La Liga',
+  'La Liga 2',
+  'Copa del Rey',
+  // İtalya
+  'Serie A',
+  'Serie B',
+  'Coppa Italia',
+  // Almanya
+  'Bundesliga',
+  '2. Bundesliga',
+  'DFB Pokal',
+  // Fransa
+  'Ligue 1',
+  'Ligue 2',
+  'Coupe de France',
+  // Hollanda
+  'Eredivisie',
+  'Eerste Divisie',
+  // Portekiz
+  'Primeira Liga',
+  // Belçika
+  'Pro League',
+  // İskoçya
+  'Scottish Premiership',
+  // Rusya
+  'Premier Lig (Rusya)',
+  // Türkiye dışı Avrupa
+  'Süper Lig (Avusturya)',
+  'Super League (İsviçre)',
+  'Ekstraklasa (Polonya)',
+  'Liga I (Romanya)',
+  'Superliga (Sırbistan)',
+  'Süper Lig (Yunanistan)',
+  // Avrupa Kupaları
+  'Şampiyonlar Ligi',
+  'UEFA Avrupa Ligi',
+  'Konferans Ligi',
+  'UEFA Süper Kupası',
+  // Milli Takım
+  'Dünya Kupası',
+  'Avrupa Şampiyonası',
+  'Uluslar Ligi',
+  'Afrika Kupası',
+  'Copa America',
+  'Asya Kupası',
+  'Dünya Kupası Elemeleri',
+  // Amerika
+  'MLS',
+  'Liga MX',
+  'Brasileirao',
+  'Argentine Primera',
+  // Asya
+  'J-League',
+  'K-League',
+  'Saudi Pro League',
+  'CSL (Çin)',
+  // Diğer
+  'Diğer',
+];
+
 class _Market {
   final String name;
   final List<String>? lines;
@@ -826,10 +900,10 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
                 label: 'Kupon adı',
                 hint: 'Akşam Kuponu'),
             const SizedBox(height: 10),
-            MatchlyInput(
-                controller: siteController,
-                label: 'Lig',
-                hint: 'Süper Lig, Premier Lig, La Liga...'),
+            _LeagueSelector(
+              selected: siteController.text,
+              onSelected: (v) => setState(() => siteController.text = v),
+            ),
             const SizedBox(height: 10),
             Row(
               children: [
@@ -1750,6 +1824,157 @@ class _Chip extends StatelessWidget {
           color: AppColors.brand,
           fontSize: 12,
           fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+}
+
+// ─── League selector ─────────────────────────────────────────────────────────
+
+class _LeagueSelector extends StatelessWidget {
+  final String selected;
+  final ValueChanged<String> onSelected;
+
+  const _LeagueSelector({
+    required this.selected,
+    required this.onSelected,
+  });
+
+  void _openPicker(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.background,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (_) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 12),
+            Container(
+              width: 40, height: 4,
+              decoration: BoxDecoration(
+                color: AppColors.gray,
+                borderRadius: BorderRadius.circular(999),
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Lig Seç',
+                  style: TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.4,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Flexible(
+              child: ListView.builder(
+                shrinkWrap: true,
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                itemCount: _leagues.length,
+                itemBuilder: (ctx, i) {
+                  final league = _leagues[i];
+                  final isSelected = league == selected;
+                  return GestureDetector(
+                    onTap: () {
+                      onSelected(league);
+                      Navigator.pop(ctx);
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 6),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? AppColors.brand.withOpacity(0.12)
+                            : AppColors.card,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: isSelected
+                              ? AppColors.brand.withOpacity(0.35)
+                              : Colors.white.withOpacity(0.07),
+                          width: 0.5,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              league,
+                              style: TextStyle(
+                                color: isSelected
+                                    ? AppColors.brand
+                                    : AppColors.textPrimary,
+                                fontSize: 14,
+                                fontWeight: isSelected
+                                    ? FontWeight.w700
+                                    : FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                          if (isSelected)
+                            const Icon(Icons.check_rounded,
+                                color: AppColors.brand, size: 16),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => _openPicker(context),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+        decoration: BoxDecoration(
+          color: AppColors.card,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: selected.isEmpty
+                ? Colors.white.withOpacity(0.08)
+                : AppColors.brand.withOpacity(0.30),
+            width: selected.isEmpty ? 1 : 0.8,
+          ),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                selected.isEmpty ? 'Lig seç' : selected,
+                style: TextStyle(
+                  color: selected.isEmpty
+                      ? AppColors.textTertiary
+                      : AppColors.textPrimary,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            Icon(
+              Icons.keyboard_arrow_down_rounded,
+              color: selected.isEmpty
+                  ? AppColors.textTertiary
+                  : AppColors.brand,
+              size: 20,
+            ),
+          ],
         ),
       ),
     );
