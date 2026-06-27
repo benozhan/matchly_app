@@ -198,13 +198,17 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
   }
 
   void _openCouponById(String couponId) {
-    final entry = _entries.firstWhere(
-      (e) => e.coupon.id.toString() == couponId,
-      orElse: () => _historyEntries.firstWhere(
-        (e) => e.coupon.id.toString() == couponId,
-        orElse: () => _entries.isNotEmpty ? _entries.first : throw Exception('not found'),
+    final entry = _entries.cast<_CouponEntry?>().firstWhere(
+      (e) => e?.coupon.id == couponId,
+      orElse: () => _historyEntries.cast<_CouponEntry?>().firstWhere(
+        (e) => e?.coupon.id == couponId,
+        orElse: () => null,
       ),
     );
+    if (entry == null) {
+      debugPrint('[Home] Kupon bulunamadı: $couponId, entries: ${_entries.length}');
+      return;
+    }
     Navigator.of(context).push(MaterialPageRoute(
       builder: (_) => CouponDetailPage(
         coupon: entry.coupon,
@@ -232,6 +236,13 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
       try {
         await SocialService.instance.ensureUser(user.username, user.displayName);
       } catch (_) {}
+    }
+
+    // Bildirimden gelen kupon — entries yüklendikten sonra aç
+    if (widget.pendingCouponId != null && mounted) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _openCouponById(widget.pendingCouponId!);
+      });
     }
   }
 
