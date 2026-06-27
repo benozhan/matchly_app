@@ -27,7 +27,7 @@ class CouponShare {
   /// existing one. Returns the [sharedId] that was used so the caller can
   /// persist it back to the coupon model.
   static Future<String> share(BuildContext context, Coupon coupon) async {
-    final id   = coupon.sharedId ?? coupon.id?.toString() ?? _generateId();
+    final id   = coupon.sharedId ?? coupon.id ?? _generateId();
     final text = buildShareText(coupon, sharedId: id);
     await Clipboard.setData(ClipboardData(text: text));
     if (context.mounted) {

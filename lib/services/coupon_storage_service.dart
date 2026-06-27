@@ -47,7 +47,7 @@ class CouponStorageService {
     }
 
     return Coupon(
-      id: int.tryParse(couponId),
+      id: couponId,
       title: coupon.title,
       meta: coupon.meta,
       status: coupon.status,
@@ -108,7 +108,7 @@ class CouponStorageService {
 
       coupons.add(
         Coupon(
-          id: int.tryParse(row['id'].toString()),
+          id: row['id']?.toString(),
           title: row['title'] as String? ?? '',
           meta: row['meta'] as String? ?? '',
           status: status,

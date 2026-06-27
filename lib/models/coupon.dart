@@ -9,7 +9,7 @@ enum CouponStatus {
 class Coupon {
   /// Real backend coupon ID (matches KuponBot's coupons.id integer).
   /// Used as the stable identifier for social sharing.
-  final int? id;
+  final String? id;
   final String title;
   final String meta;
   final CouponStatus status;

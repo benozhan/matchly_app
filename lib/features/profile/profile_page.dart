@@ -1091,7 +1091,7 @@ class _LocalCouponCardState extends State<_LocalCouponCard> {
   Future<void> _share() async {
     if (_sharing || _shared) return;
     final coupon = widget.coupon;
-    final couponId = coupon.id?.toString() ?? coupon.title.hashCode.toString();
+    final couponId = coupon.id ?? coupon.title.hashCode.toString();
 
     // Not dialog
     String note = '';
