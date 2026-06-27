@@ -53,7 +53,7 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
 
   // ── UI state ───────────────────────────────────────────────────────────────
 
-  _FilterTab _activeTab   = _FilterTab.all;
+  _FilterTab _activeTab   = _FilterTab.active;
   int        _navIndex    = 0;
 
   // ── supabase realtime ─────────────────────────────────────────────────────
