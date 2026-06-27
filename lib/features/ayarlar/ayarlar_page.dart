@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/app_colors.dart';
+import '../../core/app_state.dart';
 import '../../models/coupon.dart';
 import '../../services/auth_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -21,7 +22,7 @@ class AyarlarPage extends StatefulWidget {
 class _AyarlarPageState extends State<AyarlarPage> {
   AppUser? _user;
   bool _bildirimler         = true;
-  bool _karanlikTema        = true;
+  bool _karanlikTema        = AppState.instance.themeMode == ThemeMode.dark;
   bool _otomatikGuncelleme  = false;
 
   @override
@@ -262,7 +263,7 @@ class _AyarlarPageState extends State<AyarlarPage> {
                 title: 'Karanlık Tema',
                 subtitle: 'Uygulama görünümü',
                 value: _karanlikTema,
-                onChanged: (v) => setState(() => _karanlikTema = v),
+                onChanged: (v) { setState(() => _karanlikTema = v); AppState.instance.toggleTheme(); },
               ),
               _RowDivider(),
               _ToggleRow(
