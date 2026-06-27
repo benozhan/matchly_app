@@ -1092,6 +1092,38 @@ class _LocalCouponCardState extends State<_LocalCouponCard> {
     if (_sharing || _shared) return;
     final coupon = widget.coupon;
     final couponId = coupon.id?.toString() ?? coupon.title.hashCode.toString();
+
+    // Not dialog
+    String note = '';
+    final noteController = TextEditingController();
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.card,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text('Kuponu Paylaş', style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w700)),
+        content: TextField(
+          controller: noteController,
+          autofocus: true,
+          maxLength: 120,
+          style: const TextStyle(color: AppColors.textPrimary, fontSize: 14),
+          decoration: InputDecoration(
+            hintText: 'Bir not ekle (opsiyonel)',
+            hintStyle: TextStyle(color: AppColors.textTertiary.withOpacity(0.7)),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.white.withOpacity(0.1))),
+            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.white.withOpacity(0.1))),
+            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: AppColors.brand.withOpacity(0.5))),
+            counterStyle: TextStyle(color: AppColors.textTertiary),
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('İptal', style: TextStyle(color: AppColors.textTertiary))),
+          TextButton(onPressed: () { note = noteController.text.trim(); Navigator.pop(ctx, true); }, child: const Text('Paylaş', style: TextStyle(color: AppColors.brand, fontWeight: FontWeight.w700))),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
     setState(() => _sharing = true);
     try {
       final oddsMatch = RegExp(r'×([\d.,]+)').firstMatch(coupon.meta);
@@ -1115,6 +1147,7 @@ class _LocalCouponCardState extends State<_LocalCouponCard> {
       await SocialService.instance.createOrUpdateSharedCoupon(
         couponId:      couponId,
         ownerUsername: widget.ownerUsername,
+        note: note,
       );
       if (!mounted) return;
       setState(() { _sharing = false; _shared = true; });

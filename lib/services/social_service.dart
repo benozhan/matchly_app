@@ -42,12 +42,14 @@ class SharedCoupon {
   final String couponId;
   final bool isPublic;
   final String createdAt;
+  final String note;
 
   const SharedCoupon({
     required this.id,
     required this.couponId,
     required this.isPublic,
     required this.createdAt,
+    this.note = '',
   });
 
   factory SharedCoupon.fromJson(Map<String, dynamic> j) => SharedCoupon(
@@ -55,6 +57,7 @@ class SharedCoupon {
         couponId:  j['couponId']  as String? ?? '',
         isPublic:  j['isPublic']  as bool?   ?? true,
         createdAt: j['createdAt'] as String? ?? '',
+        note:      j['note']      as String? ?? '',
       );
 }
 
@@ -113,6 +116,7 @@ class SocialService {
     required String couponId,
     required String ownerUsername,
     bool isPublic = true,
+    String note = '',
   }) async {
     try {
       final res = await _client
@@ -123,6 +127,7 @@ class SocialService {
               'couponId': couponId,
               'ownerUsername': ownerUsername,
               'isPublic': isPublic,
+              'note': note,
             }),
           )
           .timeout(_kTimeout);

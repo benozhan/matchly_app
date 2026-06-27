@@ -302,6 +302,13 @@ class _MetaSection extends StatelessWidget {
                 ? AppColors.green
                 : AppColors.textTertiary,
           ),
+          if (sharedCoupon.note.isNotEmpty) ...[
+            _Divider(),
+            _MetaRow(
+              label: 'Not',
+              value: sharedCoupon.note,
+            ),
+          ],
           _Divider(),
           _CopyableRow(
             label: 'Kupon ID',
