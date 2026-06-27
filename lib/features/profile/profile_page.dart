@@ -602,13 +602,13 @@ class _AvatarState extends State<_Avatar> {
 
       final bytes = await picked.readAsBytes();
       final ext = picked.path.split('.').last.toLowerCase();
-      final fileName = '\${widget.username}_\${DateTime.now().millisecondsSinceEpoch}.\$ext';
+      final fileName = '${widget.username}_${DateTime.now().millisecondsSinceEpoch}.$ext';
 
       final sb = Supabase.instance.client;
       await sb.storage.from('avatars').uploadBinary(
         fileName,
         bytes,
-        fileOptions: FileOptions(contentType: 'image/\$ext', upsert: true),
+        fileOptions: FileOptions(contentType: 'image/$ext', upsert: true),
       );
 
       final url = sb.storage.from('avatars').getPublicUrl(fileName);
@@ -622,7 +622,7 @@ class _AvatarState extends State<_Avatar> {
       setState(() => _uploading = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Fotoğraf yüklenemedi: \$e'),
+          content: Text('Fotoğraf yüklenemedi: $e'),
           backgroundColor: AppColors.card,
           behavior: SnackBarBehavior.floating,
         ),
