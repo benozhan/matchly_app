@@ -879,17 +879,17 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
               'Kupon Ekle',
               style: TextStyle(
                 color: AppColors.textPrimary,
-                fontSize: 28,
+                fontSize: 24,
                 fontWeight: FontWeight.w800,
                 letterSpacing: -0.5,
               ),
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 3),
             const Text(
-              'Şimdilik manuel ekleme.',
+              'Seçimlerini ekle ve kaydet',
               style: TextStyle(
-                color: AppColors.textSecondary,
-                fontSize: 13,
+                color: AppColors.textTertiary,
+                fontSize: 12,
               ),
             ),
             const SizedBox(height: 20),
@@ -1056,9 +1056,9 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
                 child: OutlinedButton(
                   onPressed: _openAddFlow,
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.brand,
+                    foregroundColor: AppColors.green,
                     side: BorderSide(
-                        color: AppColors.brand.withOpacity(0.4)),
+                        color: AppColors.green.withOpacity(0.25)),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14)),
                   ),
@@ -1088,8 +1088,8 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
               child: ElevatedButton(
                 onPressed: _saveCoupon,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.brand,
-                  foregroundColor: Colors.white,
+                  backgroundColor: AppColors.green,
+                  foregroundColor: Colors.black,
                   elevation: 0,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16)),
@@ -1097,7 +1097,7 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
                 child: const Text(
                   'Kaydet',
                   style: TextStyle(
-                      fontSize: 15, fontWeight: FontWeight.w800),
+                      fontSize: 15, fontWeight: FontWeight.w900),
                 ),
               ),
             ),
@@ -1999,34 +1999,45 @@ class MatchlyInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
-      controller: controller,
-      keyboardType: keyboardType,
-      style: const TextStyle(
-        color: AppColors.textPrimary,
-        fontSize: 15,
-        fontWeight: FontWeight.w600,
-      ),
-      decoration: InputDecoration(
-        labelText: label,
-        hintText: hint,
-        labelStyle: const TextStyle(color: AppColors.textSecondary),
-        hintStyle: const TextStyle(color: AppColors.textTertiary),
-        filled: true,
-        fillColor: AppColors.card,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: Colors.white.withOpacity(0.08)),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label.toUpperCase(),
+          style: const TextStyle(
+            color: AppColors.textTertiary,
+            fontSize: 9,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.6,
+          ),
         ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: Colors.white.withOpacity(0.08)),
+        const SizedBox(height: 6),
+        TextField(
+          controller: controller,
+          keyboardType: keyboardType,
+          style: const TextStyle(
+            color: AppColors.textPrimary,
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+          ),
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: const TextStyle(color: AppColors.textTertiary, fontSize: 15),
+            isDense: true,
+            contentPadding: const EdgeInsets.only(bottom: 8),
+            filled: false,
+            border: const UnderlineInputBorder(
+              borderSide: BorderSide(color: Color(0xFF2a2a2e), width: 0.5),
+            ),
+            enabledBorder: const UnderlineInputBorder(
+              borderSide: BorderSide(color: Color(0xFF2a2a2e), width: 0.5),
+            ),
+            focusedBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: AppColors.green.withOpacity(0.6), width: 1),
+            ),
+          ),
         ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: AppColors.brand),
-        ),
-      ),
+      ],
     );
   }
 }
