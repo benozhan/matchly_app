@@ -216,6 +216,13 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
         ..clear()
         ..addAll(coupons.map((c) => _CouponEntry(coupon: c)));
     });
+
+    // Her açılışta social DB'ye kullanıcıyı kaydet (yeni kayıt veya eksik kayıt için)
+    if (user != null) {
+      try {
+        await SocialService.instance.ensureUser(user.username, user.displayName);
+      } catch (_) {}
+    }
   }
 
   @override
