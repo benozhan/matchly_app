@@ -523,7 +523,12 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
         ],
       ),
     );
-    if (confirmed == true) setState(() => _entries.remove(entry));
+    if (confirmed == true) {
+      setState(() => _entries.remove(entry));
+      if (entry.coupon.id != null) {
+        await CouponStorageService.instance.deleteCoupon(entry.coupon.id!);
+      }
+    }
   }
 
   List<Coupon> get _allCoupons => [

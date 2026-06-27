@@ -58,6 +58,17 @@ class CouponStorageService {
     );
   }
 
+  Future<void> deleteCoupon(String couponId) async {
+    final user = _client.auth.currentUser;
+    if (user == null) return;
+    try {
+      await _client.from('coupon_matches').delete().eq('coupon_id', couponId);
+      await _client.from('coupons').delete().eq('id', couponId).eq('user_id', user.id);
+    } catch (e) {
+      debugPrint('deleteCoupon error: $e');
+    }
+  }
+
   Future<List<Coupon>> loadCoupons() async {
     final user = _client.auth.currentUser;
     if (user == null) return [];
