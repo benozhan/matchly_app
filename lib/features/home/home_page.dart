@@ -179,8 +179,18 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
     _loadUser();
     _startLiveScoreTimer();
     _subscribeToSupabaseCoupons();
-    // Bildirimden gelen kupon ID
     if (widget.pendingCouponId != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _openCouponById(widget.pendingCouponId!);
+      });
+    }
+  }
+
+  @override
+  void didUpdateWidget(MatchlyHomePage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.pendingCouponId != null &&
+        widget.pendingCouponId != oldWidget.pendingCouponId) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _openCouponById(widget.pendingCouponId!);
       });
