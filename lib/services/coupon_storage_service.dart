@@ -8,9 +8,9 @@ class CouponStorageService {
 
   SupabaseClient get _client => Supabase.instance.client;
 
-  Future<void> saveCoupon(Coupon coupon) async {
+  Future<Coupon?> saveCoupon(Coupon coupon) async {
     final user = _client.auth.currentUser;
-    if (user == null) return;
+    if (user == null) return null;
 
     final couponRow = await _client
         .from('coupons')
@@ -45,6 +45,17 @@ class CouponStorageService {
     if (rows.isNotEmpty) {
       await _client.from('coupon_matches').insert(rows);
     }
+
+    return Coupon(
+      id: int.tryParse(couponId),
+      title: coupon.title,
+      meta: coupon.meta,
+      status: coupon.status,
+      stake: coupon.stake,
+      potential: coupon.potential,
+      progress: coupon.progress,
+      matches: coupon.matches,
+    );
   }
 
   Future<List<Coupon>> loadCoupons() async {

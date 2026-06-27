@@ -1830,6 +1830,134 @@ class _Chip extends StatelessWidget {
   }
 }
 
+// ─── League picker sheet (with search) ───────────────────────────────────────
+
+class _LeaguePickerSheet extends StatefulWidget {
+  final String selected;
+  final ValueChanged<String> onSelected;
+  const _LeaguePickerSheet({required this.selected, required this.onSelected});
+
+  @override
+  State<_LeaguePickerSheet> createState() => _LeaguePickerSheetState();
+}
+
+class _LeaguePickerSheetState extends State<_LeaguePickerSheet> {
+  final _searchController = TextEditingController();
+  List<String> _filtered = _leagues;
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _onSearch(String q) {
+    setState(() {
+      _filtered = q.trim().isEmpty
+          ? _leagues
+          : _leagues.where((l) => l.toLowerCase().contains(q.toLowerCase())).toList();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return DraggableScrollableSheet(
+      initialChildSize: 0.75,
+      maxChildSize: 0.92,
+      minChildSize: 0.5,
+      expand: false,
+      builder: (ctx, scrollController) => SafeArea(
+        child: Column(
+          children: [
+            const SizedBox(height: 12),
+            Container(
+              width: 40, height: 4,
+              decoration: BoxDecoration(color: AppColors.gray, borderRadius: BorderRadius.circular(999)),
+            ),
+            const SizedBox(height: 16),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text('Lig Seç', style: TextStyle(color: AppColors.textPrimary, fontSize: 20, fontWeight: FontWeight.w800, letterSpacing: -0.4)),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: TextField(
+                controller: _searchController,
+                autofocus: false,
+                onChanged: _onSearch,
+                style: const TextStyle(color: AppColors.textPrimary, fontSize: 14),
+                decoration: InputDecoration(
+                  hintText: 'Lig ara...',
+                  hintStyle: const TextStyle(color: AppColors.textTertiary, fontSize: 14),
+                  prefixIcon: const Icon(Icons.search_rounded, color: AppColors.textTertiary, size: 18),
+                  filled: true,
+                  fillColor: AppColors.card,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                  focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: AppColors.green.withOpacity(0.5))),
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Expanded(
+              child: _filtered.isEmpty
+                  ? const Center(child: Text('Lig bulunamadı', style: TextStyle(color: AppColors.textTertiary, fontSize: 14)))
+                  : ListView.builder(
+                      controller: scrollController,
+                      padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+                      itemCount: _filtered.length,
+                      itemBuilder: (ctx, i) {
+                        final league = _filtered[i];
+                        final isSelected = league == widget.selected;
+                        return GestureDetector(
+                          onTap: () {
+                            widget.onSelected(league);
+                            Navigator.pop(ctx);
+                          },
+                          child: Container(
+                            margin: const EdgeInsets.only(bottom: 6),
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+                            decoration: BoxDecoration(
+                              color: isSelected ? AppColors.green.withOpacity(0.10) : AppColors.card,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: isSelected ? AppColors.green.withOpacity(0.35) : Colors.white.withOpacity(0.07),
+                                width: 0.5,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    league,
+                                    style: TextStyle(
+                                      color: isSelected ? AppColors.green : AppColors.textPrimary,
+                                      fontSize: 14,
+                                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                                if (isSelected)
+                                  const Icon(Icons.check_rounded, color: AppColors.green, size: 16),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 // ─── League selector ─────────────────────────────────────────────────────────
 
 class _LeagueSelector extends StatelessWidget {
@@ -1845,94 +1973,13 @@ class _LeagueSelector extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       backgroundColor: AppColors.background,
+      isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (_) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 12),
-            Container(
-              width: 40, height: 4,
-              decoration: BoxDecoration(
-                color: AppColors.gray,
-                borderRadius: BorderRadius.circular(999),
-              ),
-            ),
-            const SizedBox(height: 16),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Lig Seç',
-                  style: TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 20,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.4,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Flexible(
-              child: ListView.builder(
-                shrinkWrap: true,
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                itemCount: _leagues.length,
-                itemBuilder: (ctx, i) {
-                  final league = _leagues[i];
-                  final isSelected = league == selected;
-                  return GestureDetector(
-                    onTap: () {
-                      onSelected(league);
-                      Navigator.pop(ctx);
-                    },
-                    child: Container(
-                      margin: const EdgeInsets.only(bottom: 6),
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? AppColors.brand.withOpacity(0.12)
-                            : AppColors.card,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: isSelected
-                              ? AppColors.brand.withOpacity(0.35)
-                              : Colors.white.withOpacity(0.07),
-                          width: 0.5,
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              league,
-                              style: TextStyle(
-                                color: isSelected
-                                    ? AppColors.brand
-                                    : AppColors.textPrimary,
-                                fontSize: 14,
-                                fontWeight: isSelected
-                                    ? FontWeight.w700
-                                    : FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                          if (isSelected)
-                            const Icon(Icons.check_rounded,
-                                color: AppColors.brand, size: 16),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
+      builder: (_) => _LeaguePickerSheet(
+        selected: selected,
+        onSelected: onSelected,
       ),
     );
   }

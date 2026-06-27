@@ -456,8 +456,8 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
       builder: (_) => const AddCouponSheet(),
     );
     if (newCoupon == null) return;
-    setState(() => _entries.insert(0, _CouponEntry(coupon: newCoupon)));
-    await CouponStorageService.instance.saveCoupon(newCoupon);
+    final savedCoupon = await CouponStorageService.instance.saveCoupon(newCoupon);
+    setState(() => _entries.insert(0, _CouponEntry(coupon: savedCoupon ?? newCoupon)));
   }
 
   Future<void> _editEntry(_CouponEntry entry) async {

@@ -18,12 +18,17 @@ class IstatistikPage extends StatelessWidget {
   }
 
   static String _fmt(double n) {
-    final i = n.toInt();
-    if (i <= 0) return '–';
+    final neg = n < 0;
+    final abs = n.abs();
+    final i = abs.toInt();
+    String formatted;
     if (i >= 1000) {
-      return '₺${i ~/ 1000}.${(i % 1000).toString().padLeft(3, '0')}';
+      formatted = '₺${(i ~/ 1000)}.${(i % 1000).toString().padLeft(3, "0")}';
+    } else {
+      formatted = '₺\$i';
     }
-    return '₺$i';
+    if (i == 0) return '–';
+    return neg ? '-\$formatted' : formatted;
   }
 
   static BoxDecoration _cardDeco() => BoxDecoration(
@@ -68,12 +73,15 @@ class IstatistikPage extends StatelessWidget {
       ligStats[lig]!['kupon'] = (ligStats[lig]!['kupon'] as int) + 1;
       if (c.status == CouponStatus.winning) {
         ligStats[lig]!['kazanan'] = (ligStats[lig]!['kazanan'] as int) + 1;
-        ligStats[lig]!['kazanc'] = (ligStats[lig]!['kazanc'] as double) + _parseAmount(c.potential);
+        ligStats[lig]!['kazanc'] = (ligStats[lig]!['kazanc'] as double) + _parseAmount(c.potential) - _parseAmount(c.stake);
       }
       if (c.status == CouponStatus.risk) {
         ligStats[lig]!['kaybeden'] = (ligStats[lig]!['kaybeden'] as int) + 1;
+        ligStats[lig]!['kazanc'] = (ligStats[lig]!['kazanc'] as double) - _parseAmount(c.stake);
       }
-      ligStats[lig]!['bahis'] = (ligStats[lig]!['bahis'] as double) + _parseAmount(c.stake);
+      if (c.status != CouponStatus.pending) {
+        ligStats[lig]!['bahis'] = (ligStats[lig]!['bahis'] as double) + _parseAmount(c.stake);
+      }
     }
     final ligList = ligStats.entries.toList()
       ..sort((a, b) => (b.value['kupon'] as int).compareTo(a.value['kupon'] as int));
@@ -260,7 +268,7 @@ class IstatistikPage extends StatelessWidget {
                     final kaybeden = s['kaybeden'] as int;
                     final bahis = s['bahis'] as double;
                     final kazanc = s['kazanc'] as double;
-                    final net = kazanc - bahis;
+                    final net = kazanc;
                     return Padding(
                       padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
                       child: Row(
