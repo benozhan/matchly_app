@@ -375,7 +375,7 @@ class _FeedCardState extends State<_FeedCard> {
 
   String _statusLabel(String s) {
     switch (s.toLowerCase()) {
-      case 'winning':   return 'KAZANDI';
+      case 'winning':   return 'KAZANIYOR';
       case 'risk':      return 'KAYBETTİ';
       case 'pending':   return 'AKTİF';
       case 'cancelled': return 'İPTAL';

@@ -339,7 +339,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                       padding:
                                           const EdgeInsets.only(bottom: 12),
                                       child: local != null
-                                          ? _LocalCouponCard(coupon: local)
+                                          ? _LocalCouponCard(coupon: local, ownerUsername: widget.username)
                                           : _SharedCouponRow(coupon: sc),
                                     );
                                   },
@@ -930,9 +930,18 @@ class _SharedCouponRowState extends State<_SharedCouponRow> {
 
 // ── Local coupon card (rich display when matched) ─────────────────────────────
 
-class _LocalCouponCard extends StatelessWidget {
+class _LocalCouponCard extends StatefulWidget {
   final Coupon coupon;
-  const _LocalCouponCard({required this.coupon});
+  final String ownerUsername;
+  const _LocalCouponCard({required this.coupon, required this.ownerUsername});
+
+  @override
+  State<_LocalCouponCard> createState() => _LocalCouponCardState();
+}
+
+class _LocalCouponCardState extends State<_LocalCouponCard> {
+  bool _sharing = false;
+  bool _shared = false;
 
   Color _statusColor(CouponStatus s) {
     switch (s) {
@@ -954,8 +963,60 @@ class _LocalCouponCard extends StatelessWidget {
     }
   }
 
+  Future<void> _share() async {
+    if (_sharing || _shared) return;
+    final coupon = widget.coupon;
+    final couponId = coupon.id?.toString() ?? coupon.title.hashCode.toString();
+    setState(() => _sharing = true);
+    try {
+      final oddsMatch = RegExp(r'×([\d.,]+)').firstMatch(coupon.meta);
+      final oddsDisplay = oddsMatch != null ? '×\${oddsMatch.group(1)}' : '—';
+      await SocialService.instance.saveCouponDetail(
+        couponId:      couponId,
+        ownerUsername: widget.ownerUsername,
+        title:         coupon.title,
+        siteName:      '',
+        stake:         coupon.stake,
+        odds:          oddsDisplay,
+        potential:     coupon.potential,
+        status:        coupon.status.name,
+        selections:    coupon.matches.map((m) => {
+          'matchName': m.teams,
+          'betType':   m.selection,
+          'status':    m.status.name,
+          'lastScore': m.score,
+        }).toList(),
+      );
+      await SocialService.instance.createOrUpdateSharedCoupon(
+        couponId:      couponId,
+        ownerUsername: widget.ownerUsername,
+      );
+      if (!mounted) return;
+      setState(() { _sharing = false; _shared = true; });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Kupon paylaşıldı! 🎉'),
+          backgroundColor: AppColors.card,
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _sharing = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Paylaşım başarısız'),
+          backgroundColor: AppColors.card,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final coupon = widget.coupon;
     final oddsMatch = RegExp(r'×([\d.,]+)').firstMatch(coupon.meta);
     final oddsDisplay = oddsMatch != null ? '×${oddsMatch.group(1)}' : '—';
 
@@ -1035,6 +1096,55 @@ class _LocalCouponCard extends StatelessWidget {
               ],
             ),
           ),
+          // ── Share button ────────────────────────────────────────────
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+            child: GestureDetector(
+              onTap: _share,
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                decoration: BoxDecoration(
+                  color: _shared
+                      ? AppColors.green.withOpacity(0.10)
+                      : AppColors.brand.withOpacity(0.10),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: _shared
+                        ? AppColors.green.withOpacity(0.30)
+                        : AppColors.brand.withOpacity(0.25),
+                    width: 0.5,
+                  ),
+                ),
+                child: _sharing
+                    ? const Center(
+                        child: SizedBox(
+                          width: 14, height: 14,
+                          child: CircularProgressIndicator(
+                              strokeWidth: 1.5, color: AppColors.brand),
+                        ),
+                      )
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            _shared ? Icons.check_rounded : Icons.share_rounded,
+                            size: 14,
+                            color: _shared ? AppColors.green : AppColors.brand,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            _shared ? 'Paylaşıldı' : 'Sosyale Paylaş',
+                            style: TextStyle(
+                              color: _shared ? AppColors.green : AppColors.brand,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+              ),
+            ),
+          ),
           if (coupon.matches.isNotEmpty) ...[
             const SizedBox(height: 12),
             const Padding(
@@ -1050,7 +1160,8 @@ class _LocalCouponCard extends StatelessWidget {
                   child: MatchRow(match: m),
                 )).toList(),
             const SizedBox(height: 14),
-          ],
+          ] else
+            const SizedBox(height: 14),
         ],
       ),
     );

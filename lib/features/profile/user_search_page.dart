@@ -19,6 +19,7 @@ class UserSearchPage extends StatefulWidget {
 
 class _UserSearchPageState extends State<UserSearchPage> {
   final _controller = TextEditingController();
+  final _focusNode = FocusNode();
   Timer? _debounce;
 
   List<SocialUser> _results = [];
@@ -32,6 +33,11 @@ class _UserSearchPageState extends State<UserSearchPage> {
   void initState() {
     super.initState();
     _loadInitialFollowState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (mounted) _focusNode.requestFocus();
+      });
+    });
   }
 
   /// Pre-loads the current user's following list so buttons show the correct
@@ -54,6 +60,7 @@ class _UserSearchPageState extends State<UserSearchPage> {
   @override
   void dispose() {
     _controller.dispose();
+    _focusNode.dispose();
     _debounce?.cancel();
     super.dispose();
   }
@@ -142,7 +149,7 @@ class _UserSearchPageState extends State<UserSearchPage> {
                 child: TextField(
                   controller: _controller,
                   onChanged: _onChanged,
-                  autofocus: true,
+                  focusNode: _focusNode,
                   style: const TextStyle(
                       color: AppColors.textPrimary, fontSize: 15),
                   decoration: InputDecoration(
