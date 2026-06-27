@@ -204,8 +204,8 @@ class SocialService {
   Future<SocialUser?> updateAvatar(String username, String avatarUrl) async {
     try {
       final res = await _client
-          .patch(
-            Uri.parse('$_kBaseUrl/social/users/$username'),
+          .post(
+            Uri.parse('$_kBaseUrl/social/users/$username/update'),
             headers: {'Content-Type': 'application/json'},
             body: jsonEncode({'username': username, 'displayName': '', 'avatar': avatarUrl}),
           )
