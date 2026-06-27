@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/app_colors.dart';
 import '../../services/social_service.dart';
+import 'profile_page.dart';
 
 enum _ListType { followers, following }
 
@@ -141,10 +142,7 @@ class _UserRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () => Navigator.of(context).push(MaterialPageRoute(
-        builder: (_) => _UserListPage(
-          username: user.username,
-          type: _ListType.followers, // placeholder — opens their profile nav
-        ),
+        builder: (_) => ProfilePage(username: user.username),
       )),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
