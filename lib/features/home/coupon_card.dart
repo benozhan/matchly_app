@@ -70,29 +70,39 @@ class _CouponCardState extends State<CouponCard> {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: fav
-                  ? [
-                      const Color(0xFF28261A),
-                      const Color(0xFF1B1B1D),
-                      const Color(0xFF131315),
-                    ]
-                  : [
-                      const Color(0xFF222228),
-                      const Color(0xFF1A1A1E),
-                      const Color(0xFF131316),
-                    ],
+                  ? [const Color(0xFF28261A), const Color(0xFF1B1B1D), const Color(0xFF131315)]
+                  : coupon.status == CouponStatus.winning
+                      ? [const Color(0xFF1A241A), const Color(0xFF141814), const Color(0xFF0F100F)]
+                      : coupon.status == CouponStatus.risk
+                          ? [const Color(0xFF241A1A), const Color(0xFF181414), const Color(0xFF100F0F)]
+                          : coupon.status == CouponStatus.pending
+                              ? [const Color(0xFF231E12), const Color(0xFF1A1710), const Color(0xFF12100C)]
+                              : [const Color(0xFF1C1C22), const Color(0xFF161618), const Color(0xFF101012)],
               stops: const [0.0, 0.45, 1.0],
             ),
             borderRadius: BorderRadius.circular(26),
             border: Border.all(
               color: fav
                   ? AppColors.amber.withOpacity(0.25)
-                  : Colors.white.withOpacity(0.07),
-              width: 0.5,
+                  : coupon.status == CouponStatus.winning
+                      ? AppColors.green.withOpacity(0.22)
+                      : coupon.status == CouponStatus.risk
+                          ? AppColors.red.withOpacity(0.22)
+                          : coupon.status == CouponStatus.pending
+                              ? const Color(0xFFFFBB00).withOpacity(0.20)
+                              : Colors.white.withOpacity(0.07),
+              width: 0.8,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.55),
-                blurRadius: 32,
+                color: coupon.status == CouponStatus.winning
+                    ? AppColors.green.withOpacity(0.10)
+                    : coupon.status == CouponStatus.risk
+                        ? AppColors.red.withOpacity(0.10)
+                        : coupon.status == CouponStatus.pending
+                            ? const Color(0xFFFFBB00).withOpacity(0.08)
+                            : Colors.black.withOpacity(0.55),
+                blurRadius: 28,
                 offset: const Offset(0, 14),
                 spreadRadius: -6,
               ),
