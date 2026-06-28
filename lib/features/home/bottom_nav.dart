@@ -21,15 +21,15 @@ class BottomNav extends StatelessWidget {
       child: Container(
         height: 68,
         decoration: BoxDecoration(
-          color: const Color(0xFF0F0F12),
+          color: AppColors.card,
           borderRadius: BorderRadius.circular(30),
           border: Border.all(
-            color: Colors.white.withOpacity(0.09),
+            color: AppColors.border,
             width: 0.5,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.65),
+              color: AppColors.card.withOpacity(0.95),
               blurRadius: 40,
               offset: const Offset(0, 16),
               spreadRadius: -4,
@@ -65,10 +65,10 @@ class BottomNav extends StatelessWidget {
                     height: 44,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.white,
+                      color: AppColors.brand,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.white.withOpacity(0.25),
+                          color: AppColors.brand.withOpacity(0.25),
                           blurRadius: 20,
                         ),
                         BoxShadow(
@@ -155,14 +155,14 @@ class NavItem extends StatelessWidget {
       children: [
         Icon(
           icon,
-          color: active ? Colors.white : AppColors.textTertiary,
+          color: active ? AppColors.brand : AppColors.textSecondary,
           size: 21,
         ),
         const SizedBox(height: 2),
         Text(
           label,
           style: TextStyle(
-            color: active ? Colors.white : AppColors.textTertiary,
+            color: active ? AppColors.brand : AppColors.textSecondary,
             fontSize: 9,
             fontWeight: active ? FontWeight.w700 : FontWeight.w500,
             letterSpacing: 0.1,
@@ -174,7 +174,7 @@ class NavItem extends StatelessWidget {
           width: active ? 4 : 0,
           height: active ? 4 : 0,
           decoration: const BoxDecoration(
-            color: Colors.white,
+            color: AppColors.brand,
             shape: BoxShape.circle,
           ),
         ),
