@@ -129,7 +129,7 @@ class _AyarlarPageState extends State<AyarlarPage> {
                   alignment: Alignment.center,
                   child: Text(
                     (_user?.displayName.isNotEmpty == true
-                            ? _user!.displayName[0]
+                            ? _user!.displayName.trim().substring(0, _user!.displayName.trim().length.clamp(0, 2))
                             : 'U')
                         .toUpperCase(),
                     style: const TextStyle(
