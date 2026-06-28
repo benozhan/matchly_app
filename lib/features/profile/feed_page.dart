@@ -226,7 +226,7 @@ class _FeedPageState extends State<FeedPage> with AutomaticKeepAliveClientMixin 
                         color: AppColors.card,
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(
-                            color: Colors.white.withOpacity(0.07), width: 0.5),
+                            color: AppColors.border, width: 0.5),
                       ),
                       child: Row(
                         children: [
@@ -399,12 +399,12 @@ class _FeedCardState extends State<_FeedCard> {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: _detail?.status == 'winning'
-                ? [const Color(0xFF1A241A), const Color(0xFF141814), const Color(0xFF0F100F)]
+                ? [const Color(0xFF1A241A), const Color(0xFF141814), AppColors.background]
                 : _detail?.status == 'risk'
-                    ? [const Color(0xFF241A1A), const Color(0xFF181414), const Color(0xFF100F0F)]
+                    ? [const Color(0xFF241A1A), const Color(0xFF181414), AppColors.background]
                     : _detail?.status == 'pending'
-                        ? [const Color(0xFF231E12), const Color(0xFF1A1710), const Color(0xFF12100C)]
-                        : [const Color(0xFF1C1C22), const Color(0xFF161618), const Color(0xFF101012)],
+                        ? [const Color(0xFF231E12), const Color(0xFF1A1710), AppColors.background]
+                        : [AppColors.card, AppColors.card, AppColors.background],
             stops: const [0.0, 0.45, 1.0],
           ),
           borderRadius: BorderRadius.circular(18),
@@ -415,7 +415,7 @@ class _FeedCardState extends State<_FeedCard> {
                     ? AppColors.red.withOpacity(0.22)
                     : _detail?.status == 'pending'
                         ? const Color(0xFFFFBB00).withOpacity(0.20)
-                        : Colors.white.withOpacity(0.07),
+                        : AppColors.border,
             width: 0.8,
           ),
           boxShadow: [
@@ -426,7 +426,7 @@ class _FeedCardState extends State<_FeedCard> {
                       ? AppColors.red.withOpacity(0.10)
                       : _detail?.status == 'pending'
                           ? const Color(0xFFFFBB00).withOpacity(0.08)
-                          : Colors.black.withOpacity(0.25),
+                          : AppColors.border,
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),
@@ -624,7 +624,7 @@ class _StatChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.04),
+          color: AppColors.border,
           borderRadius: BorderRadius.circular(10),
         ),
         child: Column(
@@ -783,7 +783,7 @@ class _EmptyBody extends StatelessWidget {
                 color: AppColors.card,
                 shape: BoxShape.circle,
                 border: Border.all(
-                    color: Colors.white.withOpacity(0.07), width: 0.5),
+                    color: AppColors.border, width: 0.5),
               ),
               child: Icon(
                 Icons.dynamic_feed_rounded,

@@ -53,12 +53,12 @@ class _AyarlarPageState extends State<AyarlarPage> {
   }
 
   static BoxDecoration _sectionDeco() => BoxDecoration(
-        color: const Color(0xFF141416),
+        color: AppColors.card,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.07), width: 0.5),
+        border: Border.all(color: AppColors.border, width: 0.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.40),
+            color: AppColors.border,
             blurRadius: 20,
             offset: const Offset(0, 8),
             spreadRadius: -4,
@@ -73,7 +73,7 @@ class _AyarlarPageState extends State<AyarlarPage> {
           'Bu özellik yakında geliyor',
           style: TextStyle(color: AppColors.textPrimary, fontSize: 13),
         ),
-        backgroundColor: const Color(0xFF1C1C1E),
+        backgroundColor: AppColors.card,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         duration: const Duration(seconds: 2),
@@ -102,10 +102,10 @@ class _AyarlarPageState extends State<AyarlarPage> {
             decoration: BoxDecoration(
               color: AppColors.card,
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.white.withOpacity(0.07), width: 0.5),
+              border: Border.all(color: AppColors.border, width: 0.5),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.30),
+                  color: AppColors.border,
                   blurRadius: 16,
                   offset: const Offset(0, 6),
                   spreadRadius: -4,
@@ -387,7 +387,7 @@ class _RowDivider extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(left: 52),
-      child: Container(height: 0.5, color: Colors.white.withOpacity(0.06)),
+      child: Container(height: 0.5, color: AppColors.border),
     );
   }
 }
@@ -407,12 +407,12 @@ class _RowIcon extends StatelessWidget {
       decoration: BoxDecoration(
         color: destructive
             ? AppColors.red.withOpacity(0.10)
-            : Colors.white.withOpacity(0.06),
+            : AppColors.border,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
           color: destructive
               ? AppColors.red.withOpacity(0.18)
-              : Colors.white.withOpacity(0.08),
+              : AppColors.border,
           width: 0.5,
         ),
       ),
@@ -472,7 +472,7 @@ class _ToggleRow extends StatelessWidget {
               onChanged: onChanged,
               activeColor: Colors.white,
               activeTrackColor: AppColors.green.withOpacity(0.80),
-              inactiveTrackColor: Colors.white.withOpacity(0.08),
+              inactiveTrackColor: AppColors.border,
               inactiveThumbColor: AppColors.textTertiary,
               trackOutlineColor: WidgetStateProperty.all(Colors.transparent),
             ),

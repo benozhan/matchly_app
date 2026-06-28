@@ -32,12 +32,12 @@ class IstatistikPage extends StatelessWidget {
   }
 
   static BoxDecoration _cardDeco() => BoxDecoration(
-        color: const Color(0xFF141416),
+        color: AppColors.card,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.07), width: 0.5),
+        border: Border.all(color: AppColors.border, width: 0.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.45),
+            color: AppColors.border,
             blurRadius: 24,
             offset: const Offset(0, 10),
             spreadRadius: -4,
@@ -184,7 +184,7 @@ class IstatistikPage extends StatelessWidget {
                 const SizedBox(height: 10),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-                  child: Container(height: 0.5, color: Colors.white.withOpacity(0.06)),
+                  child: Container(height: 0.5, color: AppColors.border),
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -311,7 +311,7 @@ class IstatistikPage extends StatelessWidget {
                   const SizedBox(height: 10),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-                    child: Container(height: 0.5, color: Colors.white.withOpacity(0.06)),
+                    child: Container(height: 0.5, color: AppColors.border),
                   ),
                   ...recent.asMap().entries.map((e) {
                     final isLast = e.key == recent.length - 1;
@@ -369,7 +369,7 @@ class _SumStat extends StatelessWidget {
 class _SDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) =>
-      Container(width: 0.5, color: Colors.white.withOpacity(0.07));
+      Container(width: 0.5, color: AppColors.border);
 }
 
 // ─── Financial hero card ──────────────────────────────────────────────────────
@@ -385,12 +385,12 @@ class _FinCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 18, 16, 18),
       decoration: BoxDecoration(
-        color: const Color(0xFF141416),
+        color: AppColors.card,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.07), width: 0.5),
+        border: Border.all(color: AppColors.border, width: 0.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.45),
+            color: AppColors.border,
             blurRadius: 24,
             offset: const Offset(0, 10),
             spreadRadius: -4,
@@ -469,7 +469,7 @@ class _StatusRow extends StatelessWidget {
               children: [
                 Container(
                   height: 4,
-                  color: Colors.white.withOpacity(0.05),
+                  color: AppColors.border,
                 ),
                 FractionallySizedBox(
                   widthFactor: pct.clamp(0.0, 1.0),
@@ -556,7 +556,7 @@ class _RecentRow extends StatelessWidget {
         if (!isLast)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Container(height: 0.5, color: Colors.white.withOpacity(0.05)),
+            child: Container(height: 0.5, color: AppColors.border),
           ),
       ],
     );

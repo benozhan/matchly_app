@@ -132,10 +132,10 @@ class _GecmisSearchBar extends StatelessWidget {
     return Container(
       height: 44,
       decoration: BoxDecoration(
-        color: const Color(0xFF161618),
+        color: AppColors.card,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: Colors.white.withOpacity(0.07),
+          color: AppColors.border,
           width: 0.5,
         ),
       ),
@@ -206,15 +206,15 @@ class _SummaryCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
       decoration: BoxDecoration(
-        color: const Color(0xFF141416),
+        color: AppColors.card,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: Colors.white.withOpacity(0.07),
+          color: AppColors.border,
           width: 0.5,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.45),
+            color: AppColors.border,
             blurRadius: 24,
             offset: const Offset(0, 10),
             spreadRadius: -4,
@@ -279,7 +279,7 @@ class _SumStat extends StatelessWidget {
 class _SumDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) =>
-      Container(width: 0.5, color: Colors.white.withOpacity(0.07));
+      Container(width: 0.5, color: AppColors.border);
 }
 
 // ─── History coupon card ──────────────────────────────────────────────────────
@@ -316,12 +316,12 @@ class _HistoryCard extends StatelessWidget {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: coupon.status == CouponStatus.winning
-                ? [const Color(0xFF1A241A), const Color(0xFF141814), const Color(0xFF0F100F)]
+                ? [const Color(0xFF1A241A), const Color(0xFF141814), AppColors.background]
                 : coupon.status == CouponStatus.risk
-                    ? [const Color(0xFF241A1A), const Color(0xFF181414), const Color(0xFF100F0F)]
+                    ? [const Color(0xFF241A1A), const Color(0xFF181414), AppColors.background]
                     : coupon.status == CouponStatus.pending
-                        ? [const Color(0xFF231E12), const Color(0xFF1A1710), const Color(0xFF12100C)]
-                        : [const Color(0xFF1C1C22), const Color(0xFF161618), const Color(0xFF101012)],
+                        ? [const Color(0xFF231E12), const Color(0xFF1A1710), AppColors.background]
+                        : [AppColors.card, AppColors.card, AppColors.background],
             stops: const [0.0, 0.45, 1.0],
           ),
           borderRadius: BorderRadius.circular(26),
@@ -332,7 +332,7 @@ class _HistoryCard extends StatelessWidget {
                     ? AppColors.red.withOpacity(0.22)
                     : coupon.status == CouponStatus.pending
                         ? const Color(0xFFFFBB00).withOpacity(0.20)
-                        : Colors.white.withOpacity(0.07),
+                        : AppColors.border,
             width: 0.8,
           ),
           boxShadow: [
@@ -343,13 +343,13 @@ class _HistoryCard extends StatelessWidget {
                       ? AppColors.red.withOpacity(0.10)
                       : coupon.status == CouponStatus.pending
                           ? const Color(0xFFFFBB00).withOpacity(0.08)
-                          : Colors.black.withOpacity(0.55),
+                          : AppColors.border,
               blurRadius: 28,
               offset: const Offset(0, 14),
               spreadRadius: -6,
             ),
             BoxShadow(
-              color: Colors.black.withOpacity(0.20),
+              color: AppColors.border,
               blurRadius: 6,
               offset: const Offset(0, 2),
             ),
@@ -397,7 +397,7 @@ class _HistoryCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 10),
-                    Container(height: 0.5, color: Colors.white.withOpacity(0.07)),
+                    Container(height: 0.5, color: AppColors.border),
                     const SizedBox(height: 1),
                     ...coupon.matches.map((m) => MatchRow(match: m)),
                     const SizedBox(height: 8),
@@ -409,10 +409,10 @@ class _HistoryCard extends StatelessWidget {
               // Footer
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.15),
+                  color: AppColors.border,
                   border: Border(
                     top: BorderSide(
-                      color: Colors.white.withOpacity(0.06),
+                      color: AppColors.border,
                       width: 0.5,
                     ),
                   ),
@@ -448,7 +448,7 @@ class _HistoryCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: Colors.black.withOpacity(0.10),
                   border: Border(
-                    top: BorderSide(color: Colors.white.withOpacity(0.05), width: 0.5),
+                    top: BorderSide(color: AppColors.border, width: 0.5),
                   ),
                 ),
                 child: Padding(
@@ -498,7 +498,7 @@ class _FooterStat extends StatelessWidget {
 
 class _VertDivider extends StatelessWidget {
   @override
-  Widget build(BuildContext context) => Container(width: 0.5, height: 28, color: Colors.white.withOpacity(0.07));
+  Widget build(BuildContext context) => Container(width: 0.5, height: 28, color: AppColors.border);
 }
 
 // ─── Empty states ─────────────────────────────────────────────────────────────

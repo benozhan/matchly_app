@@ -453,12 +453,12 @@ class _ActionButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: filled
               ? AppColors.brand.withOpacity(0.15)
-              : Colors.white.withOpacity(0.06),
+              : AppColors.border,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: filled
                 ? AppColors.brand.withOpacity(0.35)
-                : Colors.white.withOpacity(0.10),
+                : AppColors.border,
             width: 0.5,
           ),
         ),
@@ -506,12 +506,12 @@ class _FollowButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
           color: following
-              ? Colors.white.withOpacity(0.06)
+              ? AppColors.border
               : AppColors.brand.withOpacity(0.15),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: following
-                ? Colors.white.withOpacity(0.10)
+                ? AppColors.border
                 : AppColors.brand.withOpacity(0.35),
             width: 0.5,
           ),
@@ -729,10 +729,10 @@ class _StatsRow extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.card,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.07), width: 0.5),
+        border: Border.all(color: AppColors.border, width: 0.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.30),
+            color: AppColors.border,
             blurRadius: 16,
             offset: const Offset(0, 6),
             spreadRadius: -4,
@@ -814,7 +814,7 @@ class _VertDivider extends StatelessWidget {
   Widget build(BuildContext context) => Container(
         width: 0.5,
         height: 36,
-        color: Colors.white.withOpacity(0.08),
+        color: AppColors.border,
       );
 }
 
@@ -909,7 +909,7 @@ class _SharedCouponRowState extends State<_SharedCouponRow> {
           color: AppColors.card,
           borderRadius: BorderRadius.circular(18),
           border:
-              Border.all(color: Colors.white.withOpacity(0.07), width: 0.5),
+              Border.all(color: AppColors.border, width: 0.5),
         ),
         child: const Center(
           child: SizedBox(
@@ -930,7 +930,7 @@ class _SharedCouponRowState extends State<_SharedCouponRow> {
           color: AppColors.card,
           borderRadius: BorderRadius.circular(16),
           border:
-              Border.all(color: Colors.white.withOpacity(0.07), width: 0.5),
+              Border.all(color: AppColors.border, width: 0.5),
         ),
         child: Row(
           children: [
@@ -963,10 +963,10 @@ class _SharedCouponRowState extends State<_SharedCouponRow> {
       decoration: BoxDecoration(
         color: AppColors.card,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.white.withOpacity(0.07), width: 0.5),
+        border: Border.all(color: AppColors.border, width: 0.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.25),
+            color: AppColors.border,
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -1182,10 +1182,10 @@ class _LocalCouponCardState extends State<_LocalCouponCard> {
       decoration: BoxDecoration(
         color: AppColors.card,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.white.withOpacity(0.07), width: 0.5),
+        border: Border.all(color: AppColors.border, width: 0.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.25),
+            color: AppColors.border,
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),

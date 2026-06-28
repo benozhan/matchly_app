@@ -70,14 +70,14 @@ class _CouponCardState extends State<CouponCard> {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: fav
-                  ? [const Color(0xFF28261A), const Color(0xFF1B1B1D), const Color(0xFF131315)]
+                  ? [const Color(0xFF28261A), const Color(0xFF1B1B1D), AppColors.background]
                   : coupon.status == CouponStatus.winning
-                      ? [const Color(0xFF1A241A), const Color(0xFF141814), const Color(0xFF0F100F)]
+                      ? [const Color(0xFF1A241A), const Color(0xFF141814), AppColors.background]
                       : coupon.status == CouponStatus.risk
-                          ? [const Color(0xFF241A1A), const Color(0xFF181414), const Color(0xFF100F0F)]
+                          ? [const Color(0xFF241A1A), const Color(0xFF181414), AppColors.background]
                           : coupon.status == CouponStatus.pending
-                              ? [const Color(0xFF231E12), const Color(0xFF1A1710), const Color(0xFF12100C)]
-                              : [const Color(0xFF1C1C22), const Color(0xFF161618), const Color(0xFF101012)],
+                              ? [const Color(0xFF231E12), const Color(0xFF1A1710), AppColors.background]
+                              : [AppColors.card, AppColors.card, AppColors.background],
               stops: const [0.0, 0.45, 1.0],
             ),
             borderRadius: BorderRadius.circular(26),
@@ -90,7 +90,7 @@ class _CouponCardState extends State<CouponCard> {
                           ? AppColors.red.withOpacity(0.22)
                           : coupon.status == CouponStatus.pending
                               ? const Color(0xFFFFBB00).withOpacity(0.20)
-                              : Colors.white.withOpacity(0.07),
+                              : AppColors.border,
               width: 0.8,
             ),
             boxShadow: [
@@ -101,13 +101,13 @@ class _CouponCardState extends State<CouponCard> {
                         ? AppColors.red.withOpacity(0.10)
                         : coupon.status == CouponStatus.pending
                             ? const Color(0xFFFFBB00).withOpacity(0.08)
-                            : Colors.black.withOpacity(0.55),
+                            : AppColors.border,
                 blurRadius: 28,
                 offset: const Offset(0, 14),
                 spreadRadius: -6,
               ),
               BoxShadow(
-                color: Colors.black.withOpacity(0.20),
+                color: AppColors.border,
                 blurRadius: 6,
                 offset: const Offset(0, 2),
               ),
@@ -165,7 +165,7 @@ class _CouponCardState extends State<CouponCard> {
                       // Divider
                       Container(
                         height: 0.5,
-                        color: Colors.white.withOpacity(0.07),
+                        color: AppColors.border,
                       ),
                       const SizedBox(height: 1),
 
@@ -181,10 +181,10 @@ class _CouponCardState extends State<CouponCard> {
                 // ── Card footer ──
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.15),
+                    color: AppColors.border,
                     border: Border(
                       top: BorderSide(
-                        color: Colors.white.withOpacity(0.06),
+                        color: AppColors.border,
                         width: 0.5,
                       ),
                     ),
@@ -225,7 +225,7 @@ class _CouponCardState extends State<CouponCard> {
                       // Actions separator
                       Container(
                         height: 0.5,
-                        color: Colors.white.withOpacity(0.05),
+                        color: AppColors.border,
                       ),
                       // Action icons row
                       Padding(
@@ -320,7 +320,7 @@ class _VertDivider extends StatelessWidget {
     return Container(
       width: 0.5,
       height: 28,
-      color: Colors.white.withOpacity(0.07),
+      color: AppColors.border,
     );
   }
 }

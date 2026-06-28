@@ -35,7 +35,7 @@ class BottomNav extends StatelessWidget {
               spreadRadius: -4,
             ),
             BoxShadow(
-              color: Colors.black.withOpacity(0.20),
+              color: AppColors.border,
               blurRadius: 6,
               offset: const Offset(0, 2),
             ),
@@ -72,7 +72,7 @@ class BottomNav extends StatelessWidget {
                           blurRadius: 20,
                         ),
                         BoxShadow(
-                          color: Colors.white.withOpacity(0.10),
+                          color: AppColors.border,
                           blurRadius: 6,
                           spreadRadius: 2,
                         ),

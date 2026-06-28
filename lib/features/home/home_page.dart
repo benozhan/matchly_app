@@ -734,7 +734,7 @@ class _HeroCard extends StatelessWidget {
             spreadRadius: -4,
           ),
           BoxShadow(
-            color: Colors.black.withOpacity(0.18),
+            color: AppColors.border,
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -846,9 +846,9 @@ class _HomeSearchBar extends StatelessWidget {
     return Container(
       height: 44,
       decoration: BoxDecoration(
-        color: const Color(0xFF161618),
+        color: AppColors.card,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withOpacity(0.07), width: 0.5),
+        border: Border.all(color: AppColors.border, width: 0.5),
       ),
       child: Row(
         children: [
@@ -970,7 +970,7 @@ class _FiltersSheetState extends State<_FiltersSheet> {
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
-        color: Color(0xFF141416),
+        color: AppColors.card,
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       child: Column(
@@ -1080,7 +1080,7 @@ class _FilterSection extends StatelessWidget {
           decoration: BoxDecoration(
             color: const Color(0xFF1A1A1C),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.white.withOpacity(0.07), width: 0.5),
+            border: Border.all(color: AppColors.border, width: 0.5),
           ),
           child: Column(
             children: options.asMap().entries.map((entry) {
@@ -1099,8 +1099,8 @@ class _FilterSection extends StatelessWidget {
                         bottom: isLast  ? const Radius.circular(16) : Radius.zero,
                       ),
                       onTap: () => onSelect(opt),
-                      highlightColor: Colors.white.withOpacity(0.04),
-                      splashColor:    Colors.white.withOpacity(0.04),
+                      highlightColor: AppColors.border,
+                      splashColor:    AppColors.border,
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
                         child: Row(
@@ -1133,7 +1133,7 @@ class _FilterSection extends StatelessWidget {
                     Container(
                       height: 0.5,
                       margin: const EdgeInsets.symmetric(horizontal: 16),
-                      color: Colors.white.withOpacity(0.06),
+                      color: AppColors.border,
                     ),
                 ],
               );
@@ -1175,7 +1175,7 @@ class _FilterTabBar extends StatelessWidget {
           color: isActive ? const Color(0xFF232019) : const Color(0xFF0F0F0E),
           borderRadius: BorderRadius.circular(999),
           border: Border.all(
-            color: isActive ? accent.withOpacity(0.28) : Colors.white.withOpacity(0.07),
+            color: isActive ? accent.withOpacity(0.28) : AppColors.border,
             width: 0.6,
           ),
           boxShadow: isActive
@@ -1199,7 +1199,7 @@ class _FilterTabBar extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
                   decoration: BoxDecoration(
-                    color: isActive ? accent.withOpacity(0.13) : Colors.white.withOpacity(0.05),
+                    color: isActive ? accent.withOpacity(0.13) : AppColors.border,
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Text(

@@ -267,12 +267,12 @@ class _MetaSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF141416),
+        color: AppColors.card,
         borderRadius: BorderRadius.circular(26),
-        border: Border.all(color: Colors.white.withOpacity(0.07), width: 0.5),
+        border: Border.all(color: AppColors.border, width: 0.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.30),
+            color: AppColors.border,
             blurRadius: 14,
             offset: const Offset(0, 5),
             spreadRadius: -4,
@@ -376,7 +376,7 @@ class _CopyableRow extends StatelessWidget {
             content: const Text('Kopyalandı',
                 style: TextStyle(
                     color: AppColors.textPrimary, fontSize: 13)),
-            backgroundColor: const Color(0xFF1C1C1E),
+            backgroundColor: AppColors.card,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12)),
@@ -426,7 +426,7 @@ class _Divider extends StatelessWidget {
   Widget build(BuildContext context) => Padding(
         padding: const EdgeInsets.only(left: 16),
         child: Container(
-            height: 0.5, color: Colors.white.withOpacity(0.06)),
+            height: 0.5, color: AppColors.border),
       );
 }
 
@@ -450,12 +450,12 @@ class _LocalDetails extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF141416),
+        color: AppColors.card,
         borderRadius: BorderRadius.circular(26),
-        border: Border.all(color: Colors.white.withOpacity(0.07), width: 0.5),
+        border: Border.all(color: AppColors.border, width: 0.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.30),
+            color: AppColors.border,
             blurRadius: 14,
             offset: const Offset(0, 5),
             spreadRadius: -4,
@@ -482,7 +482,7 @@ class _LocalDetails extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.06),
+                    color: AppColors.border,
                     borderRadius: BorderRadius.circular(7),
                   ),
                   child: Text(
@@ -515,7 +515,7 @@ class _LocalDetails extends StatelessWidget {
               child: Divider(
                   height: 1,
                   thickness: 0.5,
-                  color: Colors.white.withOpacity(0.06)),
+                  color: AppColors.border),
             ),
             ...coupon.matches.map(
               (m) => Padding(
@@ -604,12 +604,12 @@ class _FetchedDetails extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF141416),
+        color: AppColors.card,
         borderRadius: BorderRadius.circular(26),
-        border: Border.all(color: Colors.white.withOpacity(0.07), width: 0.5),
+        border: Border.all(color: AppColors.border, width: 0.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.30),
+            color: AppColors.border,
             blurRadius: 14,
             offset: const Offset(0, 5),
             spreadRadius: -4,
@@ -640,7 +640,7 @@ class _FetchedDetails extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.06),
+                      color: AppColors.border,
                       borderRadius: BorderRadius.circular(7),
                     ),
                     child: Text(
@@ -702,7 +702,7 @@ class _FetchedDetails extends StatelessWidget {
               child: Divider(
                   height: 1,
                   thickness: 0.5,
-                  color: Colors.white.withOpacity(0.06)),
+                  color: AppColors.border),
             ),
             ...detail.selections.map((s) => _SelectionCard(sel: s)),
           ],
@@ -813,9 +813,9 @@ class _LoadingDetail extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 40),
       decoration: BoxDecoration(
-        color: const Color(0xFF141416),
+        color: AppColors.card,
         borderRadius: BorderRadius.circular(26),
-        border: Border.all(color: Colors.white.withOpacity(0.07), width: 0.5),
+        border: Border.all(color: AppColors.border, width: 0.5),
       ),
       child: const Center(
         child: CircularProgressIndicator(
@@ -835,9 +835,9 @@ class _ErrorDetail extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 32),
       decoration: BoxDecoration(
-        color: const Color(0xFF141416),
+        color: AppColors.card,
         borderRadius: BorderRadius.circular(26),
-        border: Border.all(color: Colors.white.withOpacity(0.07), width: 0.5),
+        border: Border.all(color: AppColors.border, width: 0.5),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,

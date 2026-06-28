@@ -59,12 +59,12 @@ class _CouponDetailPageState extends State<CouponDetailPage> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: status == CouponStatus.winning
-              ? [const Color(0xFF1A241A), const Color(0xFF141814), const Color(0xFF0F100F)]
+              ? [const Color(0xFF1A241A), const Color(0xFF141814), AppColors.background]
               : status == CouponStatus.risk
-                  ? [const Color(0xFF241A1A), const Color(0xFF181414), const Color(0xFF100F0F)]
+                  ? [const Color(0xFF241A1A), const Color(0xFF181414), AppColors.background]
                   : status == CouponStatus.pending
-                      ? [const Color(0xFF231E12), const Color(0xFF1A1710), const Color(0xFF12100C)]
-                      : [const Color(0xFF1C1C22), const Color(0xFF161618), const Color(0xFF101012)],
+                      ? [const Color(0xFF231E12), const Color(0xFF1A1710), AppColors.background]
+                      : [AppColors.card, AppColors.card, AppColors.background],
           stops: const [0.0, 0.45, 1.0],
         ),
         borderRadius: BorderRadius.circular(24),
@@ -75,7 +75,7 @@ class _CouponDetailPageState extends State<CouponDetailPage> {
                   ? AppColors.red.withOpacity(0.22)
                   : status == CouponStatus.pending
                       ? const Color(0xFFFFBB00).withOpacity(0.20)
-                      : Colors.white.withOpacity(0.07),
+                      : AppColors.border,
           width: 0.8,
         ),
         boxShadow: [
@@ -193,26 +193,26 @@ class _CouponDetailPageState extends State<CouponDetailPage> {
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                             colors: [
-                              Color(0xFF222228),
-                              Color(0xFF1A1A1E),
+                              AppColors.cardHigh,
+                              AppColors.card,
                               Color(0xFF131316),
                             ],
                             stops: [0.0, 0.45, 1.0],
                           ),
                           borderRadius: BorderRadius.circular(28),
                           border: Border.all(
-                            color: Colors.white.withOpacity(0.08),
+                            color: AppColors.border,
                             width: 0.5,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.55),
+                              color: AppColors.border,
                               blurRadius: 32,
                               offset: const Offset(0, 14),
                               spreadRadius: -6,
                             ),
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.20),
+                              color: AppColors.border,
                               blurRadius: 6,
                               offset: const Offset(0, 2),
                             ),
@@ -271,10 +271,10 @@ class _CouponDetailPageState extends State<CouponDetailPage> {
                               // Hero footer — BAHİS / ORAN / BEKLENTİ
                               Container(
                                 decoration: BoxDecoration(
-                                  color: Colors.black.withOpacity(0.15),
+                                  color: AppColors.border,
                                   border: Border(
                                     top: BorderSide(
-                                      color: Colors.white.withOpacity(0.06),
+                                      color: AppColors.border,
                                       width: 0.5,
                                     ),
                                   ),
@@ -345,7 +345,7 @@ class _CouponDetailPageState extends State<CouponDetailPage> {
                               padding: const EdgeInsets.symmetric(horizontal: 18),
                               child: Container(
                                 height: 0.5,
-                                color: Colors.white.withOpacity(0.06),
+                                color: AppColors.border,
                               ),
                             ),
                             Padding(
@@ -460,9 +460,9 @@ class _StatusSheet extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF141416),
+        color: AppColors.card,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-        border: Border.all(color: Colors.white.withOpacity(0.08), width: 0.5),
+        border: Border.all(color: AppColors.border, width: 0.5),
       ),
       child: SafeArea(
         child: Column(
@@ -496,7 +496,7 @@ class _StatusSheet extends StatelessWidget {
             const SizedBox(height: 16),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 22),
-              child: Container(height: 0.5, color: Colors.white.withOpacity(0.07)),
+              child: Container(height: 0.5, color: AppColors.border),
             ),
             ...rows.map((r) {
               final (status, label, icon, color) = r;
@@ -568,7 +568,7 @@ class _StatusRow extends StatelessWidget {
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 22),
-          child: Container(height: 0.5, color: Colors.white.withOpacity(0.05)),
+          child: Container(height: 0.5, color: AppColors.border),
         ),
       ],
     );
@@ -617,6 +617,6 @@ class _DetailVertDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
         width: 0.5,
-        color: Colors.white.withOpacity(0.07),
+        color: AppColors.border,
       );
 }

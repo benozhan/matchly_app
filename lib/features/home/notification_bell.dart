@@ -88,7 +88,7 @@ class _NotificationsSheet extends StatelessWidget {
     return Container(
       height: MediaQuery.of(context).size.height * 0.7,
       decoration: const BoxDecoration(
-        color: Color(0xFF141416),
+        color: AppColors.card,
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       child: Column(
@@ -120,7 +120,7 @@ class _NotificationsSheet extends StatelessWidget {
               ],
             ),
           ),
-          Container(height: 0.5, color: Colors.white.withOpacity(0.06)),
+          Container(height: 0.5, color: AppColors.border),
           Expanded(
             child: notifications.isEmpty
                 ? const Center(
@@ -135,7 +135,7 @@ class _NotificationsSheet extends StatelessWidget {
                     separatorBuilder: (_, __) => Container(
                       height: 0.5,
                       margin: const EdgeInsets.symmetric(horizontal: 20),
-                      color: Colors.white.withOpacity(0.05),
+                      color: AppColors.border,
                     ),
                     itemBuilder: (_, i) {
                       final n = notifications[i];
