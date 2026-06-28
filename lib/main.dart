@@ -61,7 +61,10 @@ class _MatchlyAppState extends State<MatchlyApp> {
   void initState() {
     super.initState();
     _appLinks.uriLinkStream.listen((uri) {
-      if (uri.scheme == 'matchly' && uri.pathSegments.length >= 2 && uri.pathSegments[0] == 'coupon') {
+      if (uri.scheme == 'matchly' && uri.host == 'login-callback') {
+        // Google/Apple OAuth callback
+        _handleSignedIn();
+      } else if (uri.scheme == 'matchly' && uri.pathSegments.length >= 2 && uri.pathSegments[0] == 'coupon') {
         final couponId = uri.pathSegments[1];
         setState(() => _pendingDeepLink = couponId);
       }
@@ -83,7 +86,11 @@ class _MatchlyAppState extends State<MatchlyApp> {
         Supabase.instance.client.auth.onAuthStateChange.listen((data) {
       if (!mounted) return;
       final signedIn = data.session != null;
-      if (_signedIn != signedIn) setState(() => _signedIn = signedIn);
+      if (!_signedIn && signedIn) {
+        _handleSignedIn();
+      } else if (_signedIn && !signedIn) {
+        setState(() { _signedIn = false; _needsUsername = false; });
+      }
     });
   }
 
