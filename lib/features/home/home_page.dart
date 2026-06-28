@@ -395,9 +395,8 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
   // ── Bugünkü istatistikler ──────────────────────────────────────────────────
   List<Coupon> get _todayCoupons {
     final today = DateTime.now();
-    final allCoupons = [..._entries.map((e) => e.coupon), ..._historyEntries.map((e) => e.coupon)];
-    return allCoupons.where((c) {
-      if (c.createdAt == null) return false;
+    return _entries.map((e) => e.coupon).where((c) {
+      if (c.createdAt == null) return true; // createdAt yoksa bugün sayılsın
       return c.createdAt!.year == today.year && c.createdAt!.month == today.month && c.createdAt!.day == today.day;
     }).toList();
   }

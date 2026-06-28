@@ -38,6 +38,72 @@ class _AyarlarPageState extends State<AyarlarPage> {
     setState(() => _user = user);
   }
 
+  Future<void> _changeUsername(BuildContext context) async {
+    final ctrl = TextEditingController(text: _user?.username ?? '');
+    final result = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.card,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Kullanıcı Adı Değiştir', style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w800)),
+        content: TextField(
+          controller: ctrl,
+          style: const TextStyle(color: AppColors.textPrimary),
+          decoration: InputDecoration(
+            hintText: 'Yeni kullanıcı adı',
+            hintStyle: TextStyle(color: AppColors.textTertiary),
+            filled: true,
+            fillColor: AppColors.background,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('İptal', style: TextStyle(color: AppColors.textSecondary))),
+          TextButton(onPressed: () => Navigator.pop(ctx, ctrl.text.trim()), child: const Text('Kaydet', style: TextStyle(color: AppColors.brand, fontWeight: FontWeight.w700))),
+        ],
+      ),
+    );
+    if (result != null && result.isNotEmpty) {
+      final uid = Supabase.instance.client.auth.currentUser?.id;
+      if (uid != null) {
+        await Supabase.instance.client.from('profiles').update({'username': result}).eq('id', uid);
+        if (mounted) setState(() {});
+      }
+    }
+  }
+
+  Future<void> _changePassword(BuildContext context) async {
+    final ctrl = TextEditingController();
+    final result = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.card,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Şifre Değiştir', style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w800)),
+        content: TextField(
+          controller: ctrl,
+          obscureText: true,
+          style: const TextStyle(color: AppColors.textPrimary),
+          decoration: InputDecoration(
+            hintText: 'Yeni şifre',
+            hintStyle: TextStyle(color: AppColors.textTertiary),
+            filled: true,
+            fillColor: AppColors.background,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('İptal', style: TextStyle(color: AppColors.textSecondary))),
+          TextButton(onPressed: () => Navigator.pop(ctx, ctrl.text.trim()), child: const Text('Kaydet', style: TextStyle(color: AppColors.brand, fontWeight: FontWeight.w700))),
+        ],
+      ),
+    );
+    if (result != null && result.length >= 6) {
+      await Supabase.instance.client.auth.updateUser(UserAttributes(password: result));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Şifre güncellendi')));
+    }
+  }
+
   Future<void> _signOut() async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -209,7 +275,32 @@ class _AyarlarPageState extends State<AyarlarPage> {
             fontWeight: FontWeight.w500,
           ),
         ),
-        const SizedBox(height: 26),
+        const SizedBox(height: 16),
+
+        // ── Hesap ────────────────────────────────────────────────────────────
+        _SectionLabel('HESAP'),
+        const SizedBox(height: 8),
+        Container(
+          decoration: _sectionDeco(),
+          child: Column(
+            children: [
+              _ValueRow(
+                icon: Icons.person_outline_rounded,
+                title: 'Kullanıcı Adı Değiştir',
+                value: '@${_user?.username ?? ''}',
+                onTap: () => _changeUsername(context),
+              ),
+              _RowDivider(),
+              _ValueRow(
+                icon: Icons.lock_outline_rounded,
+                title: 'Şifre Değiştir',
+                value: '••••••••',
+                onTap: () => _changePassword(context),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
 
         // ── Geçmiş ───────────────────────────────────────────────────────────
         _SectionLabel('GEÇMİŞ'),
