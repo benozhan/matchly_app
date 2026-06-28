@@ -632,7 +632,7 @@ class _AvatarState extends State<_Avatar> {
 
   @override
   Widget build(BuildContext context) {
-    final url = _localUrl ?? widget.avatarUrl;
+    final url = (_localUrl?.isNotEmpty == true) ? _localUrl : (widget.avatarUrl?.isNotEmpty == true) ? widget.avatarUrl : null;
     final circle = Container(
       width: 84,
       height: 84,
