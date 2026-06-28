@@ -28,7 +28,7 @@ class ProgressSegments extends StatelessWidget {
                     margin: const EdgeInsets.only(right: 3),
                     decoration: BoxDecoration(
                       color: status == CouponStatus.pending
-                          ? Colors.white.withOpacity(0.08)
+                          ? AppColors.border
                           : statusColor(status).withOpacity(0.85),
                       borderRadius: BorderRadius.circular(3),
                     ),
@@ -43,17 +43,17 @@ class ProgressSegments extends StatelessWidget {
             Text(
               '$completedCount / ${statuses.length}',
               style: const TextStyle(
-                color: AppColors.textTertiary,
-                fontSize: 10,
-                fontWeight: FontWeight.w600,
+                color: AppColors.textSecondary,
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
               ),
             ),
             const SizedBox(width: 4),
             const Text(
               'tamamlandı',
               style: TextStyle(
-                color: AppColors.textTertiary,
-                fontSize: 10,
+                color: AppColors.textSecondary,
+                fontSize: 12,
               ),
             ),
           ],

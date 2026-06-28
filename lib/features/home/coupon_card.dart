@@ -129,8 +129,8 @@ class _CouponCardState extends State<CouponCard> {
                       Text(
                         coupon.meta,
                         style: const TextStyle(
-                          color: AppColors.textTertiary,
-                          fontSize: 11,
+                          color: AppColors.textSecondary,
+                          fontSize: 12,
                           fontWeight: FontWeight.w500,
                           letterSpacing: 0.1,
                         ),
@@ -219,12 +219,12 @@ class _CouponCardState extends State<CouponCard> {
                             ),
                             _ActionBtn(
                               icon: Icons.edit_outlined,
-                              color: AppColors.textTertiary,
+                              color: AppColors.textSecondary,
                               onTap: widget.onEdit,
                             ),
                             _ActionBtn(
                               icon: Icons.ios_share_rounded,
-                              color: AppColors.textTertiary,
+                              color: AppColors.textSecondary,
                               onTap: widget.onShare,
                             ),
                             _ActionBtn(
@@ -268,7 +268,7 @@ class _FooterStat extends StatelessWidget {
         Text(
           label,
           style: const TextStyle(
-            color: AppColors.textTertiary,
+            color: AppColors.textSecondary,
             fontSize: 9,
             fontWeight: FontWeight.w700,
             letterSpacing: 0.8,
