@@ -192,19 +192,26 @@ class _AuthPageState extends State<AuthPage> {
                   const SizedBox(height: 12),
                 ],
 
-                _AuthField(
-                  controller: _emailController,
-                  hint: 'E-posta',
-                  icon: Icons.mail_outline_rounded,
-                  keyboardType: TextInputType.emailAddress,
-                ),
-                const SizedBox(height: 12),
-
-                _AuthField(
-                  controller: _passwordController,
-                  hint: 'Şifre',
-                  icon: Icons.lock_outline_rounded,
-                  obscureText: true,
+                AutofillGroup(
+                  child: Column(
+                    children: [
+                      _AuthField(
+                        controller: _emailController,
+                        hint: 'E-posta',
+                        icon: Icons.mail_outline_rounded,
+                        keyboardType: TextInputType.emailAddress,
+                        autofillHints: const [AutofillHints.email],
+                      ),
+                      const SizedBox(height: 12),
+                      _AuthField(
+                        controller: _passwordController,
+                        hint: 'Şifre',
+                        icon: Icons.lock_outline_rounded,
+                        obscureText: true,
+                        autofillHints: const [AutofillHints.password],
+                      ),
+                    ],
+                  ),
                 ),
 
                 if (_error != null) ...[
@@ -325,6 +332,7 @@ class _AuthField extends StatelessWidget {
   final IconData icon;
   final bool obscureText;
   final TextInputType? keyboardType;
+  final List<String>? autofillHints;
 
   const _AuthField({
     required this.controller,
@@ -332,6 +340,7 @@ class _AuthField extends StatelessWidget {
     required this.icon,
     this.obscureText = false,
     this.keyboardType,
+    this.autofillHints,
   });
 
   @override
@@ -347,6 +356,7 @@ class _AuthField extends StatelessWidget {
         controller: controller,
         obscureText: obscureText,
         keyboardType: keyboardType,
+        autofillHints: autofillHints,
         style: const TextStyle(
           color: AppColors.textPrimary,
           fontSize: 14,
