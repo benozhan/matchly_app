@@ -31,7 +31,7 @@ class MatchRow extends StatelessWidget {
     final awayAbbrev = _abbrev(awayName.isNotEmpty ? awayName : homeName);
 
     final nameStyle = TextStyle(
-      color: isPending ? AppColors.textTertiary : AppColors.textPrimary,
+      color: AppColors.textPrimary,
       fontSize: 12,
       fontWeight: FontWeight.w600,
       letterSpacing: -0.1,
@@ -64,7 +64,7 @@ class MatchRow extends StatelessWidget {
                   child: Text(
                     '–',
                     style: TextStyle(
-                      color: AppColors.textTertiary.withOpacity(0.5),
+                      color: AppColors.textSecondary,
                       fontSize: 11,
                       fontWeight: FontWeight.w400,
                     ),
@@ -98,7 +98,7 @@ class MatchRow extends StatelessWidget {
               match.score,
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: isPending ? AppColors.textTertiary : AppColors.textPrimary,
+                color: AppColors.textPrimary,
                 fontSize: 12,
                 fontWeight: FontWeight.w800,
                 letterSpacing: -0.4,
@@ -114,7 +114,7 @@ class MatchRow extends StatelessWidget {
               match.minute,
               textAlign: TextAlign.right,
               style: const TextStyle(
-                color: AppColors.textTertiary,
+                color: AppColors.textSecondary,
                 fontSize: 10,
                 fontWeight: FontWeight.w500,
               ),
@@ -126,7 +126,7 @@ class MatchRow extends StatelessWidget {
           Icon(
             statusIcon(match.status),
             color: isPending
-                ? AppColors.textTertiary.withOpacity(0.30)
+                ? AppColors.textSecondary.withOpacity(0.50)
                 : statusColor(match.status).withOpacity(0.85),
             size: 12,
           ),
@@ -151,9 +151,9 @@ class _MiniAvatar extends StatelessWidget {
       height: 20,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: const Color(0xFF232326),
+        color: AppColors.border,
         border: Border.all(
-          color: Colors.white.withOpacity(0.10),
+          color: AppColors.border,
           width: 0.5,
         ),
       ),
@@ -162,8 +162,8 @@ class _MiniAvatar extends StatelessWidget {
           abbrev,
           style: TextStyle(
             color: dimmed
-                ? AppColors.textTertiary.withOpacity(0.35)
-                : AppColors.textTertiary,
+                ? AppColors.textSecondary.withOpacity(0.50)
+                : AppColors.textSecondary,
             fontSize: abbrev.length > 2 ? 5.5 : 6.5,
             fontWeight: FontWeight.w800,
             letterSpacing: -0.3,
