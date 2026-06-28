@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import '../../services/social_service.dart';
 
 import '../../core/app_colors.dart';
@@ -28,6 +29,36 @@ class _AuthPageState extends State<AuthPage> {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _signInWithApple() async {
+    setState(() { _loading = true; _error = null; });
+    try {
+      await Supabase.instance.client.auth.signInWithOAuth(
+        OAuthProvider.apple,
+        redirectTo: 'com.ozhan.matchly://login-callback',
+      );
+      widget.onSignedIn();
+    } catch (e) {
+      setState(() => _error = e.toString());
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _signInWithGoogle() async {
+    setState(() { _loading = true; _error = null; });
+    try {
+      await Supabase.instance.client.auth.signInWithOAuth(
+        OAuthProvider.google,
+        redirectTo: 'com.ozhan.matchly://login-callback',
+      );
+      widget.onSignedIn();
+    } catch (e) {
+      setState(() => _error = e.toString());
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
   }
 
   Future<void> _submit() async {
@@ -193,6 +224,49 @@ class _AuthPageState extends State<AuthPage> {
                   ),
                 ),
 
+                const SizedBox(height: 16),
+
+                // ── Ayırıcı ──────────────────────────────────────────────
+                Row(children: [
+                  Expanded(child: Divider(color: AppColors.border)),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: Text('veya', style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+                  ),
+                  Expanded(child: Divider(color: AppColors.border)),
+                ]),
+                const SizedBox(height: 16),
+
+                // ── Apple ile Giriş ───────────────────────────────────────
+                SizedBox(
+                  height: 48,
+                  child: OutlinedButton.icon(
+                    onPressed: _loading ? null : _signInWithApple,
+                    icon: const Icon(Icons.apple, size: 20),
+                    label: const Text('Apple ile Devam Et', style: TextStyle(fontWeight: FontWeight.w700)),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.textPrimary,
+                      side: BorderSide(color: AppColors.border),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+
+                // ── Google ile Giriş ──────────────────────────────────────
+                SizedBox(
+                  height: 48,
+                  child: OutlinedButton.icon(
+                    onPressed: _loading ? null : _signInWithGoogle,
+                    icon: const Text('G', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Color(0xFF4285F4))),
+                    label: const Text('Google ile Devam Et', style: TextStyle(fontWeight: FontWeight.w700)),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.textPrimary,
+                      side: BorderSide(color: AppColors.border),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    ),
+                  ),
+                ),
                 const SizedBox(height: 16),
 
                 TextButton(
