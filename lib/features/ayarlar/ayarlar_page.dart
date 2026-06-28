@@ -301,7 +301,14 @@ class _AyarlarPageState extends State<AyarlarPage> {
                   );
                   if (picked != null) {
                     setState(() => _gunSonuSaati = picked);
-                    // TODO: Backend'e kaydet
+                    final uid = Supabase.instance.client.auth.currentUser?.id;
+                    if (uid != null) {
+                      await Supabase.instance.client.from('profiles').upsert({
+                        'id': uid,
+                        'daily_report_hour': picked.hour,
+                        'daily_report_minute': picked.minute,
+                      });
+                    }
                   }
                 },
               ),

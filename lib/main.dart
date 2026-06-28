@@ -86,7 +86,8 @@ class _MatchlyAppState extends State<MatchlyApp> {
         Supabase.instance.client.auth.onAuthStateChange.listen((data) {
       if (!mounted) return;
       final signedIn = data.session != null;
-      if (!_signedIn && signedIn) {
+      final event = data.event;
+      if (!_signedIn && signedIn && event == AuthChangeEvent.signedIn) {
         _handleSignedIn();
       } else if (_signedIn && !signedIn) {
         setState(() { _signedIn = false; _needsUsername = false; });
