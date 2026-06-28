@@ -34,8 +34,27 @@ class _AyarlarPageState extends State<AyarlarPage> {
 
   Future<void> _loadUser() async {
     final user = await AuthService.instance.getCurrentUser();
+    final uid = Supabase.instance.client.auth.currentUser?.id;
+    TimeOfDay? savedTime;
+    if (uid != null) {
+      try {
+        final profile = await Supabase.instance.client
+            .from('profiles')
+            .select('daily_report_hour,daily_report_minute')
+            .eq('id', uid)
+            .single();
+        if (profile != null) {
+          final h = profile['daily_report_hour'] as int? ?? 0;
+          final m = profile['daily_report_minute'] as int? ?? 0;
+          savedTime = TimeOfDay(hour: h, minute: m);
+        }
+      } catch (_) {}
+    }
     if (!mounted) return;
-    setState(() => _user = user);
+    setState(() {
+      _user = user;
+      if (savedTime != null) _gunSonuSaati = savedTime;
+    });
   }
 
   Future<void> _changeUsername(BuildContext context) async {

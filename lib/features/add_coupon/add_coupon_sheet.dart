@@ -698,6 +698,7 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
   // ── save ──────────────────────────────────────────────────────────────────
 
   void _saveCoupon() {
+    if (selections.isEmpty) return;
     final autoTitle = selections.isNotEmpty
         ? '${selections.length} Seçim ×${oddsController.text.trim().isEmpty ? "?" : oddsController.text.trim()}'
         : 'Yeni Kupon';
