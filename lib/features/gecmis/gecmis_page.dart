@@ -28,6 +28,7 @@ class GecmisPage extends StatefulWidget {
 class _GecmisPageState extends State<GecmisPage> {
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
+  int _visibleCount = 10;
 
   @override
   void dispose() {
@@ -35,7 +36,7 @@ class _GecmisPageState extends State<GecmisPage> {
     super.dispose();
   }
 
-  List<Coupon> get _filtered {
+  List<Coupon> get _allFiltered {
     if (_searchQuery.isEmpty) return widget.coupons;
     final q = _searchQuery.toLowerCase();
     return widget.coupons.where((c) {
@@ -47,6 +48,8 @@ class _GecmisPageState extends State<GecmisPage> {
           m.selection.toLowerCase().contains(q));
     }).toList();
   }
+
+  List<Coupon> get _filtered => _allFiltered.take(_visibleCount).toList();
 
   @override
   Widget build(BuildContext context) {
@@ -108,6 +111,31 @@ class _GecmisPageState extends State<GecmisPage> {
               ),
             ),
           ),
+          if (_visibleCount < _allFiltered.length)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 18),
+              child: GestureDetector(
+                onTap: () => setState(() => _visibleCount += 10),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  decoration: BoxDecoration(
+                    color: AppColors.card,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: Text(
+                    'Daha Fazla Göster (${_allFiltered.length - _visibleCount} kupon)',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: AppColors.brand,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+            ),
         ],
       ],
     );
