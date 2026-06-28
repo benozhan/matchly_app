@@ -75,7 +75,7 @@ class _AuthPageState extends State<AuthPage> {
     try {
       await Supabase.instance.client.auth.signInWithOAuth(
         OAuthProvider.google,
-        redirectTo: 'com.ozhan.matchly://login-callback',
+        redirectTo: 'matchly://login-callback',
       );
       widget.onSignedIn();
     } catch (e) {
