@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../models/coupon.dart';
 import 'app_colors.dart';
@@ -29,10 +30,7 @@ class CouponShare {
   static Future<String> share(BuildContext context, Coupon coupon) async {
     final id   = coupon.sharedId ?? coupon.id ?? _generateId();
     final text = buildShareText(coupon, sharedId: id);
-    await Clipboard.setData(ClipboardData(text: text));
-    if (context.mounted) {
-      _showTopToast(context, 'Kupon paylaşım metni kopyalandı');
-    }
+    await SharePlus.instance.share(ShareParams(text: text));
     return id;
   }
 
@@ -43,8 +41,8 @@ class CouponShare {
   // TODO(deep-links): matchly.app/coupon/{sharedId} should resolve to a live
   //   shared coupon screen showing real-time selection status updates.
   static String buildShareText(Coupon coupon, {required String sharedId}) {
-    return 'Kuponumu canlı takip et 👇\n'
-        'https://matchly.app/coupon/$sharedId';
+    final matches = coupon.matches.map((m) => '${m.teams} — ${m.selection}').join('\n');
+    return '🎯 ${coupon.title}\n$matches\n\nMatchly\'de canlı takip et 👇\nmatchly://coupon/$sharedId';
   }
 
   // ── ID generation ──────────────────────────────────────────────────────────

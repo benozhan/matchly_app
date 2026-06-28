@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:app_links/app_links.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -51,12 +52,20 @@ class MatchlyApp extends StatefulWidget {
 class _MatchlyAppState extends State<MatchlyApp> {
   late bool _signedIn;
   bool _needsUsername = false;
+  final _appLinks = AppLinks();
+  String? _pendingDeepLink;
   StreamSubscription<AuthState>? _authSubscription;
 
 
   @override
   void initState() {
     super.initState();
+    _appLinks.uriLinkStream.listen((uri) {
+      if (uri.scheme == 'matchly' && uri.pathSegments.length >= 2 && uri.pathSegments[0] == 'coupon') {
+        final couponId = uri.pathSegments[1];
+        setState(() => _pendingDeepLink = couponId);
+      }
+    });
     _signedIn = Supabase.instance.client.auth.currentSession != null;
     if (_signedIn) NotificationService.instance.initialize();
     AppState.instance.init();
