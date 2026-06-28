@@ -1,6 +1,9 @@
 import 'dart:async';
 
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import '../../services/ai_coupon_service.dart';
 
 import '../../core/app_colors.dart';
 import '../../models/coupon.dart';
@@ -456,6 +459,7 @@ class AddCouponSheet extends StatefulWidget {
 }
 
 class _AddCouponSheetState extends State<AddCouponSheet> {
+  bool _aiLoading = false;
   final titleController = TextEditingController();
   final siteController = TextEditingController();
   final stakeController = TextEditingController();
@@ -697,6 +701,46 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
 
   // ── save ──────────────────────────────────────────────────────────────────
 
+  Future<void> _analyzeWithAI() async {
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(source: ImageSource.gallery, imageQuality: 85);
+    if (picked == null) return;
+
+    setState(() => _aiLoading = true);
+    try {
+      final result = await AiCouponService.instance.analyzeCouponImage(File(picked.path));
+      if (result == null) {
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Kupon okunamadı, tekrar deneyin')),
+        );
+        return;
+      }
+
+      // Alanları doldur
+      if (result['site'] != null) siteController.text = result['site'];
+      if (result['stake'] != null) stakeController.text = result['stake'].toString();
+      if (result['total_odds'] != null) oddsController.text = result['total_odds'].toString();
+
+      // Maçları ekle
+      final matches = result['matches'] as List? ?? [];
+      setState(() {
+        selections.clear();
+        for (final m in matches) {
+          selections.add(_Selection(
+            m['teams'] ?? '',
+            m['selection'] ?? '',
+          ));
+        }
+      });
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Hata: $e')),
+      );
+    } finally {
+      if (mounted) setState(() => _aiLoading = false);
+    }
+  }
+
   void _saveCoupon() {
     if (selections.isEmpty) return;
     final autoTitle = selections.isNotEmpty
@@ -879,14 +923,37 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
               ),
             ),
             const SizedBox(height: 22),
-            const Text(
-              'Kupon Ekle',
-              style: TextStyle(
-                color: AppColors.textPrimary,
-                fontSize: 24,
-                fontWeight: FontWeight.w800,
-                letterSpacing: -0.5,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Kupon Ekle',
+                  style: TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 24,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+                GestureDetector(
+                  onTap: _analyzeWithAI,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: AppColors.brand,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.auto_awesome, color: Colors.white, size: 14),
+                        SizedBox(width: 6),
+                        Text('AI ile Ekle', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700)),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 3),
             const Text(
