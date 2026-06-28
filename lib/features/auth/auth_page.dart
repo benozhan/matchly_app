@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+import 'package:crypto/crypto.dart';
+import 'dart:math';
+import 'dart:convert';
 import '../../services/social_service.dart';
 
 import '../../core/app_colors.dart';
@@ -31,12 +34,33 @@ class _AuthPageState extends State<AuthPage> {
     super.dispose();
   }
 
+  String _generateNonce([int length = 32]) {
+    const charset = '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._';
+    final random = Random.secure();
+    return List.generate(length, (_) => charset[random.nextInt(charset.length)]).join();
+  }
+
+  String _sha256ofString(String input) {
+    final bytes = utf8.encode(input);
+    final digest = sha256.convert(bytes);
+    return digest.toString();
+  }
+
   Future<void> _signInWithApple() async {
     setState(() { _loading = true; _error = null; });
     try {
-      await Supabase.instance.client.auth.signInWithOAuth(
-        OAuthProvider.apple,
-        redirectTo: 'com.ozhan.matchly://login-callback',
+      final rawNonce = _generateNonce();
+      final nonce = _sha256ofString(rawNonce);
+      final credential = await SignInWithApple.getAppleIDCredential(
+        scopes: [AppleIDAuthorizationScopes.email, AppleIDAuthorizationScopes.fullName],
+        nonce: nonce,
+      );
+      final idToken = credential.identityToken;
+      if (idToken == null) throw Exception('Apple ID token alınamadı');
+      await Supabase.instance.client.auth.signInWithIdToken(
+        provider: OAuthProvider.apple,
+        idToken: idToken,
+        nonce: rawNonce,
       );
       widget.onSignedIn();
     } catch (e) {
