@@ -395,40 +395,18 @@ class _FeedCardState extends State<_FeedCard> {
       onTap: widget.onTap,
       child: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: _detail?.status == 'winning'
-                ? [const Color(0xFF1A241A), const Color(0xFF141814), AppColors.background]
-                : _detail?.status == 'risk'
-                    ? [const Color(0xFF241A1A), const Color(0xFF181414), AppColors.background]
-                    : _detail?.status == 'pending'
-                        ? [const Color(0xFF231E12), const Color(0xFF1A1710), AppColors.background]
-                        : [AppColors.card, AppColors.card, AppColors.background],
-            stops: const [0.0, 0.45, 1.0],
-          ),
+          color: AppColors.card,
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: _detail?.status == 'winning'
-                ? AppColors.green.withOpacity(0.22)
-                : _detail?.status == 'risk'
-                    ? AppColors.red.withOpacity(0.22)
-                    : _detail?.status == 'pending'
-                        ? const Color(0xFFFFBB00).withOpacity(0.20)
-                        : AppColors.border,
-            width: 0.8,
-          ),
-          boxShadow: [
+          border: _detail?.status == 'winning'
+              ? const Border(left: BorderSide(color: Color(0xFF16A34A), width: 3))
+              : _detail?.status == 'risk'
+                  ? const Border(left: BorderSide(color: Color(0xFFDC2626), width: 3))
+                  : Border.all(color: AppColors.border, width: 0.5),
+          boxShadow: const [
             BoxShadow(
-              color: _detail?.status == 'winning'
-                  ? AppColors.green.withOpacity(0.10)
-                  : _detail?.status == 'risk'
-                      ? AppColors.red.withOpacity(0.10)
-                      : _detail?.status == 'pending'
-                          ? const Color(0xFFFFBB00).withOpacity(0.08)
-                          : AppColors.border,
-              blurRadius: 12,
-              offset: const Offset(0, 4),
+              color: Color(0x142D4A6E),
+              blurRadius: 20,
+              offset: Offset(0, 4),
             ),
           ],
         ),
