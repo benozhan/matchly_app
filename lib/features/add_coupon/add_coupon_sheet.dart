@@ -698,8 +698,11 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
   // ── save ──────────────────────────────────────────────────────────────────
 
   void _saveCoupon() {
+    final autoTitle = selections.isNotEmpty
+        ? '${selections.length} Seçim ×${oddsController.text.trim().isEmpty ? "?" : oddsController.text.trim()}'
+        : 'Yeni Kupon';
     final title = titleController.text.trim().isEmpty
-        ? 'Yeni Kupon'
+        ? autoTitle
         : titleController.text.trim();
     final site = siteController.text.trim().isEmpty
         ? 'Manuel'
