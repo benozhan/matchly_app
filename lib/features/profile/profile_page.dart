@@ -667,41 +667,7 @@ class _AvatarState extends State<_Avatar> {
       ) : null,
     );
 
-    if (!widget.isOwnProfile) return circle;
-
-    return GestureDetector(
-      onTap: _uploading ? null : _pickAndUpload,
-      child: Stack(
-        children: [
-          circle,
-          if (_uploading)
-            const Positioned.fill(
-              child: CircleAvatar(
-                backgroundColor: Colors.black45,
-                child: SizedBox(
-                  width: 24, height: 24,
-                  child: CircularProgressIndicator(
-                      strokeWidth: 2, color: Colors.white),
-                ),
-              ),
-            )
-          else if (widget.isOwnProfile)
-            Positioned(
-              bottom: 0, right: 0,
-              child: Container(
-                width: 26, height: 26,
-                decoration: BoxDecoration(
-                  color: AppColors.brand,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: AppColors.background, width: 2),
-                ),
-                child: const Icon(Icons.camera_alt_rounded,
-                    size: 13, color: Colors.white),
-              ),
-            ),
-        ],
-      ),
-    );
+    return circle;
   }
 }
 
