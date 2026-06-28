@@ -128,6 +128,7 @@ class CouponStorageService {
           potential: row['potential'] as String? ?? '',
           progress: matches.map((m) => m.status).toList(),
           matches: matches,
+          createdAt: row['created_at'] != null ? DateTime.tryParse(row['created_at']) : null,
         ),
       );
     }

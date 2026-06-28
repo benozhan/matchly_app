@@ -23,6 +23,7 @@ class Coupon {
   // TODO(friends-following): Notify followers when a friend shares a coupon
   //   (requires push notification + follow graph).
   final String? sharedId;
+  final DateTime? createdAt;
 
   const Coupon({
     this.id,
@@ -34,6 +35,7 @@ class Coupon {
     required this.progress,
     required this.matches,
     this.sharedId,
+    this.createdAt,
   });
 
   /// Returns a new [Coupon] with any supplied fields replaced.

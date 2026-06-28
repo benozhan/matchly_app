@@ -391,6 +391,44 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
     return '₺$n';
   }
 
+
+  // ── Bugünkü istatistikler ──────────────────────────────────────────────────
+  List<Coupon> get _todayCoupons {
+    final today = DateTime.now();
+    final allCoupons = [..._entries.map((e) => e.coupon), ..._historyEntries.map((e) => e.coupon)];
+    return allCoupons.where((c) {
+      if (c.createdAt == null) return false;
+      return c.createdAt!.year == today.year && c.createdAt!.month == today.month && c.createdAt!.day == today.day;
+    }).toList();
+  }
+
+  String _fmtMoney(double n) {
+    if (n == 0) return '–';
+    final prefix = n < 0 ? '-' : '+';
+    final abs = n.abs().toInt();
+    if (abs >= 1000) return '${prefix}₺${abs ~/ 1000}.${(abs % 1000).toString().padLeft(3, "0")}';
+    return '${prefix}₺${abs}';
+  }
+
+  Map<String, dynamic> get _todayStats {
+    final coupons = _todayCoupons;
+    double stake = 0, profit = 0;
+    int won = 0, lost = 0;
+    for (final c in coupons) {
+      final s = double.tryParse(RegExp(r'₺([\d]+)').firstMatch(c.stake)?.group(1) ?? '0') ?? 0;
+      stake += s;
+      if (c.status == CouponStatus.winning) {
+        final p = double.tryParse(RegExp(r'₺([\d]+)').firstMatch(c.potential)?.group(1) ?? '0') ?? 0;
+        profit += p - s;
+        won++;
+      } else if (c.status == CouponStatus.risk) {
+        profit -= s;
+        lost++;
+      }
+    }
+    return {'stake': stake, 'profit': profit, 'won': won, 'lost': lost, 'total': coupons.length};
+  }
+
   // ── share helpers ──────────────────────────────────────────────────────────
 
   void _saveActiveSharedId(_CouponEntry entry, String id) {
@@ -592,6 +630,7 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
                                       activeCount: activeCount,
                                       winningCount: winningCount,
                                       losingCount: losingCount,
+                                      todayStats: _todayStats,
                                     ),
                                     const SizedBox(height: 22),
 
@@ -692,12 +731,14 @@ class _HeroCard extends StatelessWidget {
   final int activeCount;
   final int winningCount;
   final int losingCount;
+  final Map<String, dynamic> todayStats;
 
   const _HeroCard({
     required this.totalPotential,
     required this.activeCount,
     required this.winningCount,
     required this.losingCount,
+    required this.todayStats,
   });
 
   @override
@@ -766,8 +807,58 @@ class _HeroCard extends StatelessWidget {
               _StatDot(count: losingCount,  label: 'kaybetti',  color: AppColors.red),
             ],
           ),
+          if ((todayStats['total'] as int) > 0) ...[
+            const SizedBox(height: 12),
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.10),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _TodayStat(label: 'Bugün', value: '${todayStats['total']} kupon'),
+                  _TodayStat(label: 'Yatırım', value: '₺${(todayStats['stake'] as double).toInt()}'),
+                  _TodayStat(
+                    label: 'Kar/Zarar',
+                    value: () {
+                      final p = todayStats['profit'] as double;
+                      if (p == 0) return '–';
+                      final prefix = p > 0 ? '+' : '';
+                      return '\$prefix₺\${p.toInt().abs()}';
+                    }(),
+                    valueColor: (todayStats['profit'] as double) > 0
+                        ? Colors.greenAccent
+                        : (todayStats['profit'] as double) < 0
+                            ? Colors.redAccent
+                            : Colors.white,
+                  ),
+                ],
+              ),
+            ),
+          ],
         ],
       ),
+    );
+  }
+}
+
+class _TodayStat extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color? valueColor;
+  const _TodayStat({required this.label, required this.value, this.valueColor});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(label, style: const TextStyle(color: Colors.white60, fontSize: 9, fontWeight: FontWeight.w600, letterSpacing: 0.5)),
+        const SizedBox(height: 3),
+        Text(value, style: TextStyle(color: valueColor ?? Colors.white, fontSize: 12, fontWeight: FontWeight.w800)),
+      ],
     );
   }
 }

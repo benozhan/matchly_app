@@ -38,6 +38,20 @@ class _AyarlarPageState extends State<AyarlarPage> {
   }
 
   Future<void> _signOut() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.card,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Çıkış Yap', style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w800)),
+        content: const Text('Hesabından çıkmak istediğine emin misin?', style: TextStyle(color: AppColors.textSecondary, fontSize: 14)),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('İptal', style: TextStyle(color: AppColors.textSecondary))),
+          TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Çıkış Yap', style: TextStyle(color: AppColors.red, fontWeight: FontWeight.w700))),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
     await Supabase.instance.client.auth.signOut();
 
     if (!mounted) return;
