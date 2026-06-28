@@ -145,26 +145,32 @@ class _MiniAvatar extends StatelessWidget {
   const _MiniAvatar({required this.abbrev, this.dimmed = false});
 
   @override
+  Color _teamColor() {
+    final colors = [
+      const Color(0xFF2D4A6E), const Color(0xFF16A34A), const Color(0xFFDC2626),
+      const Color(0xFFA16207), const Color(0xFF7C3AED), const Color(0xFF0891B2),
+      const Color(0xFFBE185D), const Color(0xFF065F46), const Color(0xFF92400E),
+    ];
+    int hash = 0;
+    for (var ch in abbrev.codeUnits) { hash = (hash * 31 + ch) & 0xFFFFFF; }
+    return colors[hash % colors.length];
+  }
+
   Widget build(BuildContext context) {
+    final bgColor = _teamColor();
     return Container(
-      width: 20,
-      height: 20,
+      width: 22,
+      height: 22,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: AppColors.border,
-        border: Border.all(
-          color: AppColors.border,
-          width: 0.5,
-        ),
+        color: dimmed ? bgColor.withOpacity(0.4) : bgColor,
       ),
       child: Center(
         child: Text(
           abbrev,
           style: TextStyle(
-            color: dimmed
-                ? AppColors.textSecondary.withOpacity(0.50)
-                : AppColors.textSecondary,
-            fontSize: abbrev.length > 2 ? 5.5 : 6.5,
+            color: Colors.white,
+            fontSize: abbrev.length > 2 ? 5.5 : 7,
             fontWeight: FontWeight.w800,
             letterSpacing: -0.3,
           ),
