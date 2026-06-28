@@ -24,6 +24,7 @@ class _AyarlarPageState extends State<AyarlarPage> {
   bool _bildirimler         = true;
   bool _karanlikTema        = AppState.instance.themeMode == ThemeMode.dark;
   bool _otomatikGuncelleme  = false;
+  TimeOfDay _gunSonuSaati = const TimeOfDay(hour: 0, minute: 0);
 
   @override
   void initState() {
@@ -286,6 +287,23 @@ class _AyarlarPageState extends State<AyarlarPage> {
                 subtitle: 'Arka planda veri yenile',
                 value: _otomatikGuncelleme,
                 onChanged: (v) => setState(() => _otomatikGuncelleme = v),
+              ),
+              _RowDivider(),
+              _ValueRow(
+                icon: Icons.notifications_outlined,
+                title: 'Gün Sonu Raporu',
+                value: _gunSonuSaati.format(context),
+                onTap: () async {
+                  final picked = await showTimePicker(
+                    context: context,
+                    initialTime: _gunSonuSaati,
+                    helpText: 'Rapor saatini seç',
+                  );
+                  if (picked != null) {
+                    setState(() => _gunSonuSaati = picked);
+                    // TODO: Backend'e kaydet
+                  }
+                },
               ),
             ],
           ),
