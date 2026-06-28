@@ -5,7 +5,7 @@ class AppState extends ChangeNotifier {
   static final AppState instance = AppState._();
   AppState._();
 
-  ThemeMode _themeMode = ThemeMode.dark;
+  ThemeMode _themeMode = ThemeMode.light;
   Locale _locale = const Locale('tr');
 
   ThemeMode get themeMode => _themeMode;
@@ -13,7 +13,7 @@ class AppState extends ChangeNotifier {
 
   Future<void> init() async {
     final prefs = await SharedPreferences.getInstance();
-    _themeMode = (prefs.getBool('isDarkTheme') ?? true) ? ThemeMode.dark : ThemeMode.light;
+    _themeMode = (prefs.getBool('isDarkTheme') ?? false) ? ThemeMode.dark : ThemeMode.light;
     _locale = Locale(prefs.getString('locale') ?? 'tr');
     notifyListeners();
   }
