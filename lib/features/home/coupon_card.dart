@@ -156,7 +156,7 @@ class _CouponCardState extends State<CouponCard> {
                 // ── Card footer ──
                 Container(
                   decoration: BoxDecoration(
-                    color: AppColors.background,
+                    color: AppColors.card,
                     border: Border(
                       top: BorderSide(
                         color: AppColors.border,
