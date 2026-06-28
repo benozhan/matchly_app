@@ -139,7 +139,7 @@ class _MatchlyAppState extends State<MatchlyApp> {
       ],
       themeMode: AppState.instance.themeMode,
       home: _signedIn
-          ? MatchlyHomePage(pendingCouponId: _pendingCouponId)
+          ? MatchlyHomePage(pendingCouponId: _pendingDeepLink ?? _pendingCouponId)
           : _needsUsername
               ? _UsernameSetupPage(onDone: _handleUsernameSet)
               : AuthPage(onSignedIn: _handleSignedIn),

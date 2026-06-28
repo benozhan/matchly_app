@@ -124,11 +124,11 @@ class MatchRow extends StatelessWidget {
 
           // ── Status icon ────────────────────────────────────────
           Icon(
-            statusIcon(match.status),
+            isPending ? Icons.radio_button_unchecked : statusIcon(match.status),
             color: isPending
-                ? AppColors.textSecondary.withOpacity(0.50)
+                ? AppColors.amber
                 : statusColor(match.status).withOpacity(0.85),
-            size: 12,
+            size: 16,
           ),
         ],
       ),
