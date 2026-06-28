@@ -340,46 +340,18 @@ class _HistoryCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: coupon.status == CouponStatus.winning
-                ? [const Color(0xFF1A241A), const Color(0xFF141814), AppColors.background]
-                : coupon.status == CouponStatus.risk
-                    ? [const Color(0xFF241A1A), const Color(0xFF181414), AppColors.background]
-                    : coupon.status == CouponStatus.pending
-                        ? [const Color(0xFF231E12), const Color(0xFF1A1710), AppColors.background]
-                        : [AppColors.card, AppColors.card, AppColors.background],
-            stops: const [0.0, 0.45, 1.0],
-          ),
-          borderRadius: BorderRadius.circular(26),
-          border: Border.all(
-            color: coupon.status == CouponStatus.winning
-                ? AppColors.green.withOpacity(0.22)
-                : coupon.status == CouponStatus.risk
-                    ? AppColors.red.withOpacity(0.22)
-                    : coupon.status == CouponStatus.pending
-                        ? const Color(0xFFFFBB00).withOpacity(0.20)
-                        : AppColors.border,
-            width: 0.8,
-          ),
-          boxShadow: [
+          color: AppColors.card,
+          borderRadius: BorderRadius.circular(20),
+          border: coupon.status == CouponStatus.winning
+              ? const Border(left: BorderSide(color: Color(0xFF16A34A), width: 3))
+              : coupon.status == CouponStatus.risk
+                  ? const Border(left: BorderSide(color: Color(0xFFDC2626), width: 3))
+                  : Border.all(color: AppColors.border, width: 0.5),
+          boxShadow: const [
             BoxShadow(
-              color: coupon.status == CouponStatus.winning
-                  ? AppColors.green.withOpacity(0.10)
-                  : coupon.status == CouponStatus.risk
-                      ? AppColors.red.withOpacity(0.10)
-                      : coupon.status == CouponStatus.pending
-                          ? const Color(0xFFFFBB00).withOpacity(0.08)
-                          : AppColors.border,
-              blurRadius: 28,
-              offset: const Offset(0, 14),
-              spreadRadius: -6,
-            ),
-            BoxShadow(
-              color: AppColors.border,
-              blurRadius: 6,
-              offset: const Offset(0, 2),
+              color: Color(0x142D4A6E),
+              blurRadius: 20,
+              offset: Offset(0, 4),
             ),
           ],
         ),
