@@ -21,6 +21,7 @@ class _AuthPageState extends State<AuthPage> {
   final _usernameController = TextEditingController();
   final _emailController    = TextEditingController();
   final _passwordController = TextEditingController();
+  final _passwordConfirmController = TextEditingController();
 
   bool _isLogin = true;
   bool _loading = false;
@@ -31,6 +32,7 @@ class _AuthPageState extends State<AuthPage> {
     _usernameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _passwordConfirmController.dispose();
     super.dispose();
   }
 
@@ -98,6 +100,20 @@ class _AuthPageState extends State<AuthPage> {
     if (email.isEmpty || password.isEmpty) {
       setState(() => _error = 'E-posta ve şifre gerekli');
       return;
+    }
+    if (!_isLogin) {
+      if (password.length < 8) {
+        setState(() => _error = 'Şifre en az 8 karakter olmalı');
+        return;
+      }
+      if (!password.contains(RegExp(r'[0-9]'))) {
+        setState(() => _error = 'Şifre en az bir rakam içermeli');
+        return;
+      }
+      if (password != _passwordConfirmController.text.trim()) {
+        setState(() => _error = 'Şifreler eşleşmiyor');
+        return;
+      }
     }
 
     setState(() {
@@ -210,6 +226,15 @@ class _AuthPageState extends State<AuthPage> {
                         obscureText: true,
                         autofillHints: const [AutofillHints.password],
                       ),
+                      if (!_isLogin) ...[
+                        const SizedBox(height: 12),
+                        _AuthField(
+                          controller: _passwordConfirmController,
+                          hint: 'Şifre tekrar',
+                          icon: Icons.lock_outline_rounded,
+                          obscureText: true,
+                        ),
+                      ],
                     ],
                   ),
                 ),

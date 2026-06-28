@@ -67,41 +67,66 @@ class _AyarlarPageState extends State<AyarlarPage> {
       final uid = Supabase.instance.client.auth.currentUser?.id;
       if (uid != null) {
         await Supabase.instance.client.from('profiles').update({'username': result}).eq('id', uid);
+        await _loadUser();
         if (mounted) setState(() {});
       }
     }
   }
 
   Future<void> _changePassword(BuildContext context) async {
-    final ctrl = TextEditingController();
-    final result = await showDialog<String>(
+    final oldCtrl = TextEditingController();
+    final newCtrl = TextEditingController();
+    final confirmCtrl = TextEditingController();
+    String? dialogError;
+
+    await showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.card,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Şifre Değiştir', style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w800)),
-        content: TextField(
-          controller: ctrl,
-          obscureText: true,
-          style: const TextStyle(color: AppColors.textPrimary),
-          decoration: InputDecoration(
-            hintText: 'Yeni şifre',
-            hintStyle: TextStyle(color: AppColors.textTertiary),
-            filled: true,
-            fillColor: AppColors.background,
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setS) => AlertDialog(
+          backgroundColor: AppColors.card,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Text("Şifre Değiştir", style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w800)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _PwField(ctrl: oldCtrl, hint: "Mevcut şifre"),
+              const SizedBox(height: 10),
+              _PwField(ctrl: newCtrl, hint: "Yeni şifre (min 8 karakter, rakam içermeli)"),
+              const SizedBox(height: 10),
+              _PwField(ctrl: confirmCtrl, hint: "Yeni şifre tekrar"),
+              if (dialogError != null) ...[
+                const SizedBox(height: 8),
+                Text(dialogError!, style: const TextStyle(color: AppColors.red, fontSize: 12)),
+              ],
+            ],
           ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("İptal", style: TextStyle(color: AppColors.textSecondary))),
+            TextButton(
+              onPressed: () async {
+                final oldP = oldCtrl.text.trim();
+                final newP = newCtrl.text.trim();
+                final conf = confirmCtrl.text.trim();
+                if (oldP.isEmpty) { setS(() => dialogError = "Mevcut şifre gerekli"); return; }
+                if (newP.length < 8) { setS(() => dialogError = "En az 8 karakter olmalı"); return; }
+                if (!newP.contains(RegExp(r"[0-9]"))) { setS(() => dialogError = "En az bir rakam içermeli"); return; }
+                if (newP != conf) { setS(() => dialogError = "Şifreler eşleşmiyor"); return; }
+                try {
+                  final email = Supabase.instance.client.auth.currentUser?.email ?? "";
+                  await Supabase.instance.client.auth.signInWithPassword(email: email, password: oldP);
+                  await Supabase.instance.client.auth.updateUser(UserAttributes(password: newP));
+                  if (ctx.mounted) Navigator.pop(ctx);
+                  if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Şifre güncellendi ✓")));
+                } catch (e) {
+                  setS(() => dialogError = "Mevcut şifre yanlış");
+                }
+              },
+              child: const Text("Kaydet", style: TextStyle(color: AppColors.brand, fontWeight: FontWeight.w700)),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('İptal', style: TextStyle(color: AppColors.textSecondary))),
-          TextButton(onPressed: () => Navigator.pop(ctx, ctrl.text.trim()), child: const Text('Kaydet', style: TextStyle(color: AppColors.brand, fontWeight: FontWeight.w700))),
-        ],
       ),
     );
-    if (result != null && result.length >= 6) {
-      await Supabase.instance.client.auth.updateUser(UserAttributes(password: result));
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Şifre güncellendi')));
-    }
   }
 
   Future<void> _signOut() async {
@@ -716,6 +741,30 @@ class _ActionRow extends StatelessWidget {
                 color: AppColors.textTertiary, size: 18),
           ],
         ),
+      ),
+    );
+  }
+}
+
+
+class _PwField extends StatelessWidget {
+  final TextEditingController ctrl;
+  final String hint;
+  const _PwField({required this.ctrl, required this.hint});
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: ctrl,
+      obscureText: true,
+      style: const TextStyle(color: AppColors.textPrimary, fontSize: 13),
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: const TextStyle(color: AppColors.textTertiary, fontSize: 12),
+        filled: true,
+        fillColor: AppColors.background,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       ),
     );
   }
