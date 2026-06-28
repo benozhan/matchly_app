@@ -4,10 +4,25 @@ import '../../core/app_colors.dart';
 import '../../models/coupon.dart';
 import '../home/status_badge.dart';
 
-class IstatistikPage extends StatelessWidget {
+class IstatistikPage extends StatefulWidget {
   final List<Coupon> allCoupons;
 
   const IstatistikPage({super.key, required this.allCoupons});
+
+  @override
+  State<IstatistikPage> createState() => _IstatistikPageState();
+}
+
+class _IstatistikPageState extends State<IstatistikPage> {
+  String _selectedLig = 'Tümü';
+
+  List<Coupon> get _filtered {
+    if (_selectedLig == 'Tümü') return widget.allCoupons;
+    return widget.allCoupons.where((c) {
+      final lig = c.meta.split('·').first.trim();
+      return lig == _selectedLig;
+    }).toList();
+  }
 
   // ── Helpers ────────────────────────────────────────────────────────────────
 
@@ -47,6 +62,7 @@ class IstatistikPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final allCoupons = _filtered;
     final total    = allCoupons.length;
     final kazanan  = allCoupons.where((c) => c.status == CouponStatus.winning).length;
     final kaybeden = allCoupons.where((c) => c.status == CouponStatus.risk).length;
@@ -114,7 +130,44 @@ class IstatistikPage extends StatelessWidget {
             fontWeight: FontWeight.w500,
           ),
         ),
-        const SizedBox(height: 22),
+        const SizedBox(height: 12),
+
+        // ── Lig filtre ────────────────────────────────────────────────────────
+        Builder(builder: (context) {
+          final ligler = ['Tümü', ...widget.allCoupons.map((c) => c.meta.split('·').first.trim()).toSet().toList()..sort()];
+          return SizedBox(
+            height: 36,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: ligler.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 8),
+              itemBuilder: (_, i) {
+                final lig = ligler[i];
+                final selected = _selectedLig == lig;
+                return GestureDetector(
+                  onTap: () => setState(() => _selectedLig = lig),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: selected ? AppColors.brand : AppColors.card,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: selected ? AppColors.brand : AppColors.border),
+                    ),
+                    child: Text(
+                      lig,
+                      style: TextStyle(
+                        color: selected ? Colors.white : AppColors.textSecondary,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          );
+        }),
+        const SizedBox(height: 16),
 
         // ── Empty state ───────────────────────────────────────────────────────
         if (total == 0) ...[
