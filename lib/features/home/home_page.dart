@@ -705,38 +705,14 @@ class _HeroCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(26, 38, 26, 32),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          stops: const [0.0, 0.15, 1.0],
-          colors: [
-            const Color(0xFF1E1D1C),
-            const Color(0xFF181716),
-            const Color(0xFF101010),
-          ],
-        ),
+        color: AppColors.brand,
         borderRadius: BorderRadius.circular(32),
-        border: Border.all(
-          color: const Color(0xFFF0E8DA).withOpacity(0.30),
-          width: 0.8,
-        ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFFF0E8DA).withOpacity(0.07),
-            blurRadius: 28,
-            spreadRadius: 2,
-            offset: const Offset(0, 2),
-          ),
-          BoxShadow(
-            color: Colors.black.withOpacity(0.65),
-            blurRadius: 48,
-            offset: const Offset(0, 22),
+            color: AppColors.brand.withOpacity(0.25),
+            blurRadius: 32,
+            offset: const Offset(0, 12),
             spreadRadius: -4,
-          ),
-          BoxShadow(
-            color: AppColors.border,
-            blurRadius: 6,
-            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -746,7 +722,7 @@ class _HeroCard extends StatelessWidget {
           Text(
             'TOPLAM BEKLENTİ',
             style: TextStyle(
-              color: const Color(0xFF6B6860),
+              color: Colors.white.withOpacity(0.65),
               fontSize: 10,
               fontWeight: FontWeight.w600,
               letterSpacing: 2.0,
@@ -756,7 +732,7 @@ class _HeroCard extends StatelessWidget {
           Text(
             totalPotential,
             style: const TextStyle(
-              color: Color(0xFFF5F3EE),
+              color: Colors.white,
               fontSize: 62,
               fontWeight: FontWeight.w900,
               letterSpacing: -2.5,
