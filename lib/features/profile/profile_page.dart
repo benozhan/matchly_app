@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'shared_coupon_detail_page.dart';
+import '../coupon/coupon_detail_page.dart';
 
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -925,7 +927,14 @@ class _SharedCouponRowState extends State<_SharedCouponRow> {
       );
     }
 
-    return Container(
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => SharedCouponDetailPage(sharedCoupon: widget.coupon),
+        ),
+      ),
+      child: Container(
       decoration: BoxDecoration(
         color: AppColors.card,
         borderRadius: BorderRadius.circular(18),
@@ -1015,7 +1024,7 @@ class _SharedCouponRowState extends State<_SharedCouponRow> {
           ),
         ],
       ),
-    );
+    ));
   }
 }
 
@@ -1144,7 +1153,14 @@ class _LocalCouponCardState extends State<_LocalCouponCard> {
     final oddsMatch = RegExp(r'×([\d.,]+)').firstMatch(coupon.meta);
     final oddsDisplay = oddsMatch != null ? '×${oddsMatch.group(1)}' : '—';
 
-    return Container(
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => CouponDetailPage(coupon: widget.coupon),
+        ),
+      ),
+      child: Container(
       decoration: BoxDecoration(
         color: AppColors.card,
         borderRadius: BorderRadius.circular(18),
@@ -1288,7 +1304,7 @@ class _LocalCouponCardState extends State<_LocalCouponCard> {
             const SizedBox(height: 14),
         ],
       ),
-    );
+    ));
   }
 }
 
