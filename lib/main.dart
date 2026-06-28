@@ -50,6 +50,7 @@ class MatchlyApp extends StatefulWidget {
 
 class _MatchlyAppState extends State<MatchlyApp> {
   late bool _signedIn;
+  bool _needsUsername = false;
   StreamSubscription<AuthState>? _authSubscription;
 
 
@@ -85,8 +86,29 @@ class _MatchlyAppState extends State<MatchlyApp> {
     super.dispose();
   }
 
-  void _handleSignedIn() {
+  void _handleSignedIn() async {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user != null) {
+      // Google/Apple ile girişte username yoksa username ekranı göster
+      final meta = user.userMetadata ?? {};
+      final email = user.email ?? '';
+      final hasUsername = meta['username'] != null;
+      if (!hasUsername && (user.appMetadata['provider'] == 'google' || user.appMetadata['provider'] == 'apple')) {
+        setState(() => _needsUsername = true);
+        return;
+      }
+    }
     setState(() => _signedIn = true);
+    FcmService.instance.registerToken();
+    NotificationService.instance.initialize();
+  }
+
+  Future<void> _handleUsernameSet(String username) async {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) return;
+    final displayName = user.userMetadata?['full_name'] ?? user.userMetadata?['name'] ?? username;
+    await SocialService.instance.ensureUser(username, displayName);
+    setState(() { _needsUsername = false; _signedIn = true; });
     FcmService.instance.registerToken();
     NotificationService.instance.initialize();
   }
@@ -109,7 +131,9 @@ class _MatchlyAppState extends State<MatchlyApp> {
       themeMode: AppState.instance.themeMode,
       home: _signedIn
           ? MatchlyHomePage(pendingCouponId: _pendingCouponId)
-          : AuthPage(onSignedIn: _handleSignedIn),
+          : _needsUsername
+              ? _UsernameSetupPage(onDone: _handleUsernameSet)
+              : AuthPage(onSignedIn: _handleSignedIn),
       onGenerateRoute: _onGenerateRoute,
     );
   }
@@ -135,5 +159,98 @@ class _MatchlyAppState extends State<MatchlyApp> {
       );
     }
     return MaterialPageRoute(builder: (_) => const MatchlyHomePage());
+  }
+}
+
+
+class _UsernameSetupPage extends StatefulWidget {
+  final Future<void> Function(String username) onDone;
+  const _UsernameSetupPage({required this.onDone});
+
+  @override
+  State<_UsernameSetupPage> createState() => _UsernameSetupPageState();
+}
+
+class _UsernameSetupPageState extends State<_UsernameSetupPage> {
+  final _controller = TextEditingController();
+  bool _loading = false;
+  String? _error;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    final username = _controller.text.trim().toLowerCase().replaceAll(' ', '_');
+    if (username.isEmpty) {
+      setState(() => _error = 'Kullanıcı adı gerekli');
+      return;
+    }
+    if (username.length < 3) {
+      setState(() => _error = 'En az 3 karakter olmalı');
+      return;
+    }
+    setState(() { _loading = true; _error = null; });
+    try {
+      await widget.onDone(username);
+    } catch (e) {
+      setState(() => _error = e.toString());
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFEEF2F7),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(28),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 40),
+              const Text('Kullanıcı adı seç', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: Color(0xFF0F1C2E))),
+              const SizedBox(height: 8),
+              const Text('Bu ad profilinde görünecek.', style: TextStyle(fontSize: 14, color: Color(0xFF7A8FA8))),
+              const SizedBox(height: 32),
+              TextField(
+                controller: _controller,
+                autofocus: true,
+                decoration: InputDecoration(
+                  hintText: 'kullanici_adi',
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                ),
+              ),
+              if (_error != null) ...[
+                const SizedBox(height: 12),
+                Text(_error!, style: const TextStyle(color: Colors.red, fontSize: 13)),
+              ],
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: ElevatedButton(
+                  onPressed: _loading ? null : _submit,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF2D4A6E),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  ),
+                  child: _loading
+                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                      : const Text('Devam Et', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
