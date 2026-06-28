@@ -1139,7 +1139,6 @@ class _FilterTabBar extends StatelessWidget {
   Widget _pill(_FilterTab tab) {
     final isActive = tab == activeTab;
     final count    = tabCount(tab);
-    const accent   = Color(0xFFF0E8DA);
 
     return GestureDetector(
       onTap: () => onTabSelected(tab),
@@ -1148,14 +1147,14 @@ class _FilterTabBar extends StatelessWidget {
         curve: Curves.easeInOut,
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 9),
         decoration: BoxDecoration(
-          color: isActive ? const Color(0xFF232019) : const Color(0xFF0F0F0E),
+          color: isActive ? AppColors.brand : AppColors.card,
           borderRadius: BorderRadius.circular(999),
           border: Border.all(
-            color: isActive ? accent.withOpacity(0.28) : AppColors.border,
+            color: isActive ? AppColors.brand : AppColors.border,
             width: 0.6,
           ),
           boxShadow: isActive
-              ? [BoxShadow(color: accent.withOpacity(0.07), blurRadius: 12)]
+              ? [BoxShadow(color: AppColors.brand.withOpacity(0.20), blurRadius: 12)]
               : null,
         ),
         child: Center(
@@ -1165,7 +1164,7 @@ class _FilterTabBar extends StatelessWidget {
               Text(
                 tabLabel(tab),
                 style: TextStyle(
-                  color: isActive ? const Color(0xFFF0EBE0) : AppColors.textTertiary,
+                  color: isActive ? Colors.white : AppColors.textSecondary,
                   fontSize: 11,
                   fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
                 ),
@@ -1175,13 +1174,13 @@ class _FilterTabBar extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
                   decoration: BoxDecoration(
-                    color: isActive ? accent.withOpacity(0.13) : AppColors.border,
+                    color: isActive ? Colors.white.withOpacity(0.20) : AppColors.border,
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Text(
                     '$count',
                     style: TextStyle(
-                      color: isActive ? const Color(0xFFD6C4A8) : AppColors.textTertiary,
+                      color: isActive ? Colors.white : AppColors.textSecondary,
                       fontSize: 9,
                       fontWeight: FontWeight.w700,
                     ),

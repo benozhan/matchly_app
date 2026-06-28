@@ -45,7 +45,7 @@ class BottomNav extends StatelessWidget {
           children: [
             _NavTab(
               icon: Icons.confirmation_number_outlined,
-              label: 'Aktif',
+              label: 'Kuponlarım',
               active: activeIndex == 0,
               onTap: () => onTabChanged?.call(0),
             ),
