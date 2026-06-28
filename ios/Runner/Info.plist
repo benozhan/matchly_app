@@ -60,5 +60,17 @@
 	<string>Profil fotoğrafı çekmek için kamera erişimi gerekiyor.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Fotoğraf kaydetmek için galeri erişimi gerekiyor.</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.ozhan.matchly</string>
+				<string>1015227657475-99i6vs85hmomjsr7temil53uji5h0orv.apps.googleusercontent.com</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>
