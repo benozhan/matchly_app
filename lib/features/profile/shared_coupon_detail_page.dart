@@ -296,6 +296,15 @@ class _SharedCouponDetailPageState extends State<SharedCouponDetailPage> {
   }
 }
 
+String _timeAgo(DateTime dt) {
+  final diff = DateTime.now().difference(dt);
+  if (diff.inSeconds < 60) return 'Az önce';
+  if (diff.inMinutes < 60) return '\${diff.inMinutes} dk önce';
+  if (diff.inHours < 24) return '\${diff.inHours} sa önce';
+  if (diff.inDays < 7) return '\${diff.inDays} gün önce';
+  return '\${dt.day}.\${dt.month}.\${dt.year}';
+}
+
 class _CommentsSection extends StatelessWidget {
   final List<CouponComment> comments;
   final TextEditingController ctrl;
@@ -336,6 +345,8 @@ class _CommentsSection extends StatelessWidget {
               Row(
                 children: [
                   Text('@\${comment.username}', style: const TextStyle(color: AppColors.brand, fontSize: 12, fontWeight: FontWeight.w700)),
+                  const SizedBox(width: 8),
+                  Text(_timeAgo(comment.createdAt), style: const TextStyle(color: AppColors.textTertiary, fontSize: 11)),
                   const Spacer(),
                   if (comment.userId == currentUserId)
                     GestureDetector(
