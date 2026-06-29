@@ -386,6 +386,7 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
   double get _totalPotential {
     double total = 0;
     for (final e in _entries) {
+      if (e.coupon.status != CouponStatus.pending) continue;
       final m = RegExp(r'₺(\d+(?:[.,]\d+)?)').firstMatch(e.coupon.potential);
       if (m != null) total += double.tryParse(m.group(1)!.replaceAll(',', '.')) ?? 0;
     }
