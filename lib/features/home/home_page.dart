@@ -893,7 +893,7 @@ class _HeroCard extends StatelessWidget {
                       final p = todayStats['profit'] as double;
                       if (p == 0) return '–';
                       final prefix = p > 0 ? '+' : '';
-                      return '\$prefix₺\${p.toInt().abs()}';
+                      return '${prefix}₺${p.toInt().abs()}';
                     }(),
                     valueColor: (todayStats['profit'] as double) > 0
                         ? Colors.greenAccent
@@ -923,7 +923,7 @@ class _HeroCard extends StatelessWidget {
                         final p = yesterdayStats['profit'] as double;
                         if (p == 0) return '–';
                         final prefix = p > 0 ? '+' : '';
-                        return '\$prefix₺\${p.toInt().abs()}';
+                        return '${prefix}₺${p.toInt().abs()}';
                       }(),
                       valueColor: (yesterdayStats['profit'] as double) > 0
                           ? Colors.greenAccent

@@ -207,7 +207,7 @@ class SocialService {
         title: coupon['title'] as String? ?? '',
         siteName: (coupon['meta'] as String? ?? '').split('·').first.trim(),
         stake: coupon['stake'] as String? ?? '',
-        odds: oddsMatch != null ? '×\${oddsMatch.group(1)}' : '',
+        odds: oddsMatch != null ? '×${oddsMatch.group(1)}' : '',
         potential: coupon['potential'] as String? ?? '',
         status: coupon['status'] as String? ?? 'pending',
         createdAt: coupon['created_at'] as String? ?? '',

@@ -355,7 +355,7 @@ class _CommentsSection extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Text('@\${comment.username}', style: const TextStyle(color: AppColors.brand, fontSize: 12, fontWeight: FontWeight.w700)),
+                  Text('@${comment.username}', style: const TextStyle(color: AppColors.brand, fontSize: 12, fontWeight: FontWeight.w700)),
                   const SizedBox(width: 8),
                   Text(_timeAgo(comment.createdAt), style: const TextStyle(color: AppColors.textTertiary, fontSize: 11)),
                   const Spacer(),
