@@ -359,7 +359,15 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
       case _FilterTab.winning: list = list.where((e) => e.coupon.status == CouponStatus.winning).toList(); break;
       case _FilterTab.losing:  list = list.where((e) => e.coupon.status == CouponStatus.risk).toList();    break;
     }
-    list.sort((a, b) => a.isFavorite == b.isFavorite ? 0 : (a.isFavorite ? -1 : 1));
+    list.sort((a, b) {
+      if (a.isFavorite != b.isFavorite) return a.isFavorite ? -1 : 1;
+      final aDate = a.coupon.createdAt;
+      final bDate = b.coupon.createdAt;
+      if (aDate == null && bDate == null) return 0;
+      if (aDate == null) return 1;
+      if (bDate == null) return -1;
+      return bDate.compareTo(aDate);
+    });
     return list;
   }
 
@@ -1290,13 +1298,13 @@ class _FilterTabBar extends StatelessWidget {
     const gap = SizedBox(width: 5);
     return Row(
       children: [
-        Expanded(child: _pill(_FilterTab.all)),
-        gap,
         Expanded(child: _pill(_FilterTab.active)),
         gap,
         Expanded(child: _pill(_FilterTab.winning)),
         gap,
         Expanded(child: _pill(_FilterTab.losing)),
+        gap,
+        Expanded(child: _pill(_FilterTab.all)),
       ],
     );
   }
