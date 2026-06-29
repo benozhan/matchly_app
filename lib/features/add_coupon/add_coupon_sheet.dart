@@ -711,32 +711,32 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
     try {
       final result = await AiCouponService.instance.analyzeCouponImage(File(picked.path));
       if (result == null) {
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Kupon okunamadı, tekrar deneyin')),
-        );
+        if (mounted) CouponShare.showTopToast(context, 'Kupon okunamadı, tekrar deneyin');
         return;
       }
 
-      // Alanları doldur
-      if (result['site'] != null) siteController.text = result['site'];
-      if (result['stake'] != null) stakeController.text = result['stake'].toString();
-      if (result['total_odds'] != null) oddsController.text = result['total_odds'].toString();
+      if (result.site != null) siteController.text = result.site!;
+      if (result.stake != null) stakeController.text = result.stake!;
+      if (result.totalOdds != null) oddsController.text = result.totalOdds!;
 
-      // Maçları ekle
-      final matches = result['matches'] as List? ?? [];
       setState(() {
         selections.clear();
-        for (final m in matches) {
-          selections.add(_Selection(
-            m['teams'] ?? '',
-            m['selection'] ?? '',
-          ));
+        for (final m in result.matchedMatches) {
+          selections.add(_Selection(m.matched!, m.selection));
         }
       });
+
+      if (result.unmatchedMatches.isNotEmpty) {
+        final names = result.unmatchedMatches.map((m) => m.original).join(', ');
+        if (mounted) CouponShare.showTopToast(context, 'Bulunamadı: $names');
+      }
+
+      if (result.matchedMatches.isEmpty) {
+        if (mounted) CouponShare.showTopToast(context, 'Hiçbir maç eşleştirilemedi, manuel ekleyin');
+      }
+
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Hata: $e')),
-      );
+      if (mounted) CouponShare.showTopToast(context, 'Hata: $e');
     } finally {
       if (mounted) setState(() => _aiLoading = false);
     }
