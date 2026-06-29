@@ -17,7 +17,7 @@ class AiCouponService {
     final userId = Supabase.instance.client.auth.currentUser?.id ?? '';
 
     final response = await http.post(
-      Uri.parse('\$_baseUrl/ai/analyze-coupon'),
+      Uri.parse('http://167.172.182.128:8001/ai/analyze-coupon'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'image_base64': base64Image,
