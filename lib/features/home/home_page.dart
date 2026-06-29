@@ -1319,22 +1319,30 @@ class _EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 52),
+      padding: const EdgeInsets.symmetric(vertical: 60, horizontal: 32),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text('📭', style: TextStyle(fontSize: 36, color: Colors.white.withOpacity(0.7))),
-          const SizedBox(height: 14),
+          Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              color: AppColors.brand.withOpacity(0.10),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.receipt_long_rounded, size: 36, color: AppColors.brand),
+          ),
+          const SizedBox(height: 20),
           Text(
             message,
             textAlign: TextAlign.center,
-            style: const TextStyle(color: AppColors.textSecondary, fontSize: 15, fontWeight: FontWeight.w600),
+            style: const TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 8),
           const Text(
-            'Yeni bir kupon oluşturmak için + butonuna dokun.',
+            'Kuponlarını takip etmek için + butonuna dokun.',
             textAlign: TextAlign.center,
-            style: TextStyle(color: AppColors.textTertiary, fontSize: 12),
+            style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
           ),
         ],
       ),

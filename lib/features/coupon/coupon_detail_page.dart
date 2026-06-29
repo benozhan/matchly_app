@@ -158,121 +158,91 @@ class _CouponDetailPageState extends State<CouponDetailPage> {
                     padding: const EdgeInsets.fromLTRB(18, 8, 18, 32),
                     children: [
 
-                      // ── Hero card ─────────────────────────────────────────
+                      // ── Hero card (4. tasarım) ────────────────────────
                       Container(
                         decoration: BoxDecoration(
-                          color: AppColors.card,
-                          borderRadius: BorderRadius.circular(28),
-                          border: Border.all(color: AppColors.border, width: 0.5),
+                          color: AppColors.brand,
+                          borderRadius: BorderRadius.circular(24),
                           boxShadow: const [
-                            BoxShadow(
-                              color: Color(0x142D4A6E),
-                              blurRadius: 20,
-                              offset: Offset(0, 4),
-                            ),
+                            BoxShadow(color: Color(0x402D4A6E), blurRadius: 24, offset: Offset(0, 8)),
                           ],
                         ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(28),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    // Title + badge row
-                                    Row(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Expanded(
-                                          child: Text(
-                                            widget.coupon.title,
-                                            style: const TextStyle(
-                                              color: AppColors.textPrimary,
-                                              fontSize: 22,
-                                              fontWeight: FontWeight.w800,
-                                              letterSpacing: -0.5,
-                                              height: 1.1,
-                                            ),
-                                          ),
-                                        ),
-                                        const SizedBox(width: 12),
-                                        Padding(
-                                          padding: const EdgeInsets.only(top: 3),
-                                          child: StatusBadge(
-                                            status: _status,
-                                            resolved: widget.resolved,
-                                          ),
-                                        ),
-                                      ],
+                        padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    widget.coupon.title,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: -0.5,
+                                      height: 1.1,
                                     ),
-                                    const SizedBox(height: 5),
-                                    Text(
-                                      widget.coupon.meta,
-                                      style: const TextStyle(
-                                        color: AppColors.textTertiary,
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w500,
-                                        letterSpacing: 0.1,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.18),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: StatusBadge(status: _status, resolved: widget.resolved),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              widget.coupon.meta,
+                              style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12, fontWeight: FontWeight.w500),
+                            ),
+                            const SizedBox(height: 18),
+                            Row(
+                              children: [
+                                Expanded(child: _HeroStat(label: 'BAHİS', value: stakeDisplay)),
+                                Container(width: 0.5, height: 36, color: Colors.white.withOpacity(0.2)),
+                                Expanded(child: _HeroStat(label: 'ORAN', value: oddsDisplay)),
+                                Container(width: 0.5, height: 36, color: Colors.white.withOpacity(0.2)),
+                                Expanded(child: _HeroStat(label: 'BEKLENTİ', value: potDisplay,
+                                  highlight: _status == CouponStatus.winning)),
+                              ],
+                            ),
+                            const SizedBox(height: 14),
+                            Builder(builder: (context) {
+                              final done = widget.coupon.progress.where((s) => s != CouponStatus.pending).length;
+                              final total = widget.coupon.progress.length;
+                              final ratio = total > 0 ? done / total : 0.0;
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(4),
+                                    child: LinearProgressIndicator(
+                                      value: ratio,
+                                      backgroundColor: Colors.white.withOpacity(0.15),
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        _status == CouponStatus.risk ? AppColors.red : Colors.white,
                                       ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-
-                              // Hero footer — BAHİS / ORAN / BEKLENTİ
-                              Container(
-                                decoration: BoxDecoration(
-                                  color: AppColors.border,
-                                  border: Border(
-                                    top: BorderSide(
-                                      color: AppColors.border,
-                                      width: 0.5,
+                                      minHeight: 4,
                                     ),
                                   ),
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 14),
-                                  child: IntrinsicHeight(
-                                    child: Row(
-                                      children: [
-                                        Expanded(
-                                          child: _DetailStat(
-                                            label: 'BAHİS',
-                                            value: stakeDisplay,
-                                          ),
-                                        ),
-                                        _DetailVertDivider(),
-                                        Expanded(
-                                          child: _DetailStat(
-                                            label: 'ORAN',
-                                            value: oddsDisplay,
-                                          ),
-                                        ),
-                                        _DetailVertDivider(),
-                                        Expanded(
-                                          child: _DetailStat(
-                                            label: 'BEKLENTİ',
-                                            value: potDisplay,
-                                            valueColor: _potentialColor(_status),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                                  const SizedBox(height: 5),
+                                  Text(
+                                    '$done/$total tamamlandı',
+                                    style: TextStyle(color: Colors.white.withOpacity(0.55), fontSize: 10, fontWeight: FontWeight.w600),
                                   ),
-                                ),
-                              ),
-                            ],
-                          ),
+                                ],
+                              );
+                            }),
+                          ],
                         ),
                       ),
-
-                      const SizedBox(height: 14),
-
-                      // ── Progress ──────────────────────────────────────────
-                      ProgressSegments(statuses: widget.coupon.progress),
 
                       const SizedBox(height: 16),
 
@@ -573,4 +543,36 @@ class _DetailVertDivider extends StatelessWidget {
         width: 0.5,
         color: AppColors.border,
       );
+}
+
+
+class _HeroStat extends StatelessWidget {
+  final String label;
+  final String value;
+  final bool highlight;
+
+  const _HeroStat({required this.label, required this.value, this.highlight = false});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          label,
+          style: TextStyle(color: Colors.white.withOpacity(0.55), fontSize: 9, fontWeight: FontWeight.w700, letterSpacing: 0.8),
+        ),
+        const SizedBox(height: 5),
+        Text(
+          value,
+          style: TextStyle(
+            color: highlight ? const Color(0xFF86EFAC) : Colors.white,
+            fontSize: 15,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -0.3,
+          ),
+        ),
+      ],
+    );
+  }
 }
