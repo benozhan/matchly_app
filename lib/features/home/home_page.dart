@@ -402,24 +402,30 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
 
 
   // ── Bugünkü istatistikler ──────────────────────────────────────────────────
+  DateTime get _effectiveToday {
+    final now = DateTime.now();
+    // 03:00'dan önce ise hala "dün" sayılır
+    if (now.hour < 3) return now.subtract(const Duration(days: 1));
+    return now;
+  }
+
   List<Coupon> get _todayCoupons {
-    final today = DateTime.now();
+    final today = _effectiveToday;
     return _entries.map((e) => e.coupon).where((c) {
       if (c.createdAt == null) return false;
       return c.createdAt!.year == today.year && c.createdAt!.month == today.month && c.createdAt!.day == today.day;
     }).toList();
   }
 
-  String _fmtMoney(double n) {
-    if (n == 0) return '–';
-    final prefix = n < 0 ? '-' : '+';
-    final abs = n.abs().toInt();
-    if (abs >= 1000) return '${prefix}₺${abs ~/ 1000}.${(abs % 1000).toString().padLeft(3, "0")}';
-    return '${prefix}₺${abs}';
+  List<Coupon> get _yesterdayCoupons {
+    final yesterday = _effectiveToday.subtract(const Duration(days: 1));
+    return _entries.map((e) => e.coupon).where((c) {
+      if (c.createdAt == null) return false;
+      return c.createdAt!.year == yesterday.year && c.createdAt!.month == yesterday.month && c.createdAt!.day == yesterday.day;
+    }).toList();
   }
 
-  Map<String, dynamic> get _todayStats {
-    final coupons = _todayCoupons;
+  Map<String, dynamic> _calcStats(List<Coupon> coupons) {
     double stake = 0, profit = 0;
     int won = 0, lost = 0;
     for (final c in coupons) {
@@ -436,6 +442,17 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
     }
     return {'stake': stake, 'profit': profit, 'won': won, 'lost': lost, 'total': coupons.length};
   }
+
+  String _fmtMoney(double n) {
+    if (n == 0) return '–';
+    final prefix = n < 0 ? '-' : '+';
+    final abs = n.abs().toInt();
+    if (abs >= 1000) return '${prefix}₺${abs ~/ 1000}.${(abs % 1000).toString().padLeft(3, "0")}';
+    return '${prefix}₺${abs}';
+  }
+
+  Map<String, dynamic> get _todayStats => _calcStats(_todayCoupons);
+  Map<String, dynamic> get _yesterdayStats => _calcStats(_yesterdayCoupons);
 
   // ── share helpers ──────────────────────────────────────────────────────────
 
@@ -665,6 +682,7 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
                                       winningCount: winningCount,
                                       losingCount: losingCount,
                                       todayStats: _todayStats,
+                                      yesterdayStats: _yesterdayStats,
                                     ),
                                     const SizedBox(height: 22),
 
@@ -767,6 +785,7 @@ class _HeroCard extends StatelessWidget {
   final int winningCount;
   final int losingCount;
   final Map<String, dynamic> todayStats;
+  final Map<String, dynamic> yesterdayStats;
 
   const _HeroCard({
     required this.totalPotential,
@@ -774,6 +793,7 @@ class _HeroCard extends StatelessWidget {
     required this.winningCount,
     required this.losingCount,
     required this.todayStats,
+    required this.yesterdayStats,
   });
 
   @override
@@ -873,6 +893,37 @@ class _HeroCard extends StatelessWidget {
                 ],
               ),
             ),
+            if ((yesterdayStats['total'] as int) > 0) ...[
+              const SizedBox(height: 10),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.07),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _TodayStat(label: 'Dün', value: '${yesterdayStats['total']} kupon'),
+                    _TodayStat(label: 'Yatırım', value: '₺${(yesterdayStats['stake'] as double).toInt()}'),
+                    _TodayStat(
+                      label: 'Kar/Zarar',
+                      value: () {
+                        final p = yesterdayStats['profit'] as double;
+                        if (p == 0) return '–';
+                        final prefix = p > 0 ? '+' : '';
+                        return '\$prefix₺\${p.toInt().abs()}';
+                      }(),
+                      valueColor: (yesterdayStats['profit'] as double) > 0
+                          ? Colors.greenAccent
+                          : (yesterdayStats['profit'] as double) < 0
+                              ? Colors.redAccent
+                              : Colors.white,
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ],
         ],
       ),
