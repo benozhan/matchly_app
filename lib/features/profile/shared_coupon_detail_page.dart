@@ -275,8 +275,19 @@ class _SharedCouponDetailPageState extends State<SharedCouponDetailPage> {
                         ctrl: _commentCtrl,
                         loading: _commentLoading,
                         currentUserId: Supabase.instance.client.auth.currentUser?.id ?? '',
-                        onSubmit: () {
-                          final username = Supabase.instance.client.auth.currentUser?.userMetadata?['username'] as String? ?? 'user';
+                        onSubmit: () async {
+                          final uid = Supabase.instance.client.auth.currentUser?.id;
+                          String username = 'user';
+                          if (uid != null) {
+                            try {
+                              final res = await Supabase.instance.client
+                                  .from('profiles')
+                                  .select('username')
+                                  .eq('id', uid)
+                                  .single();
+                              username = res['username'] as String? ?? 'user';
+                            } catch (_) {}
+                          }
                           _submitComment(username);
                         },
                         onDelete: (id) async {
