@@ -5,6 +5,8 @@ import 'package:flutter/services.dart';
 
 import '../../core/app_colors.dart';
 import '../../models/coupon.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../services/comment_service.dart';
 import '../../services/social_service.dart';
 
 class SharedCouponDetailPage extends StatefulWidget {
@@ -26,6 +28,9 @@ class SharedCouponDetailPage extends StatefulWidget {
 class _SharedCouponDetailPageState extends State<SharedCouponDetailPage> {
   CouponDetail? _detail;
   bool _fetching = false;
+  List<CouponComment> _comments = [];
+  final _commentCtrl = TextEditingController();
+  bool _commentLoading = false;
   bool _silentRefreshing = false;
   String? _fetchError;
   Timer? _timer;
@@ -40,11 +45,13 @@ class _SharedCouponDetailPageState extends State<SharedCouponDetailPage> {
       _fetchDetail();
       _timer = Timer.periodic(_kRefreshInterval, (_) => _silentRefresh());
     }
+    _loadComments();
   }
 
   @override
   void dispose() {
     _timer?.cancel();
+    _commentCtrl.dispose();
     super.dispose();
   }
 
@@ -75,6 +82,27 @@ class _SharedCouponDetailPageState extends State<SharedCouponDetailPage> {
   String get _shortId {
     final id = widget.sharedCoupon.couponId;
     return id.length > 8 ? id.substring(0, 8).toUpperCase() : id.toUpperCase();
+  }
+
+  Future<void> _loadComments() async {
+    final couponId = widget.sharedCoupon.couponId;
+    try {
+      final comments = await CommentService.instance.getComments(couponId);
+      if (mounted) setState(() => _comments = comments);
+    } catch (_) {}
+  }
+
+  Future<void> _submitComment(String username) async {
+    final text = _commentCtrl.text.trim();
+    if (text.isEmpty) return;
+    setState(() => _commentLoading = true);
+    try {
+      await CommentService.instance.addComment(widget.sharedCoupon.couponId, username, text);
+      _commentCtrl.clear();
+      await _loadComments();
+    } catch (_) {} finally {
+      if (mounted) setState(() => _commentLoading = false);
+    }
   }
 
   String _fmtDate(String raw) {
@@ -224,8 +252,7 @@ class _SharedCouponDetailPageState extends State<SharedCouponDetailPage> {
                   // ── Coupon detail card ─────────────────────────────────────
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: EdgeInsets.fromLTRB(
-                          20, 0, 20, 24 + bottomPad),
+                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
                       child: widget.localCoupon != null
                           ? _LocalDetails(coupon: widget.localCoupon!)
                           : _fetching
@@ -238,12 +265,121 @@ class _SharedCouponDetailPageState extends State<SharedCouponDetailPage> {
                                     ),
                     ),
                   ),
+
+                  // ── Yorumlar ───────────────────────────────────────────────
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.fromLTRB(20, 0, 20, 24 + bottomPad),
+                      child: _CommentsSection(
+                        comments: _comments,
+                        ctrl: _commentCtrl,
+                        loading: _commentLoading,
+                        currentUserId: Supabase.instance.client.auth.currentUser?.id ?? '',
+                        onSubmit: () {
+                          final username = Supabase.instance.client.auth.currentUser?.userMetadata?['username'] as String? ?? 'user';
+                          _submitComment(username);
+                        },
+                        onDelete: (id) async {
+                          await CommentService.instance.deleteComment(id);
+                          _loadComments();
+                        },
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
           ),
         ),
       ),
+    );
+  }
+}
+
+class _CommentsSection extends StatelessWidget {
+  final List<CouponComment> comments;
+  final TextEditingController ctrl;
+  final bool loading;
+  final String currentUserId;
+  final VoidCallback onSubmit;
+  final Future<void> Function(String id) onDelete;
+
+  const _CommentsSection({
+    required this.comments,
+    required this.ctrl,
+    required this.loading,
+    required this.currentUserId,
+    required this.onSubmit,
+    required this.onDelete,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('Yorumlar', style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w800)),
+        const SizedBox(height: 12),
+        if (comments.isEmpty)
+          const Text('Henüz yorum yok.', style: TextStyle(color: AppColors.textTertiary, fontSize: 13)),
+        ...comments.map((comment) => Container(
+          margin: const EdgeInsets.only(bottom: 8),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: AppColors.card,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.border, width: 0.5),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Text('@\${comment.username}', style: const TextStyle(color: AppColors.brand, fontSize: 12, fontWeight: FontWeight.w700)),
+                  const Spacer(),
+                  if (comment.userId == currentUserId)
+                    GestureDetector(
+                      onTap: () => onDelete(comment.id),
+                      child: const Icon(Icons.delete_outline, size: 16, color: AppColors.textTertiary),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text(comment.content, style: const TextStyle(color: AppColors.textPrimary, fontSize: 13)),
+            ],
+          ),
+        )),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: ctrl,
+                style: const TextStyle(color: AppColors.textPrimary, fontSize: 13),
+                decoration: InputDecoration(
+                  hintText: 'Yorum yaz...',
+                  hintStyle: const TextStyle(color: AppColors.textTertiary, fontSize: 13),
+                  filled: true,
+                  fillColor: AppColors.card,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            GestureDetector(
+              onTap: loading ? null : onSubmit,
+              child: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(color: AppColors.brand, borderRadius: BorderRadius.circular(12)),
+                child: loading
+                    ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                    : const Icon(Icons.send_rounded, color: Colors.white, size: 18),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
