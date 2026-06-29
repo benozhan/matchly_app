@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 const String _kBaseUrl = 'http://167.172.182.128:8001';
 const Duration _kTimeout = Duration(seconds: 10);
@@ -178,6 +179,7 @@ class SocialService {
 
   /// Fetches full coupon detail from backend. Returns null on error/not-found.
   Future<CouponDetail?> getCouponDetail(String couponId) async {
+    // Önce backend'den dene
     try {
       final res = await _client
           .get(Uri.parse('$_kBaseUrl/social/coupons/$couponId'))
@@ -186,6 +188,36 @@ class SocialService {
         return CouponDetail.fromJson(
             jsonDecode(res.body) as Map<String, dynamic>);
       }
+    } catch (_) {}
+
+    // Backend bulamazsa Supabase'den direkt çek
+    try {
+      final sb = Supabase.instance.client;
+      final coupon = await sb
+          .from('coupons')
+          .select('*, coupon_matches(*)')
+          .eq('id', couponId)
+          .single();
+      final matches = (coupon['coupon_matches'] as List? ?? []);
+      final oddsMatch = RegExp(r'×([\d.,]+)').firstMatch(coupon['meta'] as String? ?? '');
+      return CouponDetail(
+        couponId: couponId,
+        ownerUsername: coupon['owner_username'] as String? ?? '',
+        ownerDisplayName: coupon['owner_username'] as String? ?? '',
+        title: coupon['title'] as String? ?? '',
+        siteName: (coupon['meta'] as String? ?? '').split('·').first.trim(),
+        stake: coupon['stake'] as String? ?? '',
+        odds: oddsMatch != null ? '×\${oddsMatch.group(1)}' : '',
+        potential: coupon['potential'] as String? ?? '',
+        status: coupon['status'] as String? ?? 'pending',
+        createdAt: coupon['created_at'] as String? ?? '',
+        selections: matches.map<CouponSelection>((m) => CouponSelection(
+          matchName: m['teams'] as String? ?? '',
+          betType: m['selection'] as String? ?? '',
+          status: m['status'] as String? ?? 'pending',
+          lastScore: m['score'] as String? ?? '',
+        )).toList(),
+      );
     } catch (_) {}
     return null;
   }
