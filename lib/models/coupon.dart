@@ -24,6 +24,7 @@ class Coupon {
   //   (requires push notification + follow graph).
   final String? sharedId;
   final DateTime? createdAt;
+  final bool isPublic;
 
   const Coupon({
     this.id,
@@ -36,10 +37,11 @@ class Coupon {
     required this.matches,
     this.sharedId,
     this.createdAt,
+    this.isPublic = false,
   });
 
   /// Returns a new [Coupon] with any supplied fields replaced.
-  Coupon copyWith({CouponStatus? status, String? sharedId}) => Coupon(
+  Coupon copyWith({CouponStatus? status, String? sharedId, bool? isPublic}) => Coupon(
         id: id,
         title: title,
         meta: meta,
@@ -49,6 +51,7 @@ class Coupon {
         progress: progress,
         matches: matches,
         sharedId: sharedId ?? this.sharedId,
+    isPublic: isPublic ?? this.isPublic,
       );
 }
 

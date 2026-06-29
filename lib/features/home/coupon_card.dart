@@ -16,6 +16,7 @@ class CouponCard extends StatefulWidget {
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
   final VoidCallback? onShare;
+  final VoidCallback? onPublicToggle;
 
   const CouponCard({
     super.key,
@@ -27,6 +28,7 @@ class CouponCard extends StatefulWidget {
     this.onEdit,
     this.onDelete,
     this.onShare,
+    this.onPublicToggle,
   });
 
   @override
@@ -221,6 +223,11 @@ class _CouponCardState extends State<CouponCard> {
                               icon: Icons.edit_outlined,
                               color: AppColors.textSecondary,
                               onTap: widget.onEdit,
+                            ),
+                            _ActionBtn(
+                              icon: widget.coupon.isPublic ? Icons.visibility_rounded : Icons.visibility_off_outlined,
+                              color: widget.coupon.isPublic ? AppColors.brand : AppColors.textTertiary,
+                              onTap: widget.onPublicToggle,
                             ),
                             _ActionBtn(
                               icon: Icons.ios_share_rounded,

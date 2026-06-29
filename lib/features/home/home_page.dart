@@ -539,6 +539,32 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
     setState(() => entry.coupon = updated);
   }
 
+  Future<void> _togglePublic(_CouponEntry entry) async {
+    final newVal = !entry.coupon.isPublic;
+    final couponId = entry.coupon.id;
+    if (couponId == null || _user == null) return;
+    setState(() => entry.coupon = entry.coupon.copyWith(isPublic: newVal));
+    await Supabase.instance.client
+        .from('coupons')
+        .update({'is_public': newVal})
+        .eq('id', couponId);
+    try {
+      if (newVal) {
+        await SocialService.instance.createOrUpdateSharedCoupon(
+          couponId: couponId,
+          ownerUsername: _user!.username,
+          isPublic: true,
+        );
+      } else {
+        await SocialService.instance.createOrUpdateSharedCoupon(
+          couponId: couponId,
+          ownerUsername: _user!.username,
+          isPublic: false,
+        );
+      }
+    } catch (_) {}
+  }
+
   Future<void> _deleteEntry(_CouponEntry entry) async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -712,6 +738,7 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
                                                 _saveActiveSharedId(entry, id)),
                                             onDelete: () =>
                                                 _deleteEntry(entry),
+                                            onPublicToggle: () => _togglePublic(entry),
                                           ),
                                         ),
                                       ),

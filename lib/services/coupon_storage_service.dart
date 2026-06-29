@@ -129,6 +129,7 @@ class CouponStorageService {
           progress: matches.map((m) => m.status).toList(),
           matches: matches,
           createdAt: row['created_at'] != null ? DateTime.tryParse(row['created_at']) : null,
+          isPublic: row['is_public'] as bool? ?? false,
         ),
       );
     }
