@@ -561,6 +561,15 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
     final couponId = entry.coupon.id;
     if (couponId == null || _user == null) return;
     setState(() => entry.coupon = entry.coupon.copyWith(isPublic: newVal));
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(newVal ? '✅ Akışta paylaşıldı' : '🔒 Akıştan kaldırıldı'),
+          duration: const Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
     await Supabase.instance.client
         .from('coupons')
         .update({'is_public': newVal})
