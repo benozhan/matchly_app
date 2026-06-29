@@ -38,15 +38,18 @@ class _AyarlarPageState extends State<AyarlarPage> {
     TimeOfDay? savedTime;
     if (uid != null) {
       try {
-        final profile = await Supabase.instance.client
+        final profiles = await Supabase.instance.client
             .from('profiles')
             .select('daily_report_hour,daily_report_minute')
-            .eq('id', uid)
-            .single();
-        if (profile != null) {
+            .eq('id', uid);
+        if (profiles.isNotEmpty) {
+          final profile = profiles.first;
           final h = profile['daily_report_hour'] as int? ?? 0;
           final m = profile['daily_report_minute'] as int? ?? 0;
           savedTime = TimeOfDay(hour: h, minute: m);
+          print('Gün sonu saati yüklendi: \$h:\$m');
+        } else {
+          print('Profil bulunamadı');
         }
       } catch (_) {}
     }
@@ -438,11 +441,10 @@ class _AyarlarPageState extends State<AyarlarPage> {
                     setState(() => _gunSonuSaati = picked);
                     final uid = Supabase.instance.client.auth.currentUser?.id;
                     if (uid != null) {
-                      await Supabase.instance.client.from('profiles').upsert({
-                        'id': uid,
+                      await Supabase.instance.client.from('profiles').update({
                         'daily_report_hour': picked.hour,
                         'daily_report_minute': picked.minute,
-                      });
+                      }).eq('id', uid);
                     }
                   }
                 },

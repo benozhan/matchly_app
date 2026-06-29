@@ -742,7 +742,12 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
   }
 
   void _saveCoupon() {
-    if (selections.isEmpty) return;
+    if (selections.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('En az bir maç seçimi ekleyin')),
+      );
+      return;
+    }
     final autoTitle = selections.isNotEmpty
         ? '${selections.length} Seçim ×${oddsController.text.trim().isEmpty ? "?" : oddsController.text.trim()}'
         : 'Yeni Kupon';
