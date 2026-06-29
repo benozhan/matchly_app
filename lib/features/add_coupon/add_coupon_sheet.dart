@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../services/ai_coupon_service.dart';
+import '../../core/coupon_share.dart';
 
 import '../../core/app_colors.dart';
 import '../../models/coupon.dart';
@@ -743,9 +744,7 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
 
   void _saveCoupon() {
     if (selections.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('En az bir maç seçimi ekleyin')),
-      );
+      CouponShare.showTopToast(context, 'En az bir maç seçimi ekleyin');
       return;
     }
     final autoTitle = selections.isNotEmpty
@@ -948,14 +947,16 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
                       color: AppColors.brand,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.auto_awesome, color: Colors.white, size: 14),
-                        SizedBox(width: 6),
-                        Text('AI ile Ekle', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700)),
-                      ],
-                    ),
+                    child: _aiLoading
+                        ? const SizedBox(width: 60, height: 20, child: Center(child: SizedBox(width: 14, height: 14, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))))
+                        : const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.auto_awesome, color: Colors.white, size: 14),
+                              SizedBox(width: 6),
+                              Text('AI ile Ekle', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700)),
+                            ],
+                          ),
                   ),
                 ),
               ],

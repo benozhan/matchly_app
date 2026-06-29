@@ -60,7 +60,7 @@ class CouponShare {
 
   // ── Top toast ──────────────────────────────────────────────────────────────
 
-  static void _showTopToast(BuildContext context, String message) {
+  static void showTopToast(BuildContext context, String message) {
     final overlay = Overlay.of(context);
     late OverlayEntry entry;
     entry = OverlayEntry(
