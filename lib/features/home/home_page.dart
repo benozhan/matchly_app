@@ -524,7 +524,7 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
     if (newCoupon == null) return;
     final savedCoupon = await CouponStorageService.instance.saveCoupon(newCoupon);
     setState(() => _entries.insert(0, _CouponEntry(coupon: savedCoupon ?? newCoupon)));
-    await _loadUser(); // Sırayı Supabase'den taze çek
+    _loadUser(); // Arka planda yenile
   }
 
   Future<void> _editEntry(_CouponEntry entry) async {
