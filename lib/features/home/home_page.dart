@@ -653,7 +653,10 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
                             )
                           : _navIndex == 3
                               ? AyarlarPage(coupons: _allCoupons)
-                              : ListView(
+                              : RefreshIndicator(
+                                  onRefresh: () => _loadUser(),
+                                  color: AppColors.brand,
+                                  child: ListView(
                                   padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
                                   children: [
 
@@ -761,6 +764,7 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
                                         ),
                                       ),
                                   ],
+                                ),
                                 ),
                 ),
                 BottomNav(
