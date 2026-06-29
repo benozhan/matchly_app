@@ -7,8 +7,6 @@ class AiCouponService {
   AiCouponService._();
   static final instance = AiCouponService._();
 
-  static const _baseUrl = 'http://167.172.182.128:8001';
-
   Future<Map<String, dynamic>?> analyzeCouponImage(File imageFile) async {
     final bytes = await imageFile.readAsBytes();
     final base64Image = base64Encode(bytes);
