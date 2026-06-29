@@ -106,6 +106,11 @@ class _MatchlyAppState extends State<MatchlyApp> {
   void _handleSignedIn() async {
     final user = Supabase.instance.client.auth.currentUser;
     if (user != null) {
+      try {
+        await OneSignal.User.addTagWithKey('user_id', user.id);
+      } catch (_) {}
+    }
+    if (user != null) {
       // Google/Apple ile girişte username yoksa username ekranı göster
       final meta = user.userMetadata ?? {};
       final email = user.email ?? '';
