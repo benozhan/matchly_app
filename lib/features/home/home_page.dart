@@ -55,6 +55,7 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
 
   _FilterTab _activeTab   = _FilterTab.active;
   int        _navIndex    = 0;
+  final ScrollController _scrollController = ScrollController();
 
   // ── supabase realtime ─────────────────────────────────────────────────────
 
@@ -248,6 +249,7 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
 
   @override
   void dispose() {
+    _scrollController.dispose();
     _liveTimer?.cancel();
     _couponChannel?.unsubscribe();
     _matchChannel?.unsubscribe();
@@ -673,6 +675,7 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
                                   onRefresh: () => _loadUser(),
                                   color: AppColors.brand,
                                   child: ListView(
+                                  controller: _scrollController,
                                   padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
                                   children: [
 
