@@ -616,6 +616,13 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
     if (confirmed == true) {
       setState(() => _entries.remove(entry));
       if (entry.coupon.id != null) {
+        // Önce is_public kapat (feed'den kaldır)
+        if (entry.coupon.isPublic) {
+          await Supabase.instance.client
+              .from('coupons')
+              .update({'is_public': false})
+              .eq('id', entry.coupon.id!);
+        }
         await CouponStorageService.instance.deleteCoupon(entry.coupon.id!);
       }
     }
