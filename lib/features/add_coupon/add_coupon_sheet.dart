@@ -747,6 +747,14 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
       CouponShare.showTopToast(context, 'En az bir maç seçimi ekleyin');
       return;
     }
+    if (oddsController.text.trim().isEmpty || (double.tryParse(oddsController.text.trim()) ?? 0) <= 0) {
+      CouponShare.showTopToast(context, 'Lütfen geçerli bir oran girin');
+      return;
+    }
+    if (stakeController.text.trim().isEmpty || (double.tryParse(stakeController.text.trim()) ?? 0) <= 0) {
+      CouponShare.showTopToast(context, 'Lütfen bahis miktarı girin');
+      return;
+    }
     final autoTitle = selections.isNotEmpty
         ? '${selections.length} Seçim ×${oddsController.text.trim().isEmpty ? "?" : oddsController.text.trim()}'
         : 'Yeni Kupon';
@@ -989,7 +997,8 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
                       controller: stakeController,
                       label: 'Bahis',
                       hint: '120',
-                      keyboardType: TextInputType.number),
+                      prefix: '₺',
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true)),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
@@ -997,7 +1006,7 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
                       controller: oddsController,
                       label: 'Oran',
                       hint: '4.20',
-                      keyboardType: TextInputType.number),
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true)),
                 ),
               ],
             ),
@@ -2112,6 +2121,7 @@ class MatchlyInput extends StatelessWidget {
   final String label;
   final String hint;
   final TextInputType? keyboardType;
+  final String? prefix;
 
   const MatchlyInput({
     super.key,
@@ -2119,6 +2129,7 @@ class MatchlyInput extends StatelessWidget {
     required this.label,
     required this.hint,
     this.keyboardType,
+    this.prefix,
   });
 
   @override
@@ -2147,6 +2158,8 @@ class MatchlyInput extends StatelessWidget {
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: const TextStyle(color: AppColors.textTertiary, fontSize: 15),
+            prefixText: prefix,
+            prefixStyle: const TextStyle(color: AppColors.textPrimary, fontSize: 15, fontWeight: FontWeight.w600),
             isDense: true,
             contentPadding: const EdgeInsets.only(bottom: 8),
             filled: false,
