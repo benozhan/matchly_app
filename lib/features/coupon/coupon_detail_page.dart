@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/app_colors.dart';
 import '../../services/comment_service.dart';
+import '../shared/reaction_bar.dart';
 
 import '../../core/app_colors.dart';
 import '../../core/coupon_share.dart';
@@ -357,6 +358,10 @@ class _CouponDetailPageState extends State<CouponDetailPage> {
                         ),
                       ),
 
+                      // ── Beğeni ─────────────────────────────────────
+                      const SizedBox(height: 16),
+                      ReactionBar(couponId: widget.coupon.id ?? ''),
+
                       // ── Yorumlar ─────────────────────────────────────
                       const SizedBox(height: 24),
                       _CouponComments(couponId: widget.coupon.id ?? ''),
@@ -383,6 +388,7 @@ String _fmtTimeAgo(DateTime dt) {
   return '${dt.day}.${dt.month}.${dt.year}';
 }
 
+
 class _CouponComments extends StatefulWidget {
   final String couponId;
   const _CouponComments({required this.couponId});
@@ -395,6 +401,8 @@ class _CouponCommentsState extends State<_CouponComments> {
   List<CouponComment> _comments = [];
   final _ctrl = TextEditingController();
   bool _loading = false;
+  String? _replyToCommentId;
+  String? _replyToUsername;
 
   @override
   void initState() {
@@ -414,6 +422,20 @@ class _CouponCommentsState extends State<_CouponComments> {
     if (mounted) setState(() => _comments = comments);
   }
 
+  void _startReply(String commentId, String username) {
+    setState(() {
+      _replyToCommentId = commentId;
+      _replyToUsername = username;
+    });
+  }
+
+  void _cancelReply() {
+    setState(() {
+      _replyToCommentId = null;
+      _replyToUsername = null;
+    });
+  }
+
   Future<void> _submit() async {
     final text = _ctrl.text.trim();
     if (text.isEmpty) return;
@@ -428,54 +450,90 @@ class _CouponCommentsState extends State<_CouponComments> {
           username = res['username'] as String? ?? 'user';
         } catch (_) {}
       }
-      await CommentService.instance.addComment(widget.couponId, username, text);
+      await CommentService.instance.addComment(widget.couponId, username, text, parentCommentId: _replyToCommentId);
       _ctrl.clear();
+      _replyToCommentId = null;
+      _replyToUsername = null;
       await _load();
     } finally {
       if (mounted) setState(() => _loading = false);
     }
   }
 
+  Widget _buildCommentCard(CouponComment c, String currentUserId, {bool isReply = false}) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 8, left: isReply ? 24 : 0),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.border, width: 0.5),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text('@${c.username}', style: const TextStyle(color: AppColors.brand, fontSize: 12, fontWeight: FontWeight.w700)),
+              const SizedBox(width: 8),
+              Text(_fmtTimeAgo(c.createdAt), style: const TextStyle(color: AppColors.textTertiary, fontSize: 11)),
+              const Spacer(),
+              if (c.userId == currentUserId)
+                GestureDetector(
+                  onTap: () async {
+                    await CommentService.instance.deleteComment(c.id);
+                    _load();
+                  },
+                  child: const Icon(Icons.delete_outline, size: 16, color: AppColors.textTertiary),
+                ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(c.content, style: const TextStyle(color: AppColors.textPrimary, fontSize: 13)),
+          const SizedBox(height: 6),
+          GestureDetector(
+            onTap: () => _startReply(c.id, c.username),
+            child: const Text('Yanıtla', style: TextStyle(color: AppColors.textTertiary, fontSize: 11, fontWeight: FontWeight.w600)),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final currentUserId = Supabase.instance.client.auth.currentUser?.id ?? '';
+    final topLevel = _comments.where((c) => c.parentCommentId == null).toList();
+    final repliesByParent = <String, List<CouponComment>>{};
+    for (final c in _comments) {
+      if (c.parentCommentId != null) {
+        repliesByParent.putIfAbsent(c.parentCommentId!, () => []).add(c);
+      }
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text('Yorumlar', style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w800)),
         const SizedBox(height: 12),
-        ..._comments.map((c) => Container(
-          margin: const EdgeInsets.only(bottom: 8),
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: AppColors.card,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.border, width: 0.5),
+        ...topLevel.expand((c) => [
+          _buildCommentCard(c, currentUserId),
+          ...(repliesByParent[c.id] ?? []).map((r) => _buildCommentCard(r, currentUserId, isReply: true)),
+        ]),
+        if (_replyToCommentId != null)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Row(
+              children: [
+                Text('@${_replyToUsername ?? ''} yanıtlanıyor', style: const TextStyle(color: AppColors.brand, fontSize: 12, fontWeight: FontWeight.w600)),
+                const SizedBox(width: 8),
+                GestureDetector(
+                  onTap: _cancelReply,
+                  child: const Icon(Icons.close, size: 14, color: AppColors.textTertiary),
+                ),
+              ],
+            ),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Text('@${c.username}', style: const TextStyle(color: AppColors.brand, fontSize: 12, fontWeight: FontWeight.w700)),
-                  const SizedBox(width: 8),
-                  Text(_fmtTimeAgo(c.createdAt), style: const TextStyle(color: AppColors.textTertiary, fontSize: 11)),
-                  const Spacer(),
-                  if (c.userId == currentUserId)
-                    GestureDetector(
-                      onTap: () async {
-                        await CommentService.instance.deleteComment(c.id);
-                        _load();
-                      },
-                      child: const Icon(Icons.delete_outline, size: 16, color: AppColors.textTertiary),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              Text(c.content, style: const TextStyle(color: AppColors.textPrimary, fontSize: 13)),
-            ],
-          ),
-        )),
         const SizedBox(height: 8),
         Row(
           children: [

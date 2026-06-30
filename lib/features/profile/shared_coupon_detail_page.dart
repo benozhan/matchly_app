@@ -7,6 +7,7 @@ import '../../core/app_colors.dart';
 import '../../models/coupon.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../services/comment_service.dart';
+import '../shared/reaction_bar.dart';
 import '../../services/social_service.dart';
 
 class SharedCouponDetailPage extends StatefulWidget {
@@ -92,13 +93,37 @@ class _SharedCouponDetailPageState extends State<SharedCouponDetailPage> {
     } catch (_) {}
   }
 
+  String? _replyToCommentId;
+  String? _replyToUsername;
+
+  void _startReply(String commentId, String username) {
+    setState(() {
+      _replyToCommentId = commentId;
+      _replyToUsername = username;
+    });
+  }
+
+  void _cancelReply() {
+    setState(() {
+      _replyToCommentId = null;
+      _replyToUsername = null;
+    });
+  }
+
   Future<void> _submitComment(String username) async {
     final text = _commentCtrl.text.trim();
     if (text.isEmpty) return;
     setState(() => _commentLoading = true);
     try {
-      await CommentService.instance.addComment(widget.sharedCoupon.couponId, username, text);
+      await CommentService.instance.addComment(
+        widget.sharedCoupon.couponId,
+        username,
+        text,
+        parentCommentId: _replyToCommentId,
+      );
       _commentCtrl.clear();
+      _replyToCommentId = null;
+      _replyToUsername = null;
       await _loadComments();
     } catch (_) {} finally {
       if (mounted) setState(() => _commentLoading = false);
@@ -266,6 +291,14 @@ class _SharedCouponDetailPageState extends State<SharedCouponDetailPage> {
                     ),
                   ),
 
+                  // ── Beğeni ───────────────────────────────────────────────
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                      child: ReactionBar(couponId: widget.sharedCoupon.couponId),
+                    ),
+                  ),
+
                   // ── Yorumlar ───────────────────────────────────────────────
                   SliverToBoxAdapter(
                     child: Padding(
@@ -275,6 +308,10 @@ class _SharedCouponDetailPageState extends State<SharedCouponDetailPage> {
                         ctrl: _commentCtrl,
                         loading: _commentLoading,
                         currentUserId: Supabase.instance.client.auth.currentUser?.id ?? '',
+                        replyToCommentId: _replyToCommentId,
+                        replyToUsername: _replyToUsername,
+                        onReply: _startReply,
+                        onCancelReply: _cancelReply,
                         onSubmit: () async {
                           final uid = Supabase.instance.client.auth.currentUser?.id;
                           String username = 'user';
@@ -321,6 +358,10 @@ class _CommentsSection extends StatelessWidget {
   final TextEditingController ctrl;
   final bool loading;
   final String currentUserId;
+  final String? replyToCommentId;
+  final String? replyToUsername;
+  final void Function(String id, String username) onReply;
+  final VoidCallback onCancelReply;
   final VoidCallback onSubmit;
   final Future<void> Function(String id) onDelete;
 
@@ -329,12 +370,61 @@ class _CommentsSection extends StatelessWidget {
     required this.ctrl,
     required this.loading,
     required this.currentUserId,
+    required this.replyToCommentId,
+    required this.replyToUsername,
+    required this.onReply,
+    required this.onCancelReply,
     required this.onSubmit,
     required this.onDelete,
   });
 
+  Widget _buildCommentCard(CouponComment comment, {bool isReply = false}) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 8, left: isReply ? 24 : 0),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.border, width: 0.5),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text('@${comment.username}', style: const TextStyle(color: AppColors.brand, fontSize: 12, fontWeight: FontWeight.w700)),
+              const SizedBox(width: 8),
+              Text(_timeAgo(comment.createdAt), style: const TextStyle(color: AppColors.textTertiary, fontSize: 11)),
+              const Spacer(),
+              if (comment.userId == currentUserId)
+                GestureDetector(
+                  onTap: () => onDelete(comment.id),
+                  child: const Icon(Icons.delete_outline, size: 16, color: AppColors.textTertiary),
+                ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(comment.content, style: const TextStyle(color: AppColors.textPrimary, fontSize: 13)),
+          const SizedBox(height: 6),
+          GestureDetector(
+            onTap: () => onReply(comment.id, comment.username),
+            child: const Text('Yanıtla', style: TextStyle(color: AppColors.textTertiary, fontSize: 11, fontWeight: FontWeight.w600)),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final topLevel = comments.where((c) => c.parentCommentId == null).toList();
+    final repliesByParent = <String, List<CouponComment>>{};
+    for (final c in comments) {
+      if (c.parentCommentId != null) {
+        repliesByParent.putIfAbsent(c.parentCommentId!, () => []).add(c);
+      }
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -342,36 +432,25 @@ class _CommentsSection extends StatelessWidget {
         const SizedBox(height: 12),
         if (comments.isEmpty)
           const Text('Henüz yorum yok.', style: TextStyle(color: AppColors.textTertiary, fontSize: 13)),
-        ...comments.map((comment) => Container(
-          margin: const EdgeInsets.only(bottom: 8),
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: AppColors.card,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.border, width: 0.5),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Text('@${comment.username}', style: const TextStyle(color: AppColors.brand, fontSize: 12, fontWeight: FontWeight.w700)),
-                  const SizedBox(width: 8),
-                  Text(_timeAgo(comment.createdAt), style: const TextStyle(color: AppColors.textTertiary, fontSize: 11)),
-                  const Spacer(),
-                  if (comment.userId == currentUserId)
-                    GestureDetector(
-                      onTap: () => onDelete(comment.id),
-                      child: const Icon(Icons.delete_outline, size: 16, color: AppColors.textTertiary),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              Text(comment.content, style: const TextStyle(color: AppColors.textPrimary, fontSize: 13)),
-            ],
-          ),
-        )),
+        ...topLevel.expand((comment) => [
+          _buildCommentCard(comment),
+          ...(repliesByParent[comment.id] ?? []).map((reply) => _buildCommentCard(reply, isReply: true)),
+        ]),
         const SizedBox(height: 12),
+        if (replyToCommentId != null)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Row(
+              children: [
+                Text('@${replyToUsername ?? ''} yanıtlanıyor', style: const TextStyle(color: AppColors.brand, fontSize: 12, fontWeight: FontWeight.w600)),
+                const SizedBox(width: 8),
+                GestureDetector(
+                  onTap: onCancelReply,
+                  child: const Icon(Icons.close, size: 14, color: AppColors.textTertiary),
+                ),
+              ],
+            ),
+          ),
         Row(
           children: [
             Expanded(
@@ -379,7 +458,7 @@ class _CommentsSection extends StatelessWidget {
                 controller: ctrl,
                 style: const TextStyle(color: AppColors.textPrimary, fontSize: 13),
                 decoration: InputDecoration(
-                  hintText: 'Yorum yaz...',
+                  hintText: replyToCommentId != null ? 'Yanıt yaz...' : 'Yorum yaz...',
                   hintStyle: const TextStyle(color: AppColors.textTertiary, fontSize: 13),
                   filled: true,
                   fillColor: AppColors.card,

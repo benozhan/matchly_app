@@ -7,6 +7,7 @@ class CouponComment {
   final String username;
   final String content;
   final DateTime createdAt;
+  final String? parentCommentId;
 
   CouponComment({
     required this.id,
@@ -15,6 +16,7 @@ class CouponComment {
     required this.username,
     required this.content,
     required this.createdAt,
+    this.parentCommentId,
   });
 
   factory CouponComment.fromJson(Map<String, dynamic> j) => CouponComment(
@@ -24,6 +26,7 @@ class CouponComment {
     username: j['username'] as String,
     content: j['content'] as String,
     createdAt: DateTime.parse(j['created_at'] as String),
+    parentCommentId: j['parent_comment_id'] as String?,
   );
 }
 
@@ -41,7 +44,7 @@ class CommentService {
     return (res as List).map((j) => CouponComment.fromJson(j)).toList();
   }
 
-  Future<void> addComment(String couponId, String username, String content) async {
+  Future<void> addComment(String couponId, String username, String content, {String? parentCommentId}) async {
     final userId = _client.auth.currentUser?.id;
     if (userId == null) return;
     await _client.from('coupon_comments').insert({
@@ -49,6 +52,7 @@ class CommentService {
       'user_id': userId,
       'username': username,
       'content': content,
+      if (parentCommentId != null) 'parent_comment_id': parentCommentId,
     });
   }
 
