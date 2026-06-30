@@ -100,9 +100,11 @@ const _leagues = [
 ];
 
 const _popularLeagues = [
-  'süper lig', 'premier league', 'la liga', 'serie a', 'bundesliga',
-  'ligue 1', 'şampiyonlar ligi', 'champions league', 'avrupa ligi',
-  'europa league', 'dünya kupası', 'world cup',
+  'süper lig', 'premier lig', 'premier league', 'la liga', 'serie a',
+  'bundesliga', 'ligue 1', 'şampiyonlar ligi', 'champions league',
+  'avrupa ligi', 'europa league', 'dünya kupası', 'world cup',
+  'türkiye', 'i̇ngiltere', 'ingiltere', 'i̇spanya', 'ispanya',
+  'i̇talya', 'italya', 'almanya', 'fransa',
 ];
 
 int _leaguePriority(String league) {
