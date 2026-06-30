@@ -8,30 +8,32 @@ import 'user_search_page.dart';
 
 class FeedPage extends StatefulWidget {
   final String username;
+
   /// Set to true when FeedPage is pushed as a route (e.g. from ProfilePage).
   /// Set to false (default) when embedded in the home bottom-nav body —
   /// in that case there is no route to pop and the back button must be hidden
   /// to prevent accidentally popping the home route (which causes a blank screen).
   final bool showBack;
 
-  const FeedPage({
-    super.key,
-    required this.username,
-    this.showBack = false,
-  });
+  const FeedPage({super.key, required this.username, this.showBack = false});
 
   @override
   State<FeedPage> createState() => _FeedPageState();
 }
 
-class _FeedPageState extends State<FeedPage> with AutomaticKeepAliveClientMixin {
+enum _FeedFilterTab { all, active, winning, losing }
+
+class _FeedPageState extends State<FeedPage>
+    with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
   List<FeedItem> _items = [];
+  final Map<String, CouponDetail?> _details = {};
   bool _loading = true;
   String? _error;
   bool? _hasFollowing;
   SocialUser? _currentUser;
+  _FeedFilterTab _activeTab = _FeedFilterTab.active;
 
   @override
   void initState() {
@@ -60,24 +62,28 @@ class _FeedPageState extends State<FeedPage> with AutomaticKeepAliveClientMixin 
 
       if (items.isEmpty) {
         try {
-          final following =
-              await SocialService.instance.getFollowing(widget.username);
+          final following = await SocialService.instance.getFollowing(
+            widget.username,
+          );
           hasFollowing = following.isNotEmpty;
 
           if (following.isNotEmpty) {
             final built = <FeedItem>[];
             for (final u in following) {
               try {
-                final coupons =
-                    await SocialService.instance.getSharedCoupons(u.username);
+                final coupons = await SocialService.instance.getSharedCoupons(
+                  u.username,
+                );
                 for (final c in coupons) {
-                  built.add(FeedItem(
-                    type: 'SHARED_COUPON',
-                    username: u.username,
-                    displayName: u.displayName,
-                    couponId: c.couponId,
-                    createdAt: c.createdAt,
-                  ));
+                  built.add(
+                    FeedItem(
+                      type: 'SHARED_COUPON',
+                      username: u.username,
+                      displayName: u.displayName,
+                      couponId: c.couponId,
+                      createdAt: c.createdAt,
+                    ),
+                  );
                 }
               } catch (_) {}
             }
@@ -94,21 +100,26 @@ class _FeedPageState extends State<FeedPage> with AutomaticKeepAliveClientMixin 
       // Kullanıcının kendi public kuponlarını her zaman feed'e ekle
       if (_currentUser != null) {
         try {
-          final own = await SocialService.instance
-              .getSharedCoupons(widget.username);
+          final own = await SocialService.instance.getSharedCoupons(
+            widget.username,
+          );
           if (own.isNotEmpty) {
             final u = _currentUser!;
             final ownIds = own.map((c) => c.couponId).toSet();
             // Zaten feed'de varsa tekrar ekleme
-            items.removeWhere((i) => ownIds.contains(i.couponId) && i.username == u.username);
+            items.removeWhere(
+              (i) => ownIds.contains(i.couponId) && i.username == u.username,
+            );
             final ownItems = own
-                .map((c) => FeedItem(
-                      type: 'SHARED_COUPON',
-                      username: u.username,
-                      displayName: u.displayName,
-                      couponId: c.couponId,
-                      createdAt: c.createdAt,
-                    ))
+                .map(
+                  (c) => FeedItem(
+                    type: 'SHARED_COUPON',
+                    username: u.username,
+                    displayName: u.displayName,
+                    couponId: c.couponId,
+                    createdAt: c.createdAt,
+                  ),
+                )
                 .toList();
             items = [...ownItems, ...items];
             items.sort((a, b) => b.createdAt.compareTo(a.createdAt));
@@ -116,9 +127,27 @@ class _FeedPageState extends State<FeedPage> with AutomaticKeepAliveClientMixin 
         } catch (_) {}
       }
 
+      // Sekmelerde (Aktif/Kazanan/Kaybeden) filtreleyebilmek için her kuponun
+      // durumunu baştan toplu çek.
+      final details = <String, CouponDetail?>{};
+      await Future.wait(
+        items.map((it) async {
+          try {
+            details[it.couponId] = await SocialService.instance.getCouponDetail(
+              it.couponId,
+            );
+          } catch (_) {
+            details[it.couponId] = null;
+          }
+        }),
+      );
+
       if (!mounted) return;
       setState(() {
         _items = items;
+        _details
+          ..clear()
+          ..addAll(details);
         _hasFollowing = hasFollowing;
         _loading = false;
       });
@@ -131,20 +160,77 @@ class _FeedPageState extends State<FeedPage> with AutomaticKeepAliveClientMixin 
     }
   }
 
+  String _statusOf(FeedItem item) =>
+      (_details[item.couponId]?.status ?? 'pending').toLowerCase();
+
+  List<FeedItem> get _filteredItems {
+    switch (_activeTab) {
+      case _FeedFilterTab.all:
+        return _items;
+      case _FeedFilterTab.active:
+        return _items.where((i) => _statusOf(i) == 'pending').toList();
+      case _FeedFilterTab.winning:
+        return _items.where((i) => _statusOf(i) == 'winning').toList();
+      case _FeedFilterTab.losing:
+        return _items.where((i) => _statusOf(i) == 'risk').toList();
+    }
+  }
+
+  int _tabCount(_FeedFilterTab tab) {
+    switch (tab) {
+      case _FeedFilterTab.all:
+        return _items.length;
+      case _FeedFilterTab.active:
+        return _items.where((i) => _statusOf(i) == 'pending').length;
+      case _FeedFilterTab.winning:
+        return _items.where((i) => _statusOf(i) == 'winning').length;
+      case _FeedFilterTab.losing:
+        return _items.where((i) => _statusOf(i) == 'risk').length;
+    }
+  }
+
+  String _tabLabel(_FeedFilterTab tab) {
+    switch (tab) {
+      case _FeedFilterTab.all:
+        return 'Tümü';
+      case _FeedFilterTab.active:
+        return 'Aktif';
+      case _FeedFilterTab.winning:
+        return 'Kazanan';
+      case _FeedFilterTab.losing:
+        return 'Kaybeden';
+    }
+  }
+
+  String _emptyTabMessage(_FeedFilterTab tab) {
+    switch (tab) {
+      case _FeedFilterTab.all:
+        return 'Henüz akış yok';
+      case _FeedFilterTab.active:
+        return 'Aktif paylaşım yok';
+      case _FeedFilterTab.winning:
+        return 'Kazanan paylaşım yok';
+      case _FeedFilterTab.losing:
+        return 'Kaybeden paylaşım yok';
+    }
+  }
+
   void _openSearch() {
     if (_currentUser == null) return;
-    Navigator.of(context).push(MaterialPageRoute(
-      builder: (_) => UserSearchPage(currentUser: _currentUser!),
-    ));
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => UserSearchPage(currentUser: _currentUser!),
+      ),
+    );
   }
 
   void _openProfile(String username) {
-    Navigator.of(context).push(MaterialPageRoute(
-      builder: (_) => ProfilePage(
-        username: username,
-        currentUsername: widget.username,
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) =>
+            ProfilePage(username: username, currentUsername: widget.username),
       ),
-    ));
+    );
   }
 
   void _openDetail(FeedItem item) {
@@ -154,9 +240,11 @@ class _FeedPageState extends State<FeedPage> with AutomaticKeepAliveClientMixin 
       isPublic: true,
       createdAt: item.createdAt,
     );
-    Navigator.of(context).push(MaterialPageRoute(
-      builder: (_) => SharedCouponDetailPage(sharedCoupon: sc),
-    ));
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => SharedCouponDetailPage(sharedCoupon: sc),
+      ),
+    );
   }
 
   @override
@@ -174,21 +262,31 @@ class _FeedPageState extends State<FeedPage> with AutomaticKeepAliveClientMixin 
                 // ── Top bar ──────────────────────────────────────────────────
                 Padding(
                   padding: EdgeInsets.fromLTRB(
-                      widget.showBack ? 4 : 16, 14, 16, 0),
+                    widget.showBack ? 4 : 16,
+                    14,
+                    16,
+                    0,
+                  ),
                   child: Row(
                     children: [
                       if (widget.showBack)
                         IconButton(
-                          icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                              size: 18, color: AppColors.textSecondary),
+                          icon: const Icon(
+                            Icons.arrow_back_ios_new_rounded,
+                            size: 18,
+                            color: AppColors.textSecondary,
+                          ),
                           onPressed: () => Navigator.of(context).maybePop(),
                         ),
                       const Spacer(),
                       if (!_loading)
                         GestureDetector(
                           onTap: _load,
-                          child: const Icon(Icons.refresh_rounded,
-                              size: 20, color: AppColors.textSecondary),
+                          child: const Icon(
+                            Icons.refresh_rounded,
+                            size: 20,
+                            color: AppColors.textSecondary,
+                          ),
                         ),
                     ],
                   ),
@@ -226,12 +324,13 @@ class _FeedPageState extends State<FeedPage> with AutomaticKeepAliveClientMixin 
                     onTap: _currentUser != null ? _openSearch : null,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 13),
+                        horizontal: 14,
+                        vertical: 13,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.card,
                         borderRadius: BorderRadius.circular(14),
-                        border: Border.all(
-                            color: AppColors.border, width: 0.5),
+                        border: Border.all(color: AppColors.border, width: 0.5),
                       ),
                       child: Row(
                         children: [
@@ -258,42 +357,61 @@ class _FeedPageState extends State<FeedPage> with AutomaticKeepAliveClientMixin 
                   ),
                 ),
 
+                // ── Filter tabs ──────────────────────────────────────────────
+                if (!_loading && _error == null && _items.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                    child: _FeedFilterTabBar(
+                      activeTab: _activeTab,
+                      tabLabel: _tabLabel,
+                      tabCount: _tabCount,
+                      onTabSelected: (tab) => setState(() => _activeTab = tab),
+                    ),
+                  ),
+
                 // ── Body ─────────────────────────────────────────────────────
                 Expanded(
                   child: _loading
                       ? const Center(
                           child: CircularProgressIndicator(
-                              color: AppColors.brand, strokeWidth: 2))
+                            color: AppColors.brand,
+                            strokeWidth: 2,
+                          ),
+                        )
                       : _error != null
-                          ? _ErrorBody(error: _error!, onRetry: _load)
-                          : _items.isEmpty
-                              ? _EmptyBody(
-                                  hasFollowing: _hasFollowing,
-                                  onSearchTap:
-                                      _currentUser != null ? _openSearch : null,
-                                )
-                              : RefreshIndicator(
-                                  color: AppColors.brand,
-                                  backgroundColor: AppColors.card,
-                                  onRefresh: _load,
-                                  child: ListView.builder(
-                                    physics:
-                                        const AlwaysScrollableScrollPhysics(),
-                                    padding: const EdgeInsets.fromLTRB(
-                                        16, 4, 16, 40),
-                                    itemCount: _items.length,
-                                    itemBuilder: (context, i) => Padding(
-                                      padding:
-                                          const EdgeInsets.only(bottom: 12),
-                                      child: _FeedCard(
-                                        item: _items[i],
-                                        onTap: () => _openDetail(_items[i]),
-                                        onProfileTap: () =>
-                                            _openProfile(_items[i].username),
-                                      ),
-                                    ),
-                                  ),
+                      ? _ErrorBody(error: _error!, onRetry: _load)
+                      : _items.isEmpty
+                      ? _EmptyBody(
+                          hasFollowing: _hasFollowing,
+                          onSearchTap: _currentUser != null
+                              ? _openSearch
+                              : null,
+                        )
+                      : _filteredItems.isEmpty
+                      ? _EmptyTabBody(message: _emptyTabMessage(_activeTab))
+                      : RefreshIndicator(
+                          color: AppColors.brand,
+                          backgroundColor: AppColors.card,
+                          onRefresh: _load,
+                          child: ListView.builder(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            padding: const EdgeInsets.fromLTRB(16, 4, 16, 40),
+                            itemCount: _filteredItems.length,
+                            itemBuilder: (context, i) {
+                              final item = _filteredItems[i];
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: _FeedCard(
+                                  item: item,
+                                  detail: _details[item.couponId],
+                                  onTap: () => _openDetail(item),
+                                  onProfileTap: () =>
+                                      _openProfile(item.username),
                                 ),
+                              );
+                            },
+                          ),
+                        ),
                 ),
               ],
             ),
@@ -304,41 +422,20 @@ class _FeedPageState extends State<FeedPage> with AutomaticKeepAliveClientMixin 
   }
 }
 
-// ── Feed card (fetches CouponDetail for rich display) ─────────────────────────
+// ── Feed card (CouponDetail prefetched by parent for tab filtering) ───────────
 
-class _FeedCard extends StatefulWidget {
+class _FeedCard extends StatelessWidget {
   final FeedItem item;
+  final CouponDetail? detail;
   final VoidCallback onTap;
   final VoidCallback onProfileTap;
 
   const _FeedCard({
     required this.item,
+    required this.detail,
     required this.onTap,
     required this.onProfileTap,
   });
-
-  @override
-  State<_FeedCard> createState() => _FeedCardState();
-}
-
-class _FeedCardState extends State<_FeedCard> {
-  CouponDetail? _detail;
-
-  @override
-  void initState() {
-    super.initState();
-    _fetch();
-  }
-
-  Future<void> _fetch() async {
-    try {
-      final d = await SocialService.instance
-          .getCouponDetail(widget.item.couponId);
-      if (mounted) setState(() => _detail = d);
-    } catch (_) {
-      if (mounted) setState(() {});
-    }
-  }
 
   String _fmtDate(String raw) {
     try {
@@ -350,8 +447,19 @@ class _FeedCardState extends State<_FeedCard> {
       if (diff.inHours < 24) return '${diff.inHours}s';
       if (diff.inDays < 7) return '${diff.inDays}g';
       const months = [
-        '', 'Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz',
-        'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'
+        '',
+        'Oca',
+        'Şub',
+        'Mar',
+        'Nis',
+        'May',
+        'Haz',
+        'Tem',
+        'Ağu',
+        'Eyl',
+        'Eki',
+        'Kas',
+        'Ara',
       ];
       return '${dt.day} ${months[dt.month]}';
     } catch (_) {
@@ -360,52 +468,64 @@ class _FeedCardState extends State<_FeedCard> {
   }
 
   String get _initials {
-    final parts = widget.item.displayName.trim().split(' ');
+    final parts = item.displayName.trim().split(' ');
     if (parts.length >= 2) {
       return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
     }
-    return widget.item.displayName.isNotEmpty
-        ? widget.item.displayName
-            .substring(0, widget.item.displayName.length.clamp(0, 2))
-            .toUpperCase()
+    return item.displayName.isNotEmpty
+        ? item.displayName
+              .substring(0, item.displayName.length.clamp(0, 2))
+              .toUpperCase()
         : '?';
   }
 
   Color _statusColor(String s) {
     switch (s.toLowerCase()) {
-      case 'winning':   return AppColors.green;
-      case 'risk':      return AppColors.red;
-      case 'cancelled': return AppColors.textTertiary;
-      default:          return AppColors.brand;
+      case 'winning':
+        return AppColors.green;
+      case 'risk':
+        return AppColors.red;
+      case 'cancelled':
+        return AppColors.textTertiary;
+      default:
+        return AppColors.brand;
     }
   }
 
   String _statusLabel(String s) {
     switch (s.toLowerCase()) {
-      case 'winning':   return 'KAZANIYOR';
-      case 'risk':      return 'KAYBETTİ';
-      case 'pending':   return 'AKTİF';
-      case 'cancelled': return 'İPTAL';
-      default:          return s.toUpperCase();
+      case 'winning':
+        return 'KAZANIYOR';
+      case 'risk':
+        return 'KAYBETTİ';
+      case 'pending':
+        return 'AKTİF';
+      case 'cancelled':
+        return 'İPTAL';
+      default:
+        return s.toUpperCase();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final item = widget.item;
-    final d = _detail;
+    final d = detail;
 
     return GestureDetector(
-      onTap: widget.onTap,
+      onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
           color: AppColors.card,
           borderRadius: BorderRadius.circular(18),
-          border: _detail?.status == 'winning'
-              ? const Border(left: BorderSide(color: Color(0xFF16A34A), width: 3))
-              : _detail?.status == 'risk'
-                  ? const Border(left: BorderSide(color: Color(0xFFDC2626), width: 3))
-                  : Border.all(color: AppColors.border, width: 0.5),
+          border: d?.status == 'winning'
+              ? const Border(
+                  left: BorderSide(color: Color(0xFF16A34A), width: 3),
+                )
+              : d?.status == 'risk'
+              ? const Border(
+                  left: BorderSide(color: Color(0xFFDC2626), width: 3),
+                )
+              : Border.all(color: AppColors.border, width: 0.5),
           boxShadow: const [
             BoxShadow(
               color: Color(0x142D4A6E),
@@ -423,7 +543,7 @@ class _FeedCardState extends State<_FeedCard> {
               child: Row(
                 children: [
                   GestureDetector(
-                    onTap: widget.onProfileTap,
+                    onTap: onProfileTap,
                     child: Container(
                       width: 36,
                       height: 36,
@@ -452,7 +572,7 @@ class _FeedCardState extends State<_FeedCard> {
                   const SizedBox(width: 10),
                   Expanded(
                     child: GestureDetector(
-                      onTap: widget.onProfileTap,
+                      onTap: onProfileTap,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -494,13 +614,17 @@ class _FeedCardState extends State<_FeedCard> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(14, 10, 14, 0),
                 child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.brand.withOpacity(0.10),
                     borderRadius: BorderRadius.circular(6),
                     border: Border.all(
-                        color: AppColors.brand.withOpacity(0.20), width: 0.5),
+                      color: AppColors.brand.withOpacity(0.20),
+                      width: 0.5,
+                    ),
                   ),
                   child: Text(
                     d.siteName,
@@ -516,10 +640,11 @@ class _FeedCardState extends State<_FeedCard> {
             // ── Coupon title ──────────────────────────────────────────────
             Padding(
               padding: EdgeInsets.fromLTRB(
-                  14,
-                  (d != null && d.siteName.isNotEmpty) ? 6 : 12,
-                  14,
-                  0),
+                14,
+                (d != null && d.siteName.isNotEmpty) ? 6 : 12,
+                14,
+                0,
+              ),
               child: Text(
                 (d != null && d.title.isNotEmpty)
                     ? d.title
@@ -562,7 +687,9 @@ class _FeedCardState extends State<_FeedCard> {
                   children: [
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 3),
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
                       decoration: BoxDecoration(
                         color: _statusColor(d.status).withOpacity(0.12),
                         borderRadius: BorderRadius.circular(6),
@@ -578,8 +705,11 @@ class _FeedCardState extends State<_FeedCard> {
                       ),
                     ),
                     const Spacer(),
-                    const Icon(Icons.chevron_right_rounded,
-                        size: 16, color: AppColors.textTertiary),
+                    const Icon(
+                      Icons.chevron_right_rounded,
+                      size: 16,
+                      color: AppColors.textTertiary,
+                    ),
                   ],
                 ),
               )
@@ -648,10 +778,12 @@ class _SelectionProgress extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final total = selections.length;
-    final winning =
-        selections.where((s) => s.status.toLowerCase() == 'winning').length;
-    final pending =
-        selections.where((s) => s.status.toLowerCase() == 'pending').length;
+    final winning = selections
+        .where((s) => s.status.toLowerCase() == 'winning')
+        .length;
+    final pending = selections
+        .where((s) => s.status.toLowerCase() == 'pending')
+        .length;
     final lost = total - winning - pending;
 
     return Padding(
@@ -676,22 +808,27 @@ class _SelectionProgress extends StatelessWidget {
                 children: [
                   if (winning > 0)
                     Expanded(
-                        flex: winning,
-                        child: Container(color: AppColors.green)),
+                      flex: winning,
+                      child: Container(color: AppColors.green),
+                    ),
                   if (pending > 0)
                     Expanded(
-                        flex: pending,
-                        child: Container(
-                            color: AppColors.textTertiary.withOpacity(0.3))),
+                      flex: pending,
+                      child: Container(
+                        color: AppColors.textTertiary.withOpacity(0.3),
+                      ),
+                    ),
                   if (lost > 0)
                     Expanded(
-                        flex: lost,
-                        child: Container(
-                            color: AppColors.red.withOpacity(0.7))),
+                      flex: lost,
+                      child: Container(color: AppColors.red.withOpacity(0.7)),
+                    ),
                   if (winning == 0 && pending == 0 && lost == 0)
                     Expanded(
-                        child: Container(
-                            color: AppColors.textTertiary.withOpacity(0.2))),
+                      child: Container(
+                        color: AppColors.textTertiary.withOpacity(0.2),
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -705,9 +842,10 @@ class _SelectionProgress extends StatelessWidget {
                 Text(
                   '$winning',
                   style: const TextStyle(
-                      color: AppColors.green,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700),
+                    color: AppColors.green,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
                 const SizedBox(width: 10),
               ],
@@ -717,9 +855,10 @@ class _SelectionProgress extends StatelessWidget {
                 Text(
                   '$pending',
                   style: const TextStyle(
-                      color: AppColors.textSecondary,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700),
+                    color: AppColors.textSecondary,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
                 const SizedBox(width: 10),
               ],
@@ -729,9 +868,10 @@ class _SelectionProgress extends StatelessWidget {
                 Text(
                   '$lost',
                   style: const TextStyle(
-                      color: AppColors.red,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700),
+                    color: AppColors.red,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ],
             ],
@@ -764,8 +904,7 @@ class _EmptyBody extends StatelessWidget {
               decoration: BoxDecoration(
                 color: AppColors.card,
                 shape: BoxShape.circle,
-                border: Border.all(
-                    color: AppColors.border, width: 0.5),
+                border: Border.all(color: AppColors.border, width: 0.5),
               ),
               child: Icon(
                 Icons.dynamic_feed_rounded,
@@ -787,10 +926,7 @@ class _EmptyBody extends StatelessWidget {
             const Text(
               'Kullanıcı ara ve takip etmeye başla.',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                color: AppColors.textSecondary,
-                fontSize: 13,
-              ),
+              style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
             ),
             const SizedBox(height: 28),
             if (onSearchTap != null)
@@ -798,7 +934,9 @@ class _EmptyBody extends StatelessWidget {
                 onTap: onSearchTap,
                 child: Container(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 32, vertical: 14),
+                    horizontal: 32,
+                    vertical: 14,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.brand,
                     borderRadius: BorderRadius.circular(14),
@@ -837,42 +975,183 @@ class _ErrorBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Center(
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          Icons.cloud_off_rounded,
+          size: 36,
+          color: AppColors.textTertiary.withOpacity(0.4),
+        ),
+        const SizedBox(height: 12),
+        const Text(
+          'Yüklenemedi',
+          style: TextStyle(
+            color: AppColors.textPrimary,
+            fontSize: 15,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 20),
+        GestureDetector(
+          onTap: onRetry,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            decoration: BoxDecoration(
+              color: AppColors.brand.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: AppColors.brand.withOpacity(0.30),
+                width: 0.5,
+              ),
+            ),
+            child: const Text(
+              'Tekrar Dene',
+              style: TextStyle(
+                color: AppColors.brand,
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+// ── Empty tab state (items exist, but none match the active filter) ──────────
+
+class _EmptyTabBody extends StatelessWidget {
+  final String message;
+  const _EmptyTabBody({required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 40),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.cloud_off_rounded,
-                size: 36,
-                color: AppColors.textTertiary.withOpacity(0.4)),
-            const SizedBox(height: 12),
-            const Text(
-              'Yüklenemedi',
-              style: TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700),
+            Icon(
+              Icons.inbox_outlined,
+              size: 34,
+              color: AppColors.textTertiary.withOpacity(0.5),
             ),
-            const SizedBox(height: 20),
-            GestureDetector(
-              onTap: onRetry,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 20, vertical: 10),
-                decoration: BoxDecoration(
-                  color: AppColors.brand.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                      color: AppColors.brand.withOpacity(0.30), width: 0.5),
-                ),
-                child: const Text(
-                  'Tekrar Dene',
-                  style: TextStyle(
-                      color: AppColors.brand,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700),
-                ),
+            const SizedBox(height: 14),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ],
         ),
-      );
+      ),
+    );
+  }
+}
+
+// ── Filter tab bar (Aktif / Kazanan / Kaybeden / Tümü) ────────────────────────
+
+class _FeedFilterTabBar extends StatelessWidget {
+  final _FeedFilterTab activeTab;
+  final String Function(_FeedFilterTab) tabLabel;
+  final int Function(_FeedFilterTab) tabCount;
+  final ValueChanged<_FeedFilterTab> onTabSelected;
+
+  const _FeedFilterTabBar({
+    required this.activeTab,
+    required this.tabLabel,
+    required this.tabCount,
+    required this.onTabSelected,
+  });
+
+  Widget _pill(_FeedFilterTab tab) {
+    final isActive = tab == activeTab;
+    final count = tabCount(tab);
+
+    return GestureDetector(
+      onTap: () => onTabSelected(tab),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeInOut,
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 9),
+        decoration: BoxDecoration(
+          color: isActive ? AppColors.brand : AppColors.card,
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(
+            color: isActive ? AppColors.brand : AppColors.border,
+            width: 0.6,
+          ),
+          boxShadow: isActive
+              ? [
+                  BoxShadow(
+                    color: AppColors.brand.withOpacity(0.20),
+                    blurRadius: 12,
+                  ),
+                ]
+              : null,
+        ),
+        child: Center(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                tabLabel(tab),
+                style: TextStyle(
+                  color: isActive ? Colors.white : AppColors.textSecondary,
+                  fontSize: 11,
+                  fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                ),
+              ),
+              if (count > 0) ...[
+                const SizedBox(width: 4),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 5,
+                    vertical: 1,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isActive
+                        ? Colors.white.withOpacity(0.20)
+                        : AppColors.border,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Text(
+                    '$count',
+                    style: TextStyle(
+                      color: isActive ? Colors.white : AppColors.textSecondary,
+                      fontSize: 9,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    const gap = SizedBox(width: 5);
+    return Row(
+      children: [
+        Expanded(child: _pill(_FeedFilterTab.active)),
+        gap,
+        Expanded(child: _pill(_FeedFilterTab.winning)),
+        gap,
+        Expanded(child: _pill(_FeedFilterTab.losing)),
+        gap,
+        Expanded(child: _pill(_FeedFilterTab.all)),
+      ],
+    );
+  }
 }
