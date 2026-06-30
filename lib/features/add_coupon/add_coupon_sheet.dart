@@ -98,6 +98,34 @@ const _leagues = [
   'Diğer',
 ];
 
+const _popularLeagues = [
+  'süper lig', 'premier league', 'la liga', 'serie a', 'bundesliga',
+  'ligue 1', 'şampiyonlar ligi', 'champions league', 'avrupa ligi',
+  'europa league', 'dünya kupası', 'world cup',
+];
+
+int _leaguePriority(String league) {
+  final l = league.toLowerCase();
+  for (var i = 0; i < _popularLeagues.length; i++) {
+    if (l.contains(_popularLeagues[i])) return i;
+  }
+  return 999;
+}
+
+List<_MatchDisplay> _sortMatches(List<_MatchDisplay> matches, List<String> recentTeams) {
+  final list = [...matches];
+  list.sort((a, b) {
+    final aRecent = recentTeams.contains(a.teams);
+    final bRecent = recentTeams.contains(b.teams);
+    if (aRecent != bRecent) return aRecent ? -1 : 1;
+    final aPrio = _leaguePriority(a.league);
+    final bPrio = _leaguePriority(b.league);
+    if (aPrio != bPrio) return aPrio.compareTo(bPrio);
+    return 0;
+  });
+  return list;
+}
+
 class _Market {
   final String name;
   final List<String>? lines;
@@ -930,13 +958,16 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
   /// - loading/idle → empty (spinner shown)
   /// - success      → API results (may be empty → "Maç bulunamadı")
   /// - error        → mock fallback filtered by current query
+  List<String> get _recentTeams =>
+      selections.isEmpty ? [] : [selections.last.teams];
+
   List<_MatchDisplay> get _displayMatches {
     switch (_searchState) {
       case _SearchState.idle:
       case _SearchState.loading:
         return [];
       case _SearchState.success:
-        return _apiResults; // caller shows "Maç bulunamadı" when empty
+        return _sortMatches(_apiResults, _recentTeams); // caller shows "Maç bulunamadı" when empty
       case _SearchState.error:
         const maxResults = 6;
         if (searchQuery.isEmpty) {
