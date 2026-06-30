@@ -292,6 +292,18 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
     return matches.map((m) {
       final live = _liveMatches[m.teams];
       if (live == null) return m;
+      final selNorm = m.selection.toLowerCase();
+      final isCornerOrCard = selNorm.contains('korner') || selNorm.contains('kart');
+      // Korner/kart bahislerinde backend'den gelen detaylı skoru koru, maç skoruyla override etme
+      if (isCornerOrCard) {
+        return MatchItem(
+          teams: m.teams,
+          selection: m.selection,
+          score: m.score,
+          minute: live.isLive ? live.minute : m.minute,
+          status: m.status,
+        );
+      }
       return MatchItem(
         teams: m.teams,
         selection: m.selection,
