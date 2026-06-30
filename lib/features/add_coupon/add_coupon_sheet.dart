@@ -440,7 +440,7 @@ class _MatchDisplay {
   }
 }
 
-enum _AddStep { search, market, line, option }
+enum _AddStep { search, market, period, line, option }
 
 class _Selection {
   final String teams;
@@ -615,10 +615,60 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
     });
   }
 
+  void _goBack() {
+    setState(() {
+      switch (addStep) {
+        case _AddStep.search:
+          break;
+        case _AddStep.market:
+          addStep = _AddStep.search;
+          pendingMatch = null;
+          break;
+        case _AddStep.period:
+          addStep = _AddStep.market;
+          pendingMarket = null;
+          break;
+        case _AddStep.line:
+          final iyVariant = pendingMarket != null ? _findIyVariant(pendingMarket!) : null;
+          final hasIy = iyVariant != null || (pendingMarket?.name.startsWith('İlk Yarı') ?? false);
+          if (hasIy) {
+            addStep = _AddStep.period;
+          } else {
+            addStep = _AddStep.market;
+          }
+          pendingLine = null;
+          break;
+        case _AddStep.option:
+          if (pendingMarket?.hasLines ?? false) {
+            addStep = _AddStep.line;
+          } else {
+            final iyVariant = pendingMarket != null ? _findIyVariant(pendingMarket!) : null;
+            final hasIy = iyVariant != null || (pendingMarket?.name.startsWith('İlk Yarı') ?? false);
+            addStep = hasIy ? _AddStep.period : _AddStep.market;
+          }
+          break;
+      }
+    });
+  }
+
   void _selectMarket(_Market market) {
+    final iyVariant = _findIyVariant(market);
     setState(() {
       pendingMarket = market;
       pendingLine = null;
+      if (iyVariant != null) {
+        addStep = _AddStep.period;
+      } else {
+        addStep = market.hasLines ? _AddStep.line : _AddStep.option;
+      }
+    });
+  }
+
+  void _selectPeriod(bool isFirstHalf) {
+    final base = pendingMarket!;
+    final market = isFirstHalf ? (_findIyVariant(base) ?? base) : base;
+    setState(() {
+      pendingMarket = market;
       addStep = market.hasLines ? _AddStep.line : _AddStep.option;
     });
   }
@@ -1132,9 +1182,11 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
                 },
                 onMatchSelected: _selectMatch,
                 onMarketSelected: _selectMarket,
+                onPeriodSelected: _selectPeriod,
                 onLineSelected: _selectLine,
                 onOptionSelected: _selectOption,
                 onCancel: _cancelAddFlow,
+                onBack: _goBack,
               )
             else
               SizedBox(
@@ -1519,6 +1571,8 @@ class _AddSelectionPanel extends StatelessWidget {
   final ValueChanged<String> onSearchChanged;
   final ValueChanged<String> onMatchSelected;
   final ValueChanged<_Market> onMarketSelected;
+  final ValueChanged<bool> onPeriodSelected;
+  final VoidCallback onBack;
   final ValueChanged<String> onLineSelected;
   final ValueChanged<String> onOptionSelected;
   final VoidCallback onCancel;
@@ -1536,6 +1590,8 @@ class _AddSelectionPanel extends StatelessWidget {
     required this.onSearchChanged,
     required this.onMatchSelected,
     required this.onMarketSelected,
+    required this.onPeriodSelected,
+    required this.onBack,
     required this.onLineSelected,
     required this.onOptionSelected,
     required this.onCancel,
@@ -1546,6 +1602,7 @@ class _AddSelectionPanel extends StatelessWidget {
       switch (step) {
         case _AddStep.search:  return 'Maç Seç';
         case _AddStep.market:  return 'Düzenle · Market';
+        case _AddStep.period:  return 'Düzenle · Zaman';
         case _AddStep.line:    return 'Düzenle · Hat Seç';
         case _AddStep.option:  return 'Düzenle · Seçenek';
       }
@@ -1553,6 +1610,7 @@ class _AddSelectionPanel extends StatelessWidget {
     switch (step) {
       case _AddStep.search:  return 'Maç Seç';
       case _AddStep.market:  return 'Market';
+      case _AddStep.period:  return 'Zaman';
       case _AddStep.line:    return 'Hat Seç';
       case _AddStep.option:  return 'Seçenek';
     }
@@ -1577,6 +1635,14 @@ class _AddSelectionPanel extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(14, 12, 8, 0),
             child: Row(
               children: [
+                if (step != _AddStep.search) ...[
+                  GestureDetector(
+                    onTap: onBack,
+                    child: const Icon(Icons.arrow_back_ios_new_rounded,
+                        color: AppColors.textTertiary, size: 15),
+                  ),
+                  const SizedBox(width: 10),
+                ],
                 Text(
                   _title,
                   style: TextStyle(
@@ -1624,6 +1690,8 @@ class _AddSelectionPanel extends StatelessWidget {
             )
           else if (step == _AddStep.market)
             _MarketGroupBody(onMarketSelected: onMarketSelected)
+          else if (step == _AddStep.period)
+            _PeriodBody(onSelected: onPeriodSelected)
           else if (step == _AddStep.line)
             _ButtonsBody(
                 items: pendingMarket!.lines!, onSelected: onLineSelected)
@@ -1637,7 +1705,99 @@ class _AddSelectionPanel extends StatelessWidget {
   }
 }
 
+// ─── Period (match / first half) body ─────────────────────────────────────────
+
+class _PeriodBody extends StatelessWidget {
+  final ValueChanged<bool> onSelected;
+  const _PeriodBody({required this.onSelected});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(14, 0, 14, 10),
+      child: Row(
+        children: [
+          Expanded(child: _PeriodOption(label: 'Maç sonu', icon: Icons.sports_soccer_rounded, onTap: () => onSelected(false))),
+          const SizedBox(width: 8),
+          Expanded(child: _PeriodOption(label: 'İlk yarı', icon: Icons.schedule_rounded, onTap: () => onSelected(true))),
+        ],
+      ),
+    );
+  }
+}
+
+class _PeriodOption extends StatefulWidget {
+  final String label;
+  final IconData icon;
+  final VoidCallback onTap;
+  const _PeriodOption({required this.label, required this.icon, required this.onTap});
+
+  @override
+  State<_PeriodOption> createState() => _PeriodOptionState();
+}
+
+class _PeriodOptionState extends State<_PeriodOption> {
+  bool _pressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _pressed = true),
+      onTapUp: (_) => setState(() => _pressed = false),
+      onTapCancel: () => setState(() => _pressed = false),
+      onTap: widget.onTap,
+      child: AnimatedScale(
+        scale: _pressed ? 0.95 : 1.0,
+        duration: const Duration(milliseconds: 100),
+        curve: Curves.easeOut,
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          decoration: BoxDecoration(
+            color: AppColors.background,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.white.withOpacity(0.10)),
+          ),
+          child: Column(
+            children: [
+              Icon(widget.icon, size: 20, color: AppColors.brand),
+              const SizedBox(height: 6),
+              Text(
+                widget.label,
+                style: const TextStyle(color: AppColors.textPrimary, fontSize: 12.5, fontWeight: FontWeight.w700),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 // ─── Market group body ────────────────────────────────────────────────────────
+
+IconData _marketIcon(String name) {
+  if (name.contains('Maç Sonucu')) return Icons.flag_rounded;
+  if (name.contains('Sonucu')) return Icons.schedule_rounded;
+  if (name.contains('KG')) return Icons.swap_horiz_rounded;
+  if (name.contains('Korner')) return Icons.turn_right_rounded;
+  if (name.contains('Kart')) return Icons.square_rounded;
+  if (name.contains('Alt') || name.contains('Üst')) return Icons.unfold_more_rounded;
+  return Icons.sports_soccer_rounded;
+}
+
+/// Base (maç sonu) market'in adına göre eşleşen İlk Yarı market'ini bulur.
+_Market? _findIyVariant(_Market base) {
+  final iyName = base.name == 'Maç Sonucu' ? 'İlk Yarı Sonucu' : 'İlk Yarı $base.name';
+  try {
+    return _markets.firstWhere((m) => m.name == iyName);
+  } catch (_) {
+    return null;
+  }
+}
+
+/// Sadece "maç sonu" market'lerini döndürür (İY varyantları ayrı entry olarak gösterilmez,
+/// ana market'e dokununca sekme ile erişilir).
+final _baseMarkets = _markets.where((m) => !m.name.startsWith('İlk Yarı')).toList();
 
 class _MarketGroupBody extends StatelessWidget {
   final ValueChanged<_Market> onMarketSelected;
@@ -1646,56 +1806,78 @@ class _MarketGroupBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(14, 0, 14, 10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: _categories.map((category) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  category.title.toUpperCase(),
-                  style: const TextStyle(
-                    color: AppColors.textTertiary,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0.8,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: category.markets.map((market) {
-                    return GestureDetector(
-                      onTap: () => onMarketSelected(market),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 14, vertical: 9),
-                        decoration: BoxDecoration(
-                          color: AppColors.background,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                              color: Colors.white.withOpacity(0.10)),
-                        ),
-                        child: Text(
-                          market.name,
-                          style: const TextStyle(
-                            color: AppColors.textPrimary,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ],
-            ),
+      padding: const EdgeInsets.fromLTRB(14, 4, 14, 14),
+      child: GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          mainAxisSpacing: 10,
+          crossAxisSpacing: 10,
+          childAspectRatio: 2.6,
+        ),
+        itemCount: _baseMarkets.length,
+        itemBuilder: (context, index) {
+          final market = _baseMarkets[index];
+          return _MarketTile(
+            market: market,
+            onTap: () => onMarketSelected(market),
           );
-        }).toList(),
+        },
+      ),
+    );
+  }
+}
+
+class _MarketTile extends StatefulWidget {
+  final _Market market;
+  final VoidCallback onTap;
+  const _MarketTile({required this.market, required this.onTap});
+
+  @override
+  State<_MarketTile> createState() => _MarketTileState();
+}
+
+class _MarketTileState extends State<_MarketTile> with SingleTickerProviderStateMixin {
+  bool _pressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _pressed = true),
+      onTapUp: (_) => setState(() => _pressed = false),
+      onTapCancel: () => setState(() => _pressed = false),
+      onTap: widget.onTap,
+      child: AnimatedScale(
+        scale: _pressed ? 0.95 : 1.0,
+        duration: const Duration(milliseconds: 100),
+        curve: Curves.easeOut,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            color: AppColors.background,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.white.withOpacity(0.10)),
+          ),
+          child: Row(
+            children: [
+              Icon(_marketIcon(widget.market.name), size: 17, color: AppColors.brand),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  widget.market.name,
+                  style: const TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -1865,27 +2047,63 @@ class _ButtonsBody extends StatelessWidget {
       child: Wrap(
         spacing: 8,
         runSpacing: 8,
-        children: items.map((item) {
-          return GestureDetector(
-            onTap: () => onSelected(item),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
-              decoration: BoxDecoration(
-                color: AppColors.background,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.white.withOpacity(0.10)),
-              ),
-              child: Text(
-                item,
-                style: const TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
+        children: items.map((item) => _AnimatedChipButton(
+          label: item,
+          onTap: () => onSelected(item),
+        )).toList(),
+      ),
+    );
+  }
+}
+
+class _AnimatedChipButton extends StatefulWidget {
+  final String label;
+  final VoidCallback onTap;
+  const _AnimatedChipButton({required this.label, required this.onTap});
+
+  @override
+  State<_AnimatedChipButton> createState() => _AnimatedChipButtonState();
+}
+
+class _AnimatedChipButtonState extends State<_AnimatedChipButton> {
+  bool _pressed = false;
+  bool _tapped = false;
+
+  void _handleTap() {
+    setState(() => _tapped = true);
+    Future.delayed(const Duration(milliseconds: 120), widget.onTap);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _pressed = true),
+      onTapUp: (_) => setState(() => _pressed = false),
+      onTapCancel: () => setState(() => _pressed = false),
+      onTap: _handleTap,
+      child: AnimatedScale(
+        scale: _tapped ? 1.08 : (_pressed ? 0.94 : 1.0),
+        duration: const Duration(milliseconds: 110),
+        curve: Curves.easeOut,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 110),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+          decoration: BoxDecoration(
+            color: _tapped ? AppColors.brand.withOpacity(0.18) : AppColors.background,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: _tapped ? AppColors.brand : Colors.white.withOpacity(0.10),
             ),
-          );
-        }).toList(),
+          ),
+          child: Text(
+            widget.label,
+            style: TextStyle(
+              color: _tapped ? AppColors.brand : AppColors.textPrimary,
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
       ),
     );
   }
