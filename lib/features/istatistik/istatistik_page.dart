@@ -107,6 +107,16 @@ class _IstatistikPageState extends State<IstatistikPage> {
     final toplamKayip = allCoupons.where((c) => c.status == CouponStatus.risk).fold(0.0, (s, c) => s + _parseAmount(c.stake));
     final netKarZarar = toplamKazanc - toplamKayip;
 
+    // Günlük gruplama
+    final Map<String, List<Coupon>> gunlukMap = {};
+    for (final c in allCoupons) {
+      if (c.createdAt == null) continue;
+      final key = '${c.createdAt!.year}-${c.createdAt!.month.toString().padLeft(2,'0')}-${c.createdAt!.day.toString().padLeft(2,'0')}';
+      gunlukMap.putIfAbsent(key, () => []).add(c);
+    }
+    final gunlukList = gunlukMap.entries.toList()
+      ..sort((a, b) => b.key.compareTo(a.key));
+
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
       children: [
@@ -299,6 +309,12 @@ class _IstatistikPageState extends State<IstatistikPage> {
               ],
             ),
           ),
+
+          // ── Günlük Geçmiş ─────────────────────────────────────────────────
+          if (gunlukList.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            _DailyHistory(gunlukList: gunlukList, fmt: _fmt, parseAmount: _parseAmount),
+          ],
 
           // ── Lig Bazlı İstatistik ──────────────────────────────────────────
           if (ligList.isNotEmpty) ...[
@@ -671,6 +687,140 @@ class _NetStat extends StatelessWidget {
           Text(label, style: TextStyle(color: color.withOpacity(0.7), fontSize: 10, fontWeight: FontWeight.w600)),
           const SizedBox(height: 4),
           Text(value, style: TextStyle(color: color, fontSize: 15, fontWeight: FontWeight.w800)),
+        ],
+      ),
+    );
+  }
+}
+
+
+// ─── Günlük Geçmiş ───────────────────────────────────────────────────────────
+
+class _DailyHistory extends StatelessWidget {
+  final List<MapEntry<String, List<Coupon>>> gunlukList;
+  final String Function(double) fmt;
+  final double Function(String) parseAmount;
+
+  const _DailyHistory({required this.gunlukList, required this.fmt, required this.parseAmount});
+
+  static const _days = ['', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
+  static const _months = ['', 'Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+
+  @override
+  Widget build(BuildContext context) {
+    final show = gunlukList.take(7).toList();
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.border, width: 0.5),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('GÜNLÜK GEÇMİŞ', style: TextStyle(color: AppColors.textTertiary.withOpacity(0.7), fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 1.0)),
+                Text('Son ${show.length} gün', style: const TextStyle(color: AppColors.textTertiary, fontSize: 11)),
+              ],
+            ),
+          ),
+          const SizedBox(height: 10),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+            child: Container(height: 0.5, color: AppColors.border),
+          ),
+          ...show.map((entry) {
+            final dt = DateTime.parse(entry.key);
+            final coupons = entry.value;
+            final tuttu = coupons.where((c) => c.status == CouponStatus.winning).length;
+            final yatti = coupons.where((c) => c.status == CouponStatus.risk).length;
+            final yatirim = coupons.fold(0.0, (s, c) => s + parseAmount(c.stake));
+            final kazanc = coupons.where((c) => c.status == CouponStatus.winning).fold(0.0, (s, c) => s + parseAmount(c.potential));
+            final net = kazanc - yatirim + coupons.where((c) => c.status == CouponStatus.winning).fold(0.0, (s, c) => s + parseAmount(c.stake));
+            final netVal = kazanc - yatirim;
+            final isPos = netVal >= 0;
+            final netColor = netVal > 0 ? AppColors.green : netVal < 0 ? AppColors.red : AppColors.textSecondary;
+
+            return Container(
+              padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+              decoration: BoxDecoration(
+                border: Border(bottom: BorderSide(color: AppColors.border, width: 0.5)),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 3,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: netVal > 0 ? AppColors.green : netVal < 0 ? AppColors.red : AppColors.border,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: AppColors.background,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text('${dt.day}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: AppColors.textPrimary, height: 1)),
+                        Text(_days[dt.weekday], style: const TextStyle(fontSize: 9, color: AppColors.textTertiary)),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('${coupons.length} kupon', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                            const SizedBox(height: 3),
+                            Row(
+                              children: [
+                                Container(width: 7, height: 7, decoration: BoxDecoration(color: AppColors.green, shape: BoxShape.circle)),
+                                const SizedBox(width: 3),
+                                Text('$tuttu tuttu', style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                                const SizedBox(width: 8),
+                                Container(width: 7, height: 7, decoration: BoxDecoration(color: AppColors.red, shape: BoxShape.circle)),
+                                const SizedBox(width: 3),
+                                Text('$yatti yattı', style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                              ],
+                            ),
+                          ],
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text('${netVal >= 0 ? '+' : ''}${fmt(netVal)}', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: netColor)),
+                            const SizedBox(height: 3),
+                            Text('${fmt(yatirim)} yatırım · ${fmt(kazanc)} kazanç', style: const TextStyle(fontSize: 10, color: AppColors.textTertiary)),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 10, 16, 14),
+            child: Center(
+              child: Text('Tüm geçmişi gör →', style: const TextStyle(fontSize: 11, color: AppColors.brand)),
+            ),
+          ),
         ],
       ),
     );
