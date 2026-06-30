@@ -37,6 +37,17 @@ class CouponCard extends StatefulWidget {
 
 class _CouponCardState extends State<CouponCard> {
   bool _pressed = false;
+  bool? _localIsPublic;
+
+  bool get _isPublic => _localIsPublic ?? widget.coupon.isPublic;
+
+  @override
+  void didUpdateWidget(CouponCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.coupon.isPublic != widget.coupon.isPublic) {
+      _localIsPublic = null;
+    }
+  }
 
   Color _potentialColor(CouponStatus status) {
     switch (status) {
@@ -225,9 +236,12 @@ class _CouponCardState extends State<CouponCard> {
                               onTap: widget.onEdit,
                             ),
                             _ActionBtn(
-                              icon: widget.coupon.isPublic ? Icons.public_rounded : Icons.public_off_rounded,
-                              color: widget.coupon.isPublic ? AppColors.brand : AppColors.textTertiary,
-                              onTap: widget.onPublicToggle,
+                              icon: _isPublic ? Icons.visibility_rounded : Icons.visibility_off_outlined,
+                              color: _isPublic ? AppColors.brand : AppColors.textTertiary,
+                              onTap: () {
+                                setState(() => _localIsPublic = !_isPublic);
+                                widget.onPublicToggle?.call();
+                              },
                             ),
                             _ActionBtn(
                               icon: Icons.ios_share_rounded,
