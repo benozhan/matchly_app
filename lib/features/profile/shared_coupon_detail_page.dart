@@ -135,8 +135,7 @@ class _SharedCouponDetailPageState extends State<SharedCouponDetailPage> {
       final dt = DateTime.parse(raw).toLocal();
       const months = ['', 'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
                       'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
-  return '${dt.day}.${dt.month}.${dt.year}';
-          ' ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+  return '${dt.day}.${dt.month}.${dt.year} ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
     } catch (_) { return raw; }
   }
 

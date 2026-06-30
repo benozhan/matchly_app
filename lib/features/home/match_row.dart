@@ -144,7 +144,6 @@ class _MiniAvatar extends StatelessWidget {
 
   const _MiniAvatar({required this.abbrev, this.dimmed = false});
 
-  @override
   Color _teamColor() {
     final colors = [
       const Color(0xFF2D4A6E), const Color(0xFF16A34A), const Color(0xFFDC2626),
