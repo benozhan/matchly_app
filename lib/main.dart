@@ -70,7 +70,10 @@ class _MatchlyAppState extends State<MatchlyApp> {
       }
     });
     _signedIn = Supabase.instance.client.auth.currentSession != null;
-    if (_signedIn) NotificationService.instance.initialize();
+    if (_signedIn) {
+      NotificationService.instance.initialize();
+      _syncOneSignalTag();
+    }
     AppState.instance.init();
     AppState.instance.addListener(() => setState(() {}));
     // Bildirim tap handler
@@ -103,13 +106,17 @@ class _MatchlyAppState extends State<MatchlyApp> {
     super.dispose();
   }
 
+  Future<void> _syncOneSignalTag() async {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) return;
+    try {
+      await OneSignal.User.addTagWithKey('user_id', user.id);
+    } catch (_) {}
+  }
+
   void _handleSignedIn() async {
     final user = Supabase.instance.client.auth.currentUser;
-    if (user != null) {
-      try {
-        await OneSignal.User.addTagWithKey('user_id', user.id);
-      } catch (_) {}
-    }
+    await _syncOneSignalTag();
     if (user != null) {
       // Google/Apple ile girişte username yoksa username ekranı göster
       final meta = user.userMetadata ?? {};
