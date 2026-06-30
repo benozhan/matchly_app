@@ -337,7 +337,7 @@ class _IstatistikPageState extends State<IstatistikPage> {
                     final kaybeden = s['kaybeden'] as int;
                     final bahis = s['bahis'] as double;
                     final kazanc = s['kazanc'] as double;
-                    final net = kazanc;
+                    final net = kazanc - bahis;
                     return Padding(
                       padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
                       child: Row(
@@ -345,7 +345,7 @@ class _IstatistikPageState extends State<IstatistikPage> {
                           Expanded(flex: 3, child: Text(lig, style: const TextStyle(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w600))),
                           Expanded(child: Text('$kupon kupon', style: const TextStyle(color: AppColors.textSecondary, fontSize: 11))),
                           Expanded(child: Text('$kazanan ✅  $kaybeden ❌', style: const TextStyle(fontSize: 11, color: AppColors.textSecondary))),
-                          Expanded(child: Text((net >= 0 ? '+' : '') + _fmt(net.abs()), style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: net >= 0 ? AppColors.green : AppColors.red))),
+                          Expanded(child: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text((net >= 0 ? '+' : '') + _fmt(net.abs()), style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: net >= 0 ? AppColors.green : AppColors.red)))),
                         ],
                       ),
                     );
