@@ -19,9 +19,10 @@ class _IstatistikPageState extends State<IstatistikPage> {
 
   List<Coupon> get _filtered {
     if (_selectedLig == 'Tümü') return widget.allCoupons;
+    final key = _selectedLig.toLowerCase();
     return widget.allCoupons.where((c) {
-      final lig = c.meta.split('·').first.trim();
-      return lig == _selectedLig;
+      final lig = c.meta.split('·').first.trim().toLowerCase();
+      return lig == key;
     }).toList();
   }
 
@@ -48,71 +49,107 @@ class _IstatistikPageState extends State<IstatistikPage> {
   }
 
   static BoxDecoration _cardDeco() => BoxDecoration(
-        color: AppColors.card,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.border, width: 0.5),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.border,
-            blurRadius: 24,
-            offset: const Offset(0, 10),
-            spreadRadius: -4,
-          ),
-        ],
-      );
+    color: AppColors.card,
+    borderRadius: BorderRadius.circular(20),
+    border: Border.all(color: AppColors.border, width: 0.5),
+    boxShadow: [
+      BoxShadow(
+        color: AppColors.border,
+        blurRadius: 24,
+        offset: const Offset(0, 10),
+        spreadRadius: -4,
+      ),
+    ],
+  );
 
   @override
   Widget build(BuildContext context) {
     final allCoupons = _filtered;
-    final total    = allCoupons.length;
-    final kazanan  = allCoupons.where((c) => c.status == CouponStatus.winning).length;
-    final kaybeden = allCoupons.where((c) => c.status == CouponStatus.risk).length;
-    final iptal    = allCoupons.where((c) => c.status == CouponStatus.cancelled).length;
-    final aktif    = allCoupons.where((c) => c.status == CouponStatus.pending).length;
+    final total = allCoupons.length;
+    final kazanan = allCoupons
+        .where((c) => c.status == CouponStatus.winning)
+        .length;
+    final kaybeden = allCoupons
+        .where((c) => c.status == CouponStatus.risk)
+        .length;
+    final iptal = allCoupons
+        .where((c) => c.status == CouponStatus.cancelled)
+        .length;
+    final aktif = allCoupons
+        .where((c) => c.status == CouponStatus.pending)
+        .length;
     final resolved = kazanan + kaybeden;
-    final basari   = resolved > 0 ? (kazanan / resolved * 100).round() : 0;
-
-    final toplamBahis    = _fmt(allCoupons.fold(0.0, (s, c) => s + _parseAmount(c.stake)));
-    final toplamBeklenti = _fmt(allCoupons.fold(0.0, (s, c) => s + _parseAmount(c.potential)));
+    final basari = resolved > 0 ? (kazanan / resolved * 100).round() : 0;
 
     final recent = allCoupons
         .where((c) => c.status != CouponStatus.pending)
-        .toList()
-        .reversed
         .take(5)
         .toList();
 
-    // Lig bazlı istatistik
+    // Site bazlı istatistik (kupon eklerken girilen bahis sitesi adına göre
+    // gruplanır). Büyük/küçük harf farkını yok sayıp ilk görülen yazımı
+    // gösterim için kullanıyoruz, ör. "Yasalbahis" ve "yasalbahis" tek
+    // satırda birleşsin.
     final ligStats = <String, Map<String, dynamic>>{};
+    final ligDisplay = <String, String>{};
     for (final c in allCoupons) {
-      final lig = c.meta.split('·').first.trim().isEmpty ? 'Diğer' : c.meta.split('·').first.trim();
-      ligStats.putIfAbsent(lig, () => {'kupon': 0, 'kazanan': 0, 'kaybeden': 0, 'bahis': 0.0, 'kazanc': 0.0});
+      final ligRaw = c.meta.split('·').first.trim().isEmpty
+          ? 'Diğer'
+          : c.meta.split('·').first.trim();
+      final lig = ligRaw.toLowerCase();
+      ligDisplay.putIfAbsent(lig, () => ligRaw);
+      ligStats.putIfAbsent(
+        lig,
+        () => {
+          'kupon': 0,
+          'kazanan': 0,
+          'kaybeden': 0,
+          'bahis': 0.0,
+          'kazanc': 0.0,
+        },
+      );
       ligStats[lig]!['kupon'] = (ligStats[lig]!['kupon'] as int) + 1;
       if (c.status == CouponStatus.winning) {
         ligStats[lig]!['kazanan'] = (ligStats[lig]!['kazanan'] as int) + 1;
-        ligStats[lig]!['kazanc'] = (ligStats[lig]!['kazanc'] as double) + _parseAmount(c.potential) - _parseAmount(c.stake);
+        ligStats[lig]!['kazanc'] =
+            (ligStats[lig]!['kazanc'] as double) +
+            _parseAmount(c.potential) -
+            _parseAmount(c.stake);
       }
       if (c.status == CouponStatus.risk) {
         ligStats[lig]!['kaybeden'] = (ligStats[lig]!['kaybeden'] as int) + 1;
-        ligStats[lig]!['kazanc'] = (ligStats[lig]!['kazanc'] as double) - _parseAmount(c.stake);
+        ligStats[lig]!['kazanc'] =
+            (ligStats[lig]!['kazanc'] as double) - _parseAmount(c.stake);
       }
       if (c.status != CouponStatus.pending) {
-        ligStats[lig]!['bahis'] = (ligStats[lig]!['bahis'] as double) + _parseAmount(c.stake);
+        ligStats[lig]!['bahis'] =
+            (ligStats[lig]!['bahis'] as double) + _parseAmount(c.stake);
       }
     }
-    final ligList = ligStats.entries.toList()
-      ..sort((a, b) => (b.value['kupon'] as int).compareTo(a.value['kupon'] as int));
+    final ligList =
+        ligStats.entries
+            .map((e) => MapEntry(ligDisplay[e.key]!, e.value))
+            .toList()
+          ..sort(
+            (a, b) =>
+                (b.value['kupon'] as int).compareTo(a.value['kupon'] as int),
+          );
 
     // Net kar/zarar
-    final toplamKazanc = allCoupons.where((c) => c.status == CouponStatus.winning).fold(0.0, (s, c) => s + _parseAmount(c.potential));
-    final toplamKayip = allCoupons.where((c) => c.status == CouponStatus.risk).fold(0.0, (s, c) => s + _parseAmount(c.stake));
+    final toplamKazanc = allCoupons
+        .where((c) => c.status == CouponStatus.winning)
+        .fold(0.0, (s, c) => s + _parseAmount(c.potential));
+    final toplamKayip = allCoupons
+        .where((c) => c.status == CouponStatus.risk)
+        .fold(0.0, (s, c) => s + _parseAmount(c.stake));
     final netKarZarar = toplamKazanc - toplamKayip;
 
     // Günlük gruplama
     final Map<String, List<Coupon>> gunlukMap = {};
     for (final c in allCoupons) {
       if (c.createdAt == null) continue;
-      final key = '${c.createdAt!.year}-${c.createdAt!.month.toString().padLeft(2,'0')}-${c.createdAt!.day.toString().padLeft(2,'0')}';
+      final key =
+          '${c.createdAt!.year}-${c.createdAt!.month.toString().padLeft(2, '0')}-${c.createdAt!.day.toString().padLeft(2, '0')}';
       gunlukMap.putIfAbsent(key, () => []).add(c);
     }
     final gunlukList = gunlukMap.entries.toList()
@@ -121,7 +158,6 @@ class _IstatistikPageState extends State<IstatistikPage> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
       children: [
-
         // ── Header ───────────────────────────────────────────────────────────
         const Text(
           'İstatistik',
@@ -143,48 +179,62 @@ class _IstatistikPageState extends State<IstatistikPage> {
         ),
         const SizedBox(height: 12),
 
-        // ── Lig filtre ────────────────────────────────────────────────────────
-        Builder(builder: (context) {
-          final ligler = ['Tümü', ...widget.allCoupons.map((c) => c.meta.split('·').first.trim()).toSet().toList()..sort()];
-          return SizedBox(
-            height: 36,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: ligler.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 8),
-              itemBuilder: (_, i) {
-                final lig = ligler[i];
-                final selected = _selectedLig == lig;
-                return GestureDetector(
-                  onTap: () => setState(() => _selectedLig = lig),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: selected ? AppColors.brand : AppColors.card,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: selected ? AppColors.brand : AppColors.border),
-                    ),
-                    child: Text(
-                      lig,
-                      style: TextStyle(
-                        color: selected ? Colors.white : AppColors.textSecondary,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
+        // ── Site filtre ───────────────────────────────────────────────────────
+        Builder(
+          builder: (context) {
+            final siteDisplay = <String, String>{};
+            for (final c in widget.allCoupons) {
+              final raw = c.meta.split('·').first.trim();
+              if (raw.isEmpty) continue;
+              siteDisplay.putIfAbsent(raw.toLowerCase(), () => raw);
+            }
+            final ligler = ['Tümü', ...siteDisplay.values.toList()..sort()];
+            return SizedBox(
+              height: 36,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: ligler.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 8),
+                itemBuilder: (_, i) {
+                  final lig = ligler[i];
+                  final selected = _selectedLig == lig;
+                  return GestureDetector(
+                    onTap: () => setState(() => _selectedLig = lig),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: selected ? AppColors.brand : AppColors.card,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: selected ? AppColors.brand : AppColors.border,
+                        ),
+                      ),
+                      child: Text(
+                        lig,
+                        style: TextStyle(
+                          color: selected
+                              ? Colors.white
+                              : AppColors.textSecondary,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ),
-                  ),
-                );
-              },
-            ),
-          );
-        }),
+                  );
+                },
+              ),
+            );
+          },
+        ),
         const SizedBox(height: 16),
 
         // ── Empty state ───────────────────────────────────────────────────────
         if (total == 0) ...[
           _EmptyState(),
         ] else ...[
-
           // ── Top summary — 4 stats ─────────────────────────────────────────
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
@@ -192,38 +242,32 @@ class _IstatistikPageState extends State<IstatistikPage> {
             child: IntrinsicHeight(
               child: Row(
                 children: [
-                  _SumStat(value: '$total',   label: 'Toplam',  color: AppColors.textSecondary),
+                  _SumStat(
+                    value: '$total',
+                    label: 'Toplam',
+                    color: AppColors.textSecondary,
+                  ),
                   _SDivider(),
-                  _SumStat(value: '$kazanan', label: 'Kazanan', color: AppColors.green),
+                  _SumStat(
+                    value: '$kazanan',
+                    label: 'Kazanan',
+                    color: AppColors.green,
+                  ),
                   _SDivider(),
-                  _SumStat(value: '$kaybeden',label: 'Kaybeden',color: AppColors.red),
+                  _SumStat(
+                    value: '$kaybeden',
+                    label: 'Kaybeden',
+                    color: AppColors.red,
+                  ),
                   _SDivider(),
-                  _SumStat(value: '$basari%', label: 'Başarı',  color: const Color(0xFFF0E8DA)),
+                  _SumStat(
+                    value: '$basari%',
+                    label: 'Başarı',
+                    color: const Color(0xFFF0E8DA),
+                  ),
                 ],
               ),
             ),
-          ),
-          const SizedBox(height: 12),
-
-          // ── Financial cards ───────────────────────────────────────────────
-          Row(
-            children: [
-              Expanded(
-                child: _FinCard(
-                  label: 'TOPLAM BAHİS',
-                  value: toplamBahis,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: _FinCard(
-                  label: 'TOPLAM BEKLENTİ',
-                  value: toplamBeklenti,
-                  color: AppColors.green,
-                ),
-              ),
-            ],
           ),
           const SizedBox(height: 12),
 
@@ -251,7 +295,10 @@ class _IstatistikPageState extends State<IstatistikPage> {
                   child: Container(height: 0.5, color: AppColors.border),
                 ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
                   child: Column(
                     children: [
                       _StatusRow(
@@ -296,15 +343,45 @@ class _IstatistikPageState extends State<IstatistikPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Net Kar / Zarar', style: TextStyle(color: AppColors.textSecondary, fontSize: 12, fontWeight: FontWeight.w600, letterSpacing: 0.5)),
+                const Text(
+                  'Net Kar / Zarar',
+                  style: TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.5,
+                  ),
+                ),
                 const SizedBox(height: 12),
                 Row(
                   children: [
-                    Expanded(child: _NetStat(label: 'Toplam Kazanç', value: _fmt(toplamKazanc), color: AppColors.green)),
+                    Expanded(
+                      child: _NetStat(
+                        label: 'Toplam Kazanç',
+                        value: _fmt(toplamKazanc),
+                        color: AppColors.green,
+                      ),
+                    ),
                     const SizedBox(width: 8),
-                    Expanded(child: _NetStat(label: 'Toplam Kayıp', value: _fmt(toplamKayip), color: AppColors.red)),
+                    Expanded(
+                      child: _NetStat(
+                        label: 'Toplam Kayıp',
+                        value: _fmt(toplamKayip),
+                        color: AppColors.red,
+                      ),
+                    ),
                     const SizedBox(width: 8),
-                    Expanded(child: _NetStat(label: 'Net', value: (netKarZarar >= 0 ? '+' : '') + _fmt(netKarZarar.abs()), color: netKarZarar >= 0 ? AppColors.green : AppColors.red)),
+                    Expanded(
+                      child: _NetStat(
+                        label: 'Net',
+                        value:
+                            (netKarZarar >= 0 ? '+' : '') +
+                            _fmt(netKarZarar.abs()),
+                        color: netKarZarar >= 0
+                            ? AppColors.green
+                            : AppColors.red,
+                      ),
+                    ),
                   ],
                 ),
               ],
@@ -314,10 +391,14 @@ class _IstatistikPageState extends State<IstatistikPage> {
           // ── Günlük Geçmiş ─────────────────────────────────────────────────
           if (gunlukList.isNotEmpty) ...[
             const SizedBox(height: 12),
-            _DailyHistory(gunlukList: gunlukList, fmt: _fmt, parseAmount: _parseAmount),
+            _DailyHistory(
+              gunlukList: gunlukList,
+              fmt: _fmt,
+              parseAmount: _parseAmount,
+            ),
           ],
 
-          // ── Lig Bazlı İstatistik ──────────────────────────────────────────
+          // ── Site Bazlı İstatistik ──────────────────────────────────────────
           if (ligList.isNotEmpty) ...[
             const SizedBox(height: 12),
             Container(
@@ -327,7 +408,15 @@ class _IstatistikPageState extends State<IstatistikPage> {
                 children: [
                   const Padding(
                     padding: EdgeInsets.fromLTRB(16, 14, 16, 0),
-                    child: Text('Lig Bazlı', style: TextStyle(color: AppColors.textSecondary, fontSize: 12, fontWeight: FontWeight.w600, letterSpacing: 0.5)),
+                    child: Text(
+                      'Site Bazlı',
+                      style: TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 8),
                   ...ligList.map((e) {
@@ -343,10 +432,51 @@ class _IstatistikPageState extends State<IstatistikPage> {
                       padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
                       child: Row(
                         children: [
-                          Expanded(flex: 3, child: Text(lig, style: const TextStyle(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w600))),
-                          Expanded(child: Text('$kupon kupon', style: const TextStyle(color: AppColors.textSecondary, fontSize: 11))),
-                          Expanded(child: Text('$kazanan ✅  $kaybeden ❌', style: const TextStyle(fontSize: 11, color: AppColors.textSecondary))),
-                          Expanded(child: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text((net >= 0 ? '+' : '') + _fmt(net.abs()), style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: net >= 0 ? AppColors.green : AppColors.red)))),
+                          Expanded(
+                            flex: 3,
+                            child: Text(
+                              lig,
+                              style: const TextStyle(
+                                color: AppColors.textPrimary,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: Text(
+                              '$kupon kupon',
+                              style: const TextStyle(
+                                color: AppColors.textSecondary,
+                                fontSize: 11,
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: Text(
+                              '$kazanan ✅  $kaybeden ❌',
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                (net >= 0 ? '+' : '') + _fmt(net.abs()),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: net >= 0
+                                      ? AppColors.green
+                                      : AppColors.red,
+                                ),
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                     );
@@ -403,7 +533,11 @@ class _SumStat extends StatelessWidget {
   final String value;
   final String label;
   final Color color;
-  const _SumStat({required this.value, required this.label, required this.color});
+  const _SumStat({
+    required this.value,
+    required this.label,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -440,59 +574,6 @@ class _SDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) =>
       Container(width: 0.5, color: AppColors.border);
-}
-
-// ─── Financial hero card ──────────────────────────────────────────────────────
-
-class _FinCard extends StatelessWidget {
-  final String label;
-  final String value;
-  final Color color;
-  const _FinCard({required this.label, required this.value, required this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(16, 18, 16, 18),
-      decoration: BoxDecoration(
-        color: AppColors.card,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.border, width: 0.5),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.border,
-            blurRadius: 24,
-            offset: const Offset(0, 10),
-            spreadRadius: -4,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              color: AppColors.textTertiary.withOpacity(0.8),
-              fontSize: 9,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.8,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: TextStyle(
-              color: color,
-              fontSize: 24,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.8,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 // ─── Status bar row ───────────────────────────────────────────────────────────
@@ -537,10 +618,7 @@ class _StatusRow extends StatelessWidget {
             borderRadius: BorderRadius.circular(999),
             child: Stack(
               children: [
-                Container(
-                  height: 4,
-                  color: AppColors.border,
-                ),
+                Container(height: 4, color: AppColors.border),
                 FractionallySizedBox(
                   widthFactor: pct.clamp(0.0, 1.0),
                   child: Container(
@@ -664,14 +742,18 @@ class _EmptyState extends StatelessWidget {
       ),
     );
   }
-
 }
+
 class _NetStat extends StatelessWidget {
   final String label;
   final String value;
   final Color color;
 
-  const _NetStat({required this.label, required this.value, required this.color});
+  const _NetStat({
+    required this.label,
+    required this.value,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -685,15 +767,28 @@ class _NetStat extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: TextStyle(color: color.withOpacity(0.7), fontSize: 10, fontWeight: FontWeight.w600)),
+          Text(
+            label,
+            style: TextStyle(
+              color: color.withOpacity(0.7),
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
           const SizedBox(height: 4),
-          Text(value, style: TextStyle(color: color, fontSize: 15, fontWeight: FontWeight.w800)),
+          Text(
+            value,
+            style: TextStyle(
+              color: color,
+              fontSize: 15,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
         ],
       ),
     );
   }
 }
-
 
 // ─── Günlük Geçmiş ───────────────────────────────────────────────────────────
 
@@ -702,7 +797,11 @@ class _DailyHistory extends StatelessWidget {
   final String Function(double) fmt;
   final double Function(String) parseAmount;
 
-  const _DailyHistory({required this.gunlukList, required this.fmt, required this.parseAmount});
+  const _DailyHistory({
+    required this.gunlukList,
+    required this.fmt,
+    required this.parseAmount,
+  });
 
   static const _days = ['', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
 
@@ -723,8 +822,22 @@ class _DailyHistory extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('GÜNLÜK GEÇMİŞ', style: TextStyle(color: AppColors.textTertiary.withOpacity(0.7), fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 1.0)),
-                Text('Son ${show.length} gün', style: const TextStyle(color: AppColors.textTertiary, fontSize: 11)),
+                Text(
+                  'GÜNLÜK GEÇMİŞ',
+                  style: TextStyle(
+                    color: AppColors.textTertiary.withOpacity(0.7),
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1.0,
+                  ),
+                ),
+                Text(
+                  'Son ${show.length} gün',
+                  style: const TextStyle(
+                    color: AppColors.textTertiary,
+                    fontSize: 11,
+                  ),
+                ),
               ],
             ),
           ),
@@ -736,17 +849,32 @@ class _DailyHistory extends StatelessWidget {
           ...show.map((entry) {
             final dt = DateTime.parse(entry.key);
             final coupons = entry.value;
-            final tuttu = coupons.where((c) => c.status == CouponStatus.winning).length;
-            final yatti = coupons.where((c) => c.status == CouponStatus.risk).length;
-            final yatirim = coupons.fold(0.0, (s, c) => s + parseAmount(c.stake));
-            final kazanc = coupons.where((c) => c.status == CouponStatus.winning).fold(0.0, (s, c) => s + parseAmount(c.potential));
+            final tuttu = coupons
+                .where((c) => c.status == CouponStatus.winning)
+                .length;
+            final yatti = coupons
+                .where((c) => c.status == CouponStatus.risk)
+                .length;
+            final yatirim = coupons.fold(
+              0.0,
+              (s, c) => s + parseAmount(c.stake),
+            );
+            final kazanc = coupons
+                .where((c) => c.status == CouponStatus.winning)
+                .fold(0.0, (s, c) => s + parseAmount(c.potential));
             final netVal = kazanc - yatirim;
-            final netColor = netVal > 0 ? AppColors.green : netVal < 0 ? AppColors.red : AppColors.textSecondary;
+            final netColor = netVal > 0
+                ? AppColors.green
+                : netVal < 0
+                ? AppColors.red
+                : AppColors.textSecondary;
 
             return Container(
               padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
               decoration: BoxDecoration(
-                border: Border(bottom: BorderSide(color: AppColors.border, width: 0.5)),
+                border: Border(
+                  bottom: BorderSide(color: AppColors.border, width: 0.5),
+                ),
               ),
               child: Row(
                 children: [
@@ -754,7 +882,11 @@ class _DailyHistory extends StatelessWidget {
                     width: 3,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: netVal > 0 ? AppColors.green : netVal < 0 ? AppColors.red : AppColors.border,
+                      color: netVal > 0
+                          ? AppColors.green
+                          : netVal < 0
+                          ? AppColors.red
+                          : AppColors.border,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -769,8 +901,22 @@ class _DailyHistory extends StatelessWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text('${dt.day}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: AppColors.textPrimary, height: 1)),
-                        Text(_days[dt.weekday], style: const TextStyle(fontSize: 9, color: AppColors.textTertiary)),
+                        Text(
+                          '${dt.day}',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.textPrimary,
+                            height: 1,
+                          ),
+                        ),
+                        Text(
+                          _days[dt.weekday],
+                          style: const TextStyle(
+                            fontSize: 9,
+                            color: AppColors.textTertiary,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -783,17 +929,49 @@ class _DailyHistory extends StatelessWidget {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('${coupons.length} kupon', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                            Text(
+                              '${coupons.length} kupon',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
                             const SizedBox(height: 3),
                             Row(
                               children: [
-                                Container(width: 7, height: 7, decoration: BoxDecoration(color: AppColors.green, shape: BoxShape.circle)),
+                                Container(
+                                  width: 7,
+                                  height: 7,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.green,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
                                 const SizedBox(width: 3),
-                                Text('$tuttu tuttu', style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                                Text(
+                                  '$tuttu tuttu',
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
                                 const SizedBox(width: 8),
-                                Container(width: 7, height: 7, decoration: BoxDecoration(color: AppColors.red, shape: BoxShape.circle)),
+                                Container(
+                                  width: 7,
+                                  height: 7,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.red,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
                                 const SizedBox(width: 3),
-                                Text('$yatti yattı', style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                                Text(
+                                  '$yatti yattı',
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
                               ],
                             ),
                           ],
@@ -801,9 +979,22 @@ class _DailyHistory extends StatelessWidget {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            Text('${netVal >= 0 ? '+' : ''}${fmt(netVal)}', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: netColor)),
+                            Text(
+                              '${netVal >= 0 ? '+' : ''}${fmt(netVal)}',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: netColor,
+                              ),
+                            ),
                             const SizedBox(height: 3),
-                            Text('${fmt(yatirim)} yatırım · ${fmt(kazanc)} kazanç', style: const TextStyle(fontSize: 10, color: AppColors.textTertiary)),
+                            Text(
+                              '${fmt(yatirim)} yatırım · ${fmt(kazanc)} kazanç',
+                              style: const TextStyle(
+                                fontSize: 10,
+                                color: AppColors.textTertiary,
+                              ),
+                            ),
                           ],
                         ),
                       ],
@@ -816,11 +1007,19 @@ class _DailyHistory extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 10, 16, 14),
             child: GestureDetector(
-              onTap: () => Navigator.push(context, MaterialPageRoute(
-                builder: (_) => DailyHistoryPage(allCoupons: gunlukList.expand((e) => e.value).toList()),
-              )),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => DailyHistoryPage(
+                    allCoupons: gunlukList.expand((e) => e.value).toList(),
+                  ),
+                ),
+              ),
               child: Center(
-                child: Text('Tüm geçmişi gör →', style: const TextStyle(fontSize: 11, color: AppColors.brand)),
+                child: Text(
+                  'Tüm geçmişi gör →',
+                  style: const TextStyle(fontSize: 11, color: AppColors.brand),
+                ),
               ),
             ),
           ),
