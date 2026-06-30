@@ -179,6 +179,7 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
     _searchController = TextEditingController();
     _loadUser();
     _startLiveScoreTimer();
+    _startPeriodicRefresh();
     _subscribeToSupabaseCoupons();
     if (widget.pendingCouponId != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -258,6 +259,14 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
   }
 
   // ── live scores ────────────────────────────────────────────────────────────
+
+  void _startPeriodicRefresh() {
+    Future.delayed(const Duration(seconds: 30), () async {
+      if (!mounted) return;
+      await _loadUser();
+      _startPeriodicRefresh();
+    });
+  }
 
   void _startLiveScoreTimer() {
     _fetchLiveScores();
@@ -907,7 +916,7 @@ class _HeroCard extends StatelessWidget {
               _StatDot(count: losingCount,  label: 'kaybetti',  color: AppColors.red),
             ],
           ),
-          if ((todayStats['total'] as int) > 0) ...[
+          if ((todayStats['total'] as int) > 0 || (yesterdayStats['total'] as int) > 0) ...[
             const SizedBox(height: 12),
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 4),
