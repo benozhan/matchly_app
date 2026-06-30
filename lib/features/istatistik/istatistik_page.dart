@@ -43,7 +43,7 @@ class _IstatistikPageState extends State<IstatistikPage> {
       formatted = '₺$i';
     }
     if (i == 0) return '–';
-    return neg ? '-\$formatted' : formatted;
+    return neg ? '-$formatted' : formatted;
   }
 
   static BoxDecoration _cardDeco() => BoxDecoration(
