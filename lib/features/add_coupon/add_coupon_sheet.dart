@@ -1637,11 +1637,15 @@ class _AddSelectionPanel extends StatelessWidget {
               children: [
                 if (step != _AddStep.search) ...[
                   GestureDetector(
+                    behavior: HitTestBehavior.opaque,
                     onTap: onBack,
-                    child: const Icon(Icons.arrow_back_ios_new_rounded,
-                        color: AppColors.textTertiary, size: 15),
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                      child: Icon(Icons.arrow_back_ios_new_rounded,
+                          color: AppColors.textTertiary, size: 15),
+                    ),
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 6),
                 ],
                 Text(
                   _title,
@@ -1840,6 +1844,12 @@ class _MarketTile extends StatefulWidget {
 
 class _MarketTileState extends State<_MarketTile> with SingleTickerProviderStateMixin {
   bool _pressed = false;
+  bool _tapped = false;
+
+  void _handleTap() {
+    setState(() => _tapped = true);
+    Future.delayed(const Duration(milliseconds: 130), widget.onTap);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1847,17 +1857,20 @@ class _MarketTileState extends State<_MarketTile> with SingleTickerProviderState
       onTapDown: (_) => setState(() => _pressed = true),
       onTapUp: (_) => setState(() => _pressed = false),
       onTapCancel: () => setState(() => _pressed = false),
-      onTap: widget.onTap,
+      onTap: _handleTap,
       child: AnimatedScale(
-        scale: _pressed ? 0.95 : 1.0,
-        duration: const Duration(milliseconds: 100),
+        scale: _tapped ? 1.05 : (_pressed ? 0.95 : 1.0),
+        duration: const Duration(milliseconds: 120),
         curve: Curves.easeOut,
-        child: Container(
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 120),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           decoration: BoxDecoration(
-            color: AppColors.background,
+            color: _tapped ? AppColors.brand.withOpacity(0.16) : AppColors.background,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.white.withOpacity(0.10)),
+            border: Border.all(
+              color: _tapped ? AppColors.brand : Colors.white.withOpacity(0.10),
+            ),
           ),
           child: Row(
             children: [
@@ -1994,41 +2007,70 @@ class _SearchBody extends StatelessWidget {
               ),
               itemBuilder: (_, i) {
                 final m = matchResults[i];
-                return InkWell(
-                  onTap: () => onMatchSelected(m.teams),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 10),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          m.teams,
-                          style: const TextStyle(
-                            color: AppColors.textPrimary,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        if (m.sublabel.isNotEmpty) ...[
-                          const SizedBox(height: 2),
-                          Text(
-                            m.sublabel,
-                            style: const TextStyle(
-                              color: AppColors.textTertiary,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                );
+                return _AnimatedMatchRow(match: m, onTap: () => onMatchSelected(m.teams));
               },
             ),
           ),
       ],
+    );
+  }
+}
+
+class _AnimatedMatchRow extends StatefulWidget {
+  final _MatchDisplay match;
+  final VoidCallback onTap;
+  const _AnimatedMatchRow({required this.match, required this.onTap});
+
+  @override
+  State<_AnimatedMatchRow> createState() => _AnimatedMatchRowState();
+}
+
+class _AnimatedMatchRowState extends State<_AnimatedMatchRow> {
+  bool _pressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final m = widget.match;
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapDown: (_) => setState(() => _pressed = true),
+      onTapUp: (_) => setState(() => _pressed = false),
+      onTapCancel: () => setState(() => _pressed = false),
+      onTap: widget.onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 110),
+        color: _pressed ? AppColors.brand.withOpacity(0.08) : Colors.transparent,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        child: AnimatedScale(
+          scale: _pressed ? 0.97 : 1.0,
+          duration: const Duration(milliseconds: 110),
+          curve: Curves.easeOut,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                m.teams,
+                style: const TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              if (m.sublabel.isNotEmpty) ...[
+                const SizedBox(height: 2),
+                Text(
+                  m.sublabel,
+                  style: const TextStyle(
+                    color: AppColors.textTertiary,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
