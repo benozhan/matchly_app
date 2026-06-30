@@ -7,6 +7,7 @@ import '../../models/coupon.dart';
 import '../../services/social_service.dart';
 import '../home/match_row.dart';
 import 'feed_page.dart';
+import 'user_list_page.dart';
 import 'user_search_page.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -246,6 +247,20 @@ class _ProfilePageState extends State<ProfilePage> {
                                 coupons: _sharedCoupons.length,
                                 username: widget.username,
                                 onScrollToCoupons: _scrollToCoupons,
+                                onTapFollowers: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        FollowersPage(username: widget.username),
+                                  ),
+                                ),
+                                onTapFollowing: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        FollowingPage(username: widget.username),
+                                  ),
+                                ),
                               ),
                             ),
                           ),
@@ -636,6 +651,8 @@ class _StatsRow extends StatelessWidget {
   final int coupons;
   final String username;
   final VoidCallback onScrollToCoupons;
+  final VoidCallback onTapFollowers;
+  final VoidCallback onTapFollowing;
 
   const _StatsRow({
     required this.followers,
@@ -643,6 +660,8 @@ class _StatsRow extends StatelessWidget {
     required this.coupons,
     required this.username,
     required this.onScrollToCoupons,
+    required this.onTapFollowers,
+    required this.onTapFollowing,
   });
 
   @override
@@ -668,6 +687,7 @@ class _StatsRow extends StatelessWidget {
             child: _StatCell(
               value: followers,
               label: 'Takipçi',
+              onTap: onTapFollowers,
             ),
           ),
           _VertDivider(),
@@ -675,6 +695,7 @@ class _StatsRow extends StatelessWidget {
             child: _StatCell(
               value: following,
               label: 'Takip',
+              onTap: onTapFollowing,
             ),
           ),
           _VertDivider(),
