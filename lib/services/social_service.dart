@@ -179,18 +179,7 @@ class SocialService {
 
   /// Fetches full coupon detail from backend. Returns null on error/not-found.
   Future<CouponDetail?> getCouponDetail(String couponId) async {
-    // Önce backend'den dene
-    try {
-      final res = await _client
-          .get(Uri.parse('$_kBaseUrl/social/coupons/$couponId'))
-          .timeout(_kTimeout);
-      if (res.statusCode == 200) {
-        return CouponDetail.fromJson(
-            jsonDecode(res.body) as Map<String, dynamic>);
-      }
-    } catch (_) {}
-
-    // Backend bulamazsa Supabase'den direkt çek
+    // Önce Supabase'den canlı veriyi çek (her zaman güncel)
     try {
       final sb = Supabase.instance.client;
       final coupon = await sb
@@ -218,6 +207,17 @@ class SocialService {
           lastScore: m['score'] as String? ?? '',
         )).toList(),
       );
+    } catch (_) {}
+
+    // Supabase'de bulunamazsa backend API'ye düş
+    try {
+      final res = await _client
+          .get(Uri.parse('$_kBaseUrl/social/coupons/$couponId'))
+          .timeout(_kTimeout);
+      if (res.statusCode == 200) {
+        return CouponDetail.fromJson(
+            jsonDecode(res.body) as Map<String, dynamic>);
+      }
     } catch (_) {}
     return null;
   }
