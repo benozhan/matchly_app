@@ -51,6 +51,7 @@ class Coupon {
         progress: progress,
         matches: matches,
         sharedId: sharedId ?? this.sharedId,
+        createdAt: createdAt,
     isPublic: isPublic ?? this.isPublic,
       );
 }
@@ -82,5 +83,7 @@ extension CouponX on Coupon {
     progress: progress,
     matches: matches,
     sharedId: sharedId,
+    createdAt: createdAt,
+    isPublic: isPublic,
   );
 }

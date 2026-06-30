@@ -23,7 +23,7 @@ class CouponStorageService {
           'stake': coupon.stake,
           'potential': coupon.potential,
         })
-        .select('id')
+        .select('id, created_at')
         .single();
 
     final couponId = couponRow['id'] as String;
@@ -56,6 +56,9 @@ class CouponStorageService {
       potential: coupon.potential,
       progress: coupon.progress,
       matches: coupon.matches,
+      createdAt: couponRow['created_at'] != null
+          ? DateTime.tryParse(couponRow['created_at'] as String)
+          : null,
     );
   }
 
