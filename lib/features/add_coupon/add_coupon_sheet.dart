@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'dart:io';
 import 'package:flutter/material.dart';
+import '../../services/coupon_storage_service.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../services/ai_coupon_service.dart';
 import '../../core/coupon_share.dart';
@@ -821,7 +822,10 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
     }
   }
 
-  void _saveCoupon() {
+  bool _saving = false;
+
+  Future<void> _saveCoupon() async {
+    if (_saving) return;
     if (selections.isEmpty) {
       CouponShare.showTopToast(context, 'En az bir maç seçimi ekleyin');
       return;
@@ -872,18 +876,20 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
             ),
           ];
 
-    Navigator.pop(
-      context,
-      Coupon(
-        title: selections.isEmpty ? 'Maç seçilmedi' : title,
-        meta: '$site · ${matches.length} seçim · ×$odds',
-        status: CouponStatus.pending,
-        stake: stake,
-        potential: potential,
-        progress: List.filled(matches.length, CouponStatus.pending),
-        matches: matches,
-      ),
+    final newCoupon = Coupon(
+      title: selections.isEmpty ? 'Maç seçilmedi' : title,
+      meta: '$site · ${matches.length} seçim · ×$odds',
+      status: CouponStatus.pending,
+      stake: stake,
+      potential: potential,
+      progress: List.filled(matches.length, CouponStatus.pending),
+      matches: matches,
     );
+
+    setState(() => _saving = true);
+    final savedCoupon = await CouponStorageService.instance.saveCoupon(newCoupon);
+    if (!mounted) return;
+    Navigator.pop(context, savedCoupon ?? newCoupon);
   }
 
   // ── search ────────────────────────────────────────────────────────────────
@@ -1256,19 +1262,29 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
               width: double.infinity,
               height: 52,
               child: ElevatedButton(
-                onPressed: _saveCoupon,
+                onPressed: _saving ? null : _saveCoupon,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.green,
                   foregroundColor: Colors.black,
+                  disabledBackgroundColor: AppColors.green.withOpacity(0.6),
                   elevation: 0,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16)),
                 ),
-                child: const Text(
-                  'Kaydet',
-                  style: TextStyle(
-                      fontSize: 15, fontWeight: FontWeight.w900),
-                ),
+                child: _saving
+                    ? const SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.5,
+                          color: Colors.black,
+                        ),
+                      )
+                    : const Text(
+                        'Kaydet',
+                        style: TextStyle(
+                            fontSize: 15, fontWeight: FontWeight.w900),
+                      ),
               ),
             ),
           ],

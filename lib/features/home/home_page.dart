@@ -563,23 +563,7 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
       builder: (_) => const AddCouponSheet(),
     );
     if (newCoupon == null) return;
-    final messenger = ScaffoldMessenger.of(context);
-    messenger.showSnackBar(
-      const SnackBar(
-        content: Row(
-          children: [
-            SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)),
-            SizedBox(width: 12),
-            Text('Kupon ekleniyor...'),
-          ],
-        ),
-        duration: Duration(seconds: 10),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-    final savedCoupon = await CouponStorageService.instance.saveCoupon(newCoupon);
-    setState(() => _entries.insert(0, _CouponEntry(coupon: savedCoupon ?? newCoupon)));
-    messenger.hideCurrentSnackBar();
+    setState(() => _entries.insert(0, _CouponEntry(coupon: newCoupon)));
     _loadUser(); // Arka planda yenile
   }
 
