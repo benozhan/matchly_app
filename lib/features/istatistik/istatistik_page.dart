@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'daily_history_page.dart';
 
 import '../../core/app_colors.dart';
 import '../../models/coupon.dart';
@@ -817,8 +818,13 @@ class _DailyHistory extends StatelessWidget {
           }),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 10, 16, 14),
-            child: Center(
-              child: Text('Tüm geçmişi gör →', style: const TextStyle(fontSize: 11, color: AppColors.brand)),
+            child: GestureDetector(
+              onTap: () => Navigator.push(context, MaterialPageRoute(
+                builder: (_) => DailyHistoryPage(allCoupons: gunlukList.expand((e) => e.value).toList()),
+              )),
+              child: Center(
+                child: Text('Tüm geçmişi gör →', style: const TextStyle(fontSize: 11, color: AppColors.brand)),
+              ),
             ),
           ),
         ],
