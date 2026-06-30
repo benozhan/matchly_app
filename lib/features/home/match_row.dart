@@ -112,7 +112,7 @@ class MatchRow extends StatelessWidget {
             child: Text(
               match.minute,
               textAlign: TextAlign.right,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppColors.textSecondary,
                 fontSize: 10,
                 fontWeight: FontWeight.w500,

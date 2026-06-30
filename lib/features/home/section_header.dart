@@ -35,7 +35,7 @@ class SectionHeader extends StatelessWidget {
           ),
         Text(
           title,
-          style: const TextStyle(
+          style: TextStyle(
             color: AppColors.textTertiary,
             fontSize: 10,
             fontWeight: FontWeight.w700,

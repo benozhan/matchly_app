@@ -15,7 +15,7 @@ class NotificationBell extends StatelessWidget {
           child: Stack(
             clipBehavior: Clip.none,
             children: [
-              const Icon(Icons.notifications_outlined,
+              Icon(Icons.notifications_outlined,
                   color: AppColors.textSecondary, size: 22),
               if (count > 0)
                 Positioned(
@@ -24,7 +24,7 @@ class NotificationBell extends StatelessWidget {
                   child: Container(
                     width: 16,
                     height: 16,
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       color: AppColors.red,
                       shape: BoxShape.circle,
                     ),
@@ -87,7 +87,7 @@ class _NotificationsSheet extends StatelessWidget {
 
     return Container(
       height: MediaQuery.of(context).size.height * 0.7,
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.card,
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
@@ -104,8 +104,8 @@ class _NotificationsSheet extends StatelessWidget {
               ),
             ),
           ),
-          const Padding(
-            padding: EdgeInsets.fromLTRB(24, 12, 24, 16),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 12, 24, 16),
             child: Row(
               children: [
                 Text(
@@ -123,7 +123,7 @@ class _NotificationsSheet extends StatelessWidget {
           Container(height: 0.5, color: AppColors.border),
           Expanded(
             child: notifications.isEmpty
-                ? const Center(
+                ? Center(
                     child: Text(
                       'Henüz bildirim yok',
                       style: TextStyle(color: AppColors.textTertiary, fontSize: 14),
@@ -165,7 +165,7 @@ class _NotificationsSheet extends StatelessWidget {
                                 children: [
                                   Text(
                                     n.title,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       color: AppColors.textPrimary,
                                       fontSize: 14,
                                       fontWeight: FontWeight.w700,
@@ -174,7 +174,7 @@ class _NotificationsSheet extends StatelessWidget {
                                   const SizedBox(height: 3),
                                   Text(
                                     n.body,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       color: AppColors.textSecondary,
                                       fontSize: 13,
                                     ),

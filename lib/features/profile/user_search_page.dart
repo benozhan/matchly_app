@@ -118,12 +118,12 @@ class _UserSearchPageState extends State<UserSearchPage> {
               child: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.arrow_back_ios_new_rounded,
+                    icon: Icon(Icons.arrow_back_ios_new_rounded,
                         size: 18, color: AppColors.textSecondary),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                   const SizedBox(width: 4),
-                  const Text(
+                  Text(
                     'Kullanıcı Ara',
                     style: TextStyle(
                       color: AppColors.textPrimary,
@@ -150,14 +150,14 @@ class _UserSearchPageState extends State<UserSearchPage> {
                   controller: _controller,
                   onChanged: _onChanged,
                   focusNode: _focusNode,
-                  style: const TextStyle(
+                  style: TextStyle(
                       color: AppColors.textPrimary, fontSize: 15),
                   decoration: InputDecoration(
                     hintText: 'Kullanıcı adı veya isim',
                     hintStyle: TextStyle(
                         color: AppColors.textTertiary.withOpacity(0.7),
                         fontSize: 15),
-                    prefixIcon: const Icon(Icons.search_rounded,
+                    prefixIcon: Icon(Icons.search_rounded,
                         color: AppColors.textTertiary, size: 20),
                     border: InputBorder.none,
                     contentPadding:
@@ -170,7 +170,7 @@ class _UserSearchPageState extends State<UserSearchPage> {
             // ── Results ──────────────────────────────────────────────────
             Expanded(
               child: _loading
-                  ? const Center(
+                  ? Center(
                       child: CircularProgressIndicator(
                           color: AppColors.brand, strokeWidth: 2))
                   : _error != null
@@ -297,7 +297,7 @@ class _UserRow extends StatelessWidget {
                 children: [
                   Text(
                     user.displayName,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppColors.textPrimary,
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
@@ -306,7 +306,7 @@ class _UserRow extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     '@${user.username}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppColors.textTertiary,
                       fontSize: 12,
                     ),
@@ -358,7 +358,7 @@ class _HintState extends StatelessWidget {
   const _HintState();
 
   @override
-  Widget build(BuildContext context) => const Center(
+  Widget build(BuildContext context) => Center(
         child: Text(
           'Kullanıcı adı veya isim ara',
           style: TextStyle(
@@ -373,7 +373,7 @@ class _EmptyState extends StatelessWidget {
   const _EmptyState();
 
   @override
-  Widget build(BuildContext context) => const Center(
+  Widget build(BuildContext context) => Center(
         child: Text(
           'Kullanıcı bulunamadı',
           style: TextStyle(
@@ -392,7 +392,7 @@ class _ErrorState extends StatelessWidget {
   Widget build(BuildContext context) => Center(
         child: Text(
           message,
-          style: const TextStyle(
+          style: TextStyle(
               color: AppColors.textTertiary,
               fontSize: 14,
               fontWeight: FontWeight.w500),

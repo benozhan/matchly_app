@@ -159,7 +159,7 @@ class _IstatistikPageState extends State<IstatistikPage> {
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
       children: [
         // ── Header ───────────────────────────────────────────────────────────
-        const Text(
+        Text(
           'İstatistik',
           style: TextStyle(
             color: AppColors.textPrimary,
@@ -169,7 +169,7 @@ class _IstatistikPageState extends State<IstatistikPage> {
           ),
         ),
         const SizedBox(height: 4),
-        const Text(
+        Text(
           'Kupon performans özeti',
           style: TextStyle(
             color: AppColors.textTertiary,
@@ -343,7 +343,7 @@ class _IstatistikPageState extends State<IstatistikPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Net Kar / Zarar',
                   style: TextStyle(
                     color: AppColors.textSecondary,
@@ -406,8 +406,8 @@ class _IstatistikPageState extends State<IstatistikPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Padding(
-                    padding: EdgeInsets.fromLTRB(16, 14, 16, 0),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
                     child: Text(
                       'Site Bazlı',
                       style: TextStyle(
@@ -436,7 +436,7 @@ class _IstatistikPageState extends State<IstatistikPage> {
                             flex: 3,
                             child: Text(
                               lig,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 color: AppColors.textPrimary,
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
@@ -446,7 +446,7 @@ class _IstatistikPageState extends State<IstatistikPage> {
                           Expanded(
                             child: Text(
                               '$kupon kupon',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 color: AppColors.textSecondary,
                                 fontSize: 11,
                               ),
@@ -455,7 +455,7 @@ class _IstatistikPageState extends State<IstatistikPage> {
                           Expanded(
                             child: Text(
                               '$kazanan ✅  $kaybeden ❌',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 11,
                                 color: AppColors.textSecondary,
                               ),
@@ -557,7 +557,7 @@ class _SumStat extends StatelessWidget {
           const SizedBox(height: 3),
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.textTertiary,
               fontSize: 10,
               fontWeight: FontWeight.w500,
@@ -606,7 +606,7 @@ class _StatusRow extends StatelessWidget {
           width: 72,
           child: Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.textSecondary,
               fontSize: 12,
               fontWeight: FontWeight.w600,
@@ -689,7 +689,7 @@ class _RecentRow extends StatelessWidget {
                   coupon.title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.textPrimary,
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
@@ -716,13 +716,13 @@ class _RecentRow extends StatelessWidget {
 class _EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.symmetric(vertical: 52),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 52),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text('📊', style: TextStyle(fontSize: 36)),
-          SizedBox(height: 14),
+          const Text('📊', style: TextStyle(fontSize: 36)),
+          const SizedBox(height: 14),
           Text(
             'Henüz istatistik yok',
             textAlign: TextAlign.center,
@@ -732,7 +732,7 @@ class _EmptyState extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
           ),
-          SizedBox(height: 6),
+          const SizedBox(height: 6),
           Text(
             'Kupon ekledikçe burada görünecek.',
             textAlign: TextAlign.center,
@@ -833,7 +833,7 @@ class _DailyHistory extends StatelessWidget {
                 ),
                 Text(
                   'Son ${show.length} gün',
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.textTertiary,
                     fontSize: 11,
                   ),
@@ -903,7 +903,7 @@ class _DailyHistory extends StatelessWidget {
                       children: [
                         Text(
                           '${dt.day}',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
                             color: AppColors.textPrimary,
@@ -912,7 +912,7 @@ class _DailyHistory extends StatelessWidget {
                         ),
                         Text(
                           _days[dt.weekday],
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 9,
                             color: AppColors.textTertiary,
                           ),
@@ -931,7 +931,7 @@ class _DailyHistory extends StatelessWidget {
                           children: [
                             Text(
                               '${coupons.length} kupon',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 12,
                                 color: AppColors.textSecondary,
                               ),
@@ -950,7 +950,7 @@ class _DailyHistory extends StatelessWidget {
                                 const SizedBox(width: 3),
                                 Text(
                                   '$tuttu tuttu',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 11,
                                     color: AppColors.textSecondary,
                                   ),
@@ -967,7 +967,7 @@ class _DailyHistory extends StatelessWidget {
                                 const SizedBox(width: 3),
                                 Text(
                                   '$yatti yattı',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 11,
                                     color: AppColors.textSecondary,
                                   ),
@@ -990,7 +990,7 @@ class _DailyHistory extends StatelessWidget {
                             const SizedBox(height: 3),
                             Text(
                               '${fmt(yatirim)} yatırım · ${fmt(kazanc)} kazanç',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 10,
                                 color: AppColors.textTertiary,
                               ),
@@ -1018,7 +1018,7 @@ class _DailyHistory extends StatelessWidget {
               child: Center(
                 child: Text(
                   'Tüm geçmişi gör →',
-                  style: const TextStyle(fontSize: 11, color: AppColors.brand),
+                  style: TextStyle(fontSize: 11, color: AppColors.brand),
                 ),
               ),
             ),

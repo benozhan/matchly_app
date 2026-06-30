@@ -167,7 +167,7 @@ class _AuthPageState extends State<AuthPage> {
             child: ListView(
               padding: const EdgeInsets.fromLTRB(24, 42, 24, 24),
               children: [
-                const Text(
+                Text(
                   'Matchly',
                   textAlign: TextAlign.center,
                   style: TextStyle(
@@ -178,7 +178,7 @@ class _AuthPageState extends State<AuthPage> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                const Text(
+                Text(
                   'Kuponlarını hesabına kaydet.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
@@ -191,7 +191,7 @@ class _AuthPageState extends State<AuthPage> {
 
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.textPrimary,
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
@@ -243,7 +243,7 @@ class _AuthPageState extends State<AuthPage> {
                   const SizedBox(height: 14),
                   Text(
                     _error!,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppColors.red,
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
@@ -336,7 +336,7 @@ class _AuthPageState extends State<AuthPage> {
                     _isLogin
                         ? 'Hesabın yok mu? Kayıt ol'
                         : 'Zaten hesabın var mı? Giriş yap',
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppColors.textSecondary,
                       fontWeight: FontWeight.w600,
                     ),
@@ -382,7 +382,7 @@ class _AuthField extends StatelessWidget {
         obscureText: obscureText,
         keyboardType: keyboardType,
         autofillHints: autofillHints,
-        style: const TextStyle(
+        style: TextStyle(
           color: AppColors.textPrimary,
           fontSize: 14,
           fontWeight: FontWeight.w500,

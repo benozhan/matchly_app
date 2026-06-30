@@ -67,10 +67,10 @@ class _AyarlarPageState extends State<AyarlarPage> {
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.card,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Kullanıcı Adı Değiştir', style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w800)),
+        title: Text('Kullanıcı Adı Değiştir', style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w800)),
         content: TextField(
           controller: ctrl,
-          style: const TextStyle(color: AppColors.textPrimary),
+          style: TextStyle(color: AppColors.textPrimary),
           decoration: InputDecoration(
             hintText: 'Yeni kullanıcı adı',
             hintStyle: TextStyle(color: AppColors.textTertiary),
@@ -80,8 +80,8 @@ class _AyarlarPageState extends State<AyarlarPage> {
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('İptal', style: TextStyle(color: AppColors.textSecondary))),
-          TextButton(onPressed: () => Navigator.pop(ctx, ctrl.text.trim()), child: const Text('Kaydet', style: TextStyle(color: AppColors.brand, fontWeight: FontWeight.w700))),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text('İptal', style: TextStyle(color: AppColors.textSecondary))),
+          TextButton(onPressed: () => Navigator.pop(ctx, ctrl.text.trim()), child: Text('Kaydet', style: TextStyle(color: AppColors.brand, fontWeight: FontWeight.w700))),
         ],
       ),
     );
@@ -107,7 +107,7 @@ class _AyarlarPageState extends State<AyarlarPage> {
         builder: (ctx, setS) => AlertDialog(
           backgroundColor: AppColors.card,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: const Text("Şifre Değiştir", style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w800)),
+          title: Text("Şifre Değiştir", style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w800)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -118,12 +118,12 @@ class _AyarlarPageState extends State<AyarlarPage> {
               _PwField(ctrl: confirmCtrl, hint: "Yeni şifre tekrar"),
               if (dialogError != null) ...[
                 const SizedBox(height: 8),
-                Text(dialogError!, style: const TextStyle(color: AppColors.red, fontSize: 12)),
+                Text(dialogError!, style: TextStyle(color: AppColors.red, fontSize: 12)),
               ],
             ],
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("İptal", style: TextStyle(color: AppColors.textSecondary))),
+            TextButton(onPressed: () => Navigator.pop(ctx), child: Text("İptal", style: TextStyle(color: AppColors.textSecondary))),
             TextButton(
               onPressed: () async {
                 final oldP = oldCtrl.text.trim();
@@ -143,7 +143,7 @@ class _AyarlarPageState extends State<AyarlarPage> {
                   setS(() => dialogError = "Mevcut şifre yanlış");
                 }
               },
-              child: const Text("Kaydet", style: TextStyle(color: AppColors.brand, fontWeight: FontWeight.w700)),
+              child: Text("Kaydet", style: TextStyle(color: AppColors.brand, fontWeight: FontWeight.w700)),
             ),
           ],
         ),
@@ -157,11 +157,11 @@ class _AyarlarPageState extends State<AyarlarPage> {
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.card,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Çıkış Yap', style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w800)),
-        content: const Text('Hesabından çıkmak istediğine emin misin?', style: TextStyle(color: AppColors.textSecondary, fontSize: 14)),
+        title: Text('Çıkış Yap', style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w800)),
+        content: Text('Hesabından çıkmak istediğine emin misin?', style: TextStyle(color: AppColors.textSecondary, fontSize: 14)),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('İptal', style: TextStyle(color: AppColors.textSecondary))),
-          TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Çıkış Yap', style: TextStyle(color: AppColors.red, fontWeight: FontWeight.w700))),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text('İptal', style: TextStyle(color: AppColors.textSecondary))),
+          TextButton(onPressed: () => Navigator.pop(ctx, true), child: Text('Çıkış Yap', style: TextStyle(color: AppColors.red, fontWeight: FontWeight.w700))),
         ],
       ),
     );
@@ -197,7 +197,7 @@ class _AyarlarPageState extends State<AyarlarPage> {
   void _showComingSoon(BuildContext ctx) {
     ScaffoldMessenger.of(ctx).showSnackBar(
       SnackBar(
-        content: const Text(
+        content: Text(
           'Bu özellik yakında geliyor',
           style: TextStyle(color: AppColors.textPrimary, fontSize: 13),
         ),
@@ -274,7 +274,7 @@ class _AyarlarPageState extends State<AyarlarPage> {
                     children: [
                       Text(
                         _user?.displayName ?? 'Kullanıcı',
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: AppColors.textPrimary,
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
@@ -283,7 +283,7 @@ class _AyarlarPageState extends State<AyarlarPage> {
                       const SizedBox(height: 2),
                       Text(
                         '@${_user?.username ?? 'user'}',
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: AppColors.textTertiary,
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
@@ -292,7 +292,7 @@ class _AyarlarPageState extends State<AyarlarPage> {
                     ],
                   ),
                 ),
-                const Icon(
+                Icon(
                   Icons.chevron_right_rounded,
                   color: AppColors.textTertiary,
                   size: 20,
@@ -304,7 +304,7 @@ class _AyarlarPageState extends State<AyarlarPage> {
         const SizedBox(height: 24),
 
         // ── Header ───────────────────────────────────────────────────────────
-        const Text(
+        Text(
           'Ayarlar',
           style: TextStyle(
             color: AppColors.textPrimary,
@@ -314,7 +314,7 @@ class _AyarlarPageState extends State<AyarlarPage> {
           ),
         ),
         const SizedBox(height: 4),
-        const Text(
+        Text(
           'Uygulama tercihleri',
           style: TextStyle(
             color: AppColors.textTertiary,
@@ -367,10 +367,10 @@ class _AyarlarPageState extends State<AyarlarPage> {
                     foregroundColor: AppColors.textPrimary,
                     elevation: 0,
                     leading: IconButton(
-                      icon: const Icon(Icons.arrow_back_rounded, color: AppColors.textPrimary),
+                      icon: Icon(Icons.arrow_back_rounded, color: AppColors.textPrimary),
                       onPressed: () => Navigator.of(ctx).pop(),
                     ),
-                    title: const Text('Kupon Geçmişi', style: TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.w700)),
+                    title: Text('Kupon Geçmişi', style: TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.w700)),
                   ),
                   body: Theme(
                     data: Theme.of(ctx).copyWith(
@@ -628,13 +628,13 @@ class _ToggleRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(title,
-                    style: const TextStyle(
+                    style: TextStyle(
                         color: AppColors.textPrimary,
                         fontSize: 14,
                         fontWeight: FontWeight.w600)),
                 const SizedBox(height: 2),
                 Text(subtitle,
-                    style: const TextStyle(
+                    style: TextStyle(
                         color: AppColors.textTertiary,
                         fontSize: 11,
                         fontWeight: FontWeight.w400)),
@@ -687,21 +687,21 @@ class _ValueRow extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: Text(title,
-                  style: const TextStyle(
+                  style: TextStyle(
                       color: AppColors.textPrimary,
                       fontSize: 14,
                       fontWeight: FontWeight.w600)),
             ),
             if (value.isNotEmpty) ...[
               Text(value,
-                  style: const TextStyle(
+                  style: TextStyle(
                       color: AppColors.textTertiary,
                       fontSize: 13,
                       fontWeight: FontWeight.w500)),
               const SizedBox(width: 4),
             ],
             if (onTap != null)
-              const Icon(Icons.chevron_right_rounded,
+              Icon(Icons.chevron_right_rounded,
                   color: AppColors.textTertiary, size: 18),
           ],
         ),
@@ -750,7 +750,7 @@ class _ActionRow extends StatelessWidget {
                   if (subtitle.isNotEmpty) ...[
                     const SizedBox(height: 2),
                     Text(subtitle,
-                        style: const TextStyle(
+                        style: TextStyle(
                             color: AppColors.textTertiary,
                             fontSize: 11,
                             fontWeight: FontWeight.w400)),
@@ -758,7 +758,7 @@ class _ActionRow extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right_rounded,
+            Icon(Icons.chevron_right_rounded,
                 color: AppColors.textTertiary, size: 18),
           ],
         ),
@@ -778,10 +778,10 @@ class _PwField extends StatelessWidget {
     return TextField(
       controller: ctrl,
       obscureText: true,
-      style: const TextStyle(color: AppColors.textPrimary, fontSize: 13),
+      style: TextStyle(color: AppColors.textPrimary, fontSize: 13),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: const TextStyle(color: AppColors.textTertiary, fontSize: 12),
+        hintStyle: TextStyle(color: AppColors.textTertiary, fontSize: 12),
         filled: true,
         fillColor: AppColors.background,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),

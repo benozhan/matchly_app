@@ -114,7 +114,7 @@ class _CouponDetailPageState extends State<CouponDetailPage> {
                     children: [
                       IconButton(
                         onPressed: () => Navigator.of(context).pop(),
-                        icon: const Icon(
+                        icon: Icon(
                           Icons.arrow_back_ios_new_rounded,
                           color: AppColors.textPrimary,
                           size: 20,
@@ -124,7 +124,7 @@ class _CouponDetailPageState extends State<CouponDetailPage> {
                       IconButton(
                         onPressed: () => CouponShare.share(context, widget.coupon)
                             .then((id) => widget.onSharedIdGenerated?.call(id)),
-                        icon: const Icon(
+                        icon: Icon(
                           Icons.ios_share_rounded,
                           color: AppColors.textSecondary,
                           size: 20,
@@ -143,7 +143,7 @@ class _CouponDetailPageState extends State<CouponDetailPage> {
                             ),
                           ),
                           tooltip: 'Önizleme',
-                          icon: const Icon(
+                          icon: Icon(
                             Icons.open_in_new_rounded,
                             color: AppColors.textTertiary,
                             size: 18,
@@ -329,13 +329,13 @@ class _CouponDetailPageState extends State<CouponDetailPage> {
                               horizontal: 20, vertical: 16),
                           child: Row(
                             children: [
-                              const Icon(
+                              Icon(
                                 Icons.swap_horiz_rounded,
                                 color: AppColors.textTertiary,
                                 size: 18,
                               ),
                               const SizedBox(width: 12),
-                              const Expanded(
+                              Expanded(
                                 child: Text(
                                   'Durumu Değiştir',
                                   style: TextStyle(
@@ -471,9 +471,9 @@ class _CouponCommentsState extends State<_CouponComments> {
         children: [
           Row(
             children: [
-              Text('@${c.username}', style: const TextStyle(color: AppColors.brand, fontSize: 12, fontWeight: FontWeight.w700)),
+              Text('@${c.username}', style: TextStyle(color: AppColors.brand, fontSize: 12, fontWeight: FontWeight.w700)),
               const SizedBox(width: 8),
-              Text(_fmtTimeAgo(c.createdAt), style: const TextStyle(color: AppColors.textTertiary, fontSize: 11)),
+              Text(_fmtTimeAgo(c.createdAt), style: TextStyle(color: AppColors.textTertiary, fontSize: 11)),
               const Spacer(),
               if (c.userId == currentUserId)
                 GestureDetector(
@@ -481,16 +481,16 @@ class _CouponCommentsState extends State<_CouponComments> {
                     await CommentService.instance.deleteComment(c.id);
                     _load();
                   },
-                  child: const Icon(Icons.delete_outline, size: 16, color: AppColors.textTertiary),
+                  child: Icon(Icons.delete_outline, size: 16, color: AppColors.textTertiary),
                 ),
             ],
           ),
           const SizedBox(height: 4),
-          Text(c.content, style: const TextStyle(color: AppColors.textPrimary, fontSize: 13)),
+          Text(c.content, style: TextStyle(color: AppColors.textPrimary, fontSize: 13)),
           const SizedBox(height: 6),
           GestureDetector(
             onTap: () => _startReply(c.id, c.username),
-            child: const Text('Yanıtla', style: TextStyle(color: AppColors.textTertiary, fontSize: 11, fontWeight: FontWeight.w600)),
+            child: Text('Yanıtla', style: TextStyle(color: AppColors.textTertiary, fontSize: 11, fontWeight: FontWeight.w600)),
           ),
         ],
       ),
@@ -511,7 +511,7 @@ class _CouponCommentsState extends State<_CouponComments> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Yorumlar', style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w800)),
+        Text('Yorumlar', style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w800)),
         const SizedBox(height: 12),
         ...topLevel.expand((c) => [
           _buildCommentCard(c, currentUserId),
@@ -522,11 +522,11 @@ class _CouponCommentsState extends State<_CouponComments> {
             padding: const EdgeInsets.only(bottom: 8),
             child: Row(
               children: [
-                Text('@${_replyToUsername ?? ''} yanıtlanıyor', style: const TextStyle(color: AppColors.brand, fontSize: 12, fontWeight: FontWeight.w600)),
+                Text('@${_replyToUsername ?? ''} yanıtlanıyor', style: TextStyle(color: AppColors.brand, fontSize: 12, fontWeight: FontWeight.w600)),
                 const SizedBox(width: 8),
                 GestureDetector(
                   onTap: _cancelReply,
-                  child: const Icon(Icons.close, size: 14, color: AppColors.textTertiary),
+                  child: Icon(Icons.close, size: 14, color: AppColors.textTertiary),
                 ),
               ],
             ),
@@ -537,10 +537,10 @@ class _CouponCommentsState extends State<_CouponComments> {
             Expanded(
               child: TextField(
                 controller: _ctrl,
-                style: const TextStyle(color: AppColors.textPrimary, fontSize: 13),
+                style: TextStyle(color: AppColors.textPrimary, fontSize: 13),
                 decoration: InputDecoration(
                   hintText: 'Yorum yaz...',
-                  hintStyle: const TextStyle(color: AppColors.textTertiary),
+                  hintStyle: TextStyle(color: AppColors.textTertiary),
                   isDense: true,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   filled: true,
@@ -578,7 +578,7 @@ class _StatusSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const rows = [
+    final rows = [
       (CouponStatus.pending,   'Aktif',    Icons.radio_button_unchecked, AppColors.textSecondary),
       (CouponStatus.winning,   'Kazandı',  Icons.check_circle_outline,   AppColors.green),
       (CouponStatus.risk,      'Kaybetti', Icons.cancel_outlined,         AppColors.red),
@@ -605,8 +605,8 @@ class _StatusSheet extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 22),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 22),
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
@@ -718,7 +718,7 @@ class _DetailStat extends StatelessWidget {
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             color: AppColors.textTertiary,
             fontSize: 9,
             fontWeight: FontWeight.w700,

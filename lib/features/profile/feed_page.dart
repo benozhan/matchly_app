@@ -271,7 +271,7 @@ class _FeedPageState extends State<FeedPage>
                     children: [
                       if (widget.showBack)
                         IconButton(
-                          icon: const Icon(
+                          icon: Icon(
                             Icons.arrow_back_ios_new_rounded,
                             size: 18,
                             color: AppColors.textSecondary,
@@ -282,7 +282,7 @@ class _FeedPageState extends State<FeedPage>
                       if (!_loading)
                         GestureDetector(
                           onTap: _load,
-                          child: const Icon(
+                          child: Icon(
                             Icons.refresh_rounded,
                             size: 20,
                             color: AppColors.textSecondary,
@@ -293,8 +293,8 @@ class _FeedPageState extends State<FeedPage>
                 ),
 
                 // ── Large title ──────────────────────────────────────────────
-                const Padding(
-                  padding: EdgeInsets.fromLTRB(20, 4, 20, 2),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 4, 20, 2),
                   child: Text(
                     'Akış',
                     style: TextStyle(
@@ -305,8 +305,8 @@ class _FeedPageState extends State<FeedPage>
                     ),
                   ),
                 ),
-                const Padding(
-                  padding: EdgeInsets.fromLTRB(20, 0, 20, 16),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
                   child: Text(
                     'Takip ettiğin kullanıcıların paylaşımları',
                     style: TextStyle(
@@ -372,7 +372,7 @@ class _FeedPageState extends State<FeedPage>
                 // ── Body ─────────────────────────────────────────────────────
                 Expanded(
                   child: _loading
-                      ? const Center(
+                      ? Center(
                           child: CircularProgressIndicator(
                             color: AppColors.brand,
                             strokeWidth: 2,
@@ -578,7 +578,7 @@ class _FeedCard extends StatelessWidget {
                         children: [
                           Text(
                             item.displayName,
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: AppColors.textPrimary,
                               fontSize: 13,
                               fontWeight: FontWeight.w700,
@@ -588,7 +588,7 @@ class _FeedCard extends StatelessWidget {
                           ),
                           Text(
                             '@${item.username}',
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: AppColors.textTertiary,
                               fontSize: 11,
                             ),
@@ -600,7 +600,7 @@ class _FeedCard extends StatelessWidget {
                   const SizedBox(width: 8),
                   Text(
                     _fmtDate(item.createdAt),
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppColors.textTertiary,
                       fontSize: 11,
                     ),
@@ -628,7 +628,7 @@ class _FeedCard extends StatelessWidget {
                   ),
                   child: Text(
                     d.siteName,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppColors.brand,
                       fontSize: 10,
                       fontWeight: FontWeight.w700,
@@ -649,7 +649,7 @@ class _FeedCard extends StatelessWidget {
                 (d != null && d.title.isNotEmpty)
                     ? d.title
                     : 'Kupon #${item.couponId}',
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppColors.textPrimary,
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
@@ -705,7 +705,7 @@ class _FeedCard extends StatelessWidget {
                       ),
                     ),
                     const Spacer(),
-                    const Icon(
+                    Icon(
                       Icons.chevron_right_rounded,
                       size: 16,
                       color: AppColors.textTertiary,
@@ -744,7 +744,7 @@ class _StatChip extends StatelessWidget {
           children: [
             Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppColors.textTertiary,
                 fontSize: 9,
                 fontWeight: FontWeight.w500,
@@ -753,7 +753,7 @@ class _StatChip extends StatelessWidget {
             const SizedBox(height: 2),
             Text(
               value,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppColors.textPrimary,
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
@@ -793,7 +793,7 @@ class _SelectionProgress extends StatelessWidget {
         children: [
           Text(
             '$total seçim',
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.textSecondary,
               fontSize: 11,
               fontWeight: FontWeight.w600,
@@ -841,7 +841,7 @@ class _SelectionProgress extends StatelessWidget {
                 const SizedBox(width: 3),
                 Text(
                   '$winning',
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.green,
                     fontSize: 10,
                     fontWeight: FontWeight.w700,
@@ -854,7 +854,7 @@ class _SelectionProgress extends StatelessWidget {
                 const SizedBox(width: 3),
                 Text(
                   '$pending',
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.textSecondary,
                     fontSize: 10,
                     fontWeight: FontWeight.w700,
@@ -867,7 +867,7 @@ class _SelectionProgress extends StatelessWidget {
                 const SizedBox(width: 3),
                 Text(
                   '$lost',
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.red,
                     fontSize: 10,
                     fontWeight: FontWeight.w700,
@@ -913,7 +913,7 @@ class _EmptyBody extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            const Text(
+            Text(
               'Henüz akış yok',
               style: TextStyle(
                 color: AppColors.textPrimary,
@@ -923,7 +923,7 @@ class _EmptyBody extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Kullanıcı ara ve takip etmeye başla.',
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
@@ -984,7 +984,7 @@ class _ErrorBody extends StatelessWidget {
           color: AppColors.textTertiary.withOpacity(0.4),
         ),
         const SizedBox(height: 12),
-        const Text(
+        Text(
           'Yüklenemedi',
           style: TextStyle(
             color: AppColors.textPrimary,
@@ -1005,7 +1005,7 @@ class _ErrorBody extends StatelessWidget {
                 width: 0.5,
               ),
             ),
-            child: const Text(
+            child: Text(
               'Tekrar Dene',
               style: TextStyle(
                 color: AppColors.brand,
@@ -1043,7 +1043,7 @@ class _EmptyTabBody extends StatelessWidget {
             Text(
               message,
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppColors.textSecondary,
                 fontSize: 14,
                 fontWeight: FontWeight.w600,

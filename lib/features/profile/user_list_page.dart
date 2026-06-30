@@ -76,14 +76,14 @@ class _UserListPageState extends State<_UserListPage> {
               child: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.arrow_back_ios_new_rounded,
+                    icon: Icon(Icons.arrow_back_ios_new_rounded,
                         size: 18, color: AppColors.textSecondary),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                   const SizedBox(width: 4),
                   Text(
                     _title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppColors.textPrimary,
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
@@ -96,7 +96,7 @@ class _UserListPageState extends State<_UserListPage> {
             // ── Body ────────────────────────────────────────────────────────
             Expanded(
               child: _loading
-                  ? const Center(
+                  ? Center(
                       child: CircularProgressIndicator(
                           color: AppColors.brand, strokeWidth: 2))
                   : _error != null
@@ -182,7 +182,7 @@ class _UserRow extends StatelessWidget {
                 children: [
                   Text(
                     user.displayName,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppColors.textPrimary,
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
@@ -191,7 +191,7 @@ class _UserRow extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     '@${user.username}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppColors.textTertiary,
                       fontSize: 12,
                     ),
@@ -201,7 +201,7 @@ class _UserRow extends StatelessWidget {
             ),
             Text(
               '${user.followerCount} takipçi',
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppColors.textTertiary,
                 fontSize: 11,
                 fontWeight: FontWeight.w500,
@@ -228,7 +228,7 @@ class _EmptyView extends StatelessWidget {
           Icon(Icons.people_outline_rounded,
               size: 40, color: AppColors.textTertiary.withOpacity(0.4)),
           const SizedBox(height: 12),
-          const Text(
+          Text(
             'Henüz kullanıcı yok',
             style: TextStyle(
               color: AppColors.textTertiary,
@@ -255,7 +255,7 @@ class _ErrorView extends StatelessWidget {
           Icon(Icons.cloud_off_rounded,
               size: 36, color: AppColors.textTertiary.withOpacity(0.4)),
           const SizedBox(height: 12),
-          const Text('Yüklenemedi',
+          Text('Yüklenemedi',
               style: TextStyle(color: AppColors.textTertiary, fontSize: 13)),
           const SizedBox(height: 16),
           GestureDetector(
@@ -268,7 +268,7 @@ class _ErrorView extends StatelessWidget {
                 border: Border.all(
                     color: AppColors.brand.withOpacity(0.3), width: 0.5),
               ),
-              child: const Text('Tekrar Dene',
+              child: Text('Tekrar Dene',
                   style: TextStyle(
                       color: AppColors.brand,
                       fontSize: 13,

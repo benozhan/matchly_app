@@ -597,26 +597,26 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.card,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text(
+        title: Text(
           'Kuponu Sil',
           style: TextStyle(
               color: AppColors.textPrimary,
               fontSize: 16,
               fontWeight: FontWeight.w800),
         ),
-        content: const Text(
+        content: Text(
           'Bu kupon kalıcı olarak silinecek.',
           style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('İptal',
+            child: Text('İptal',
                 style: TextStyle(color: AppColors.textSecondary)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Sil',
+            child: Text('Sil',
                 style: TextStyle(color: AppColors.red, fontWeight: FontWeight.w700)),
           ),
         ],
@@ -682,7 +682,7 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
-                                        const Text(
+                                        Text(
                                           'Matchly',
                                           style: TextStyle(
                                             color: AppColors.textPrimary,
@@ -984,7 +984,7 @@ class _StatDot extends StatelessWidget {
       children: [
         Text('$count', style: TextStyle(color: color, fontSize: 13, fontWeight: FontWeight.w700)),
         const SizedBox(width: 3),
-        Text(label, style: const TextStyle(color: AppColors.textTertiary, fontSize: 12, fontWeight: FontWeight.w500)),
+        Text(label, style: TextStyle(color: AppColors.textTertiary, fontSize: 12, fontWeight: FontWeight.w500)),
       ],
     );
   }
@@ -993,8 +993,8 @@ class _StatDot extends StatelessWidget {
 class _Sep extends StatelessWidget {
   const _Sep();
   @override
-  Widget build(BuildContext context) => const Padding(
-        padding: EdgeInsets.symmetric(horizontal: 7),
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 7),
         child: Text('·', style: TextStyle(color: AppColors.textTertiary, fontSize: 12)),
       );
 }
@@ -1029,13 +1029,13 @@ class _HomeSearchBar extends StatelessWidget {
       child: Row(
         children: [
           const SizedBox(width: 14),
-          const Icon(Icons.search_rounded, color: AppColors.textTertiary, size: 18),
+          Icon(Icons.search_rounded, color: AppColors.textTertiary, size: 18),
           const SizedBox(width: 8),
           Expanded(
             child: TextField(
               controller: controller,
               onChanged: onChanged,
-              style: const TextStyle(color: AppColors.textPrimary, fontSize: 14, fontWeight: FontWeight.w500),
+              style: TextStyle(color: AppColors.textPrimary, fontSize: 14, fontWeight: FontWeight.w500),
               decoration: InputDecoration(
                 hintText: 'Kupon ara...',
                 hintStyle: TextStyle(color: AppColors.textTertiary.withOpacity(0.8), fontSize: 14, fontWeight: FontWeight.w400),
@@ -1145,7 +1145,7 @@ class _FiltersSheetState extends State<_FiltersSheet> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.card,
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
@@ -1169,7 +1169,7 @@ class _FiltersSheetState extends State<_FiltersSheet> {
             padding: const EdgeInsets.fromLTRB(24, 12, 16, 4),
             child: Row(
               children: [
-                const Text(
+                Text(
                   'Filtreler',
                   style: TextStyle(
                     color: AppColors.textPrimary,
@@ -1244,7 +1244,7 @@ class _FilterSection extends StatelessWidget {
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             color: AppColors.textTertiary,
             fontSize: 10,
             fontWeight: FontWeight.w700,
@@ -1431,16 +1431,16 @@ class _EmptyState extends StatelessWidget {
               color: AppColors.brand.withOpacity(0.10),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.receipt_long_rounded, size: 36, color: AppColors.brand),
+            child: Icon(Icons.receipt_long_rounded, size: 36, color: AppColors.brand),
           ),
           const SizedBox(height: 20),
           Text(
             message,
             textAlign: TextAlign.center,
-            style: const TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w700),
+            style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 8),
-          const Text(
+          Text(
             'Kuponlarını takip etmek için + butonuna dokun.',
             textAlign: TextAlign.center,
             style: TextStyle(color: AppColors.textSecondary, fontSize: 13),

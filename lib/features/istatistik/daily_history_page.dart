@@ -44,11 +44,11 @@ class DailyHistoryPage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: AppColors.background,
         elevation: 0,
-        title: const Text('Günlük Geçmiş', style: TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.w800)),
-        iconTheme: const IconThemeData(color: AppColors.textPrimary),
+        title: Text('Günlük Geçmiş', style: TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.w800)),
+        iconTheme: IconThemeData(color: AppColors.textPrimary),
       ),
       body: gunlukList.isEmpty
-          ? const Center(child: Text('Henüz geçmiş yok', style: TextStyle(color: AppColors.textTertiary)))
+          ? Center(child: Text('Henüz geçmiş yok', style: TextStyle(color: AppColors.textTertiary)))
           : ListView.builder(
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
               itemCount: gunlukList.length,
@@ -89,8 +89,8 @@ class DailyHistoryPage extends StatelessWidget {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text('${dt.day}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: AppColors.textPrimary, height: 1)),
-                            Text(_days[dt.weekday], style: const TextStyle(fontSize: 9, color: AppColors.textTertiary)),
+                            Text('${dt.day}', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: AppColors.textPrimary, height: 1)),
+                            Text(_days[dt.weekday], style: TextStyle(fontSize: 9, color: AppColors.textTertiary)),
                           ],
                         ),
                       ),
@@ -107,18 +107,18 @@ class DailyHistoryPage extends StatelessWidget {
                                 children: [
                                   Text(
                                     aktif > 0 ? '${coupons.length} kupon · $aktif aktif' : '${coupons.length} kupon',
-                                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                                    style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                                   ),
                                   const SizedBox(height: 4),
                                   Row(
                                     children: [
-                                      Container(width: 7, height: 7, decoration: const BoxDecoration(color: AppColors.green, shape: BoxShape.circle)),
+                                      Container(width: 7, height: 7, decoration: BoxDecoration(color: AppColors.green, shape: BoxShape.circle)),
                                       const SizedBox(width: 3),
-                                      Text('$tuttu tuttu', style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                                      Text('$tuttu tuttu', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                                       const SizedBox(width: 8),
-                                      Container(width: 7, height: 7, decoration: const BoxDecoration(color: AppColors.red, shape: BoxShape.circle)),
+                                      Container(width: 7, height: 7, decoration: BoxDecoration(color: AppColors.red, shape: BoxShape.circle)),
                                       const SizedBox(width: 3),
-                                      Text('$yatti yattı', style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                                      Text('$yatti yattı', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                                     ],
                                   ),
                                 ],
@@ -135,7 +135,7 @@ class DailyHistoryPage extends StatelessWidget {
                                     const SizedBox(height: 3),
                                     Text(
                                       '${_fmt(yatirim)} yatırım · ${_fmt(kazanc)} kazanç',
-                                      style: const TextStyle(fontSize: 10, color: AppColors.textTertiary),
+                                      style: TextStyle(fontSize: 10, color: AppColors.textTertiary),
                                     ),
                                   ],
                                 ),

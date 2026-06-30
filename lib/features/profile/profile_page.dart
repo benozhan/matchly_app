@@ -156,7 +156,7 @@ class _ProfilePageState extends State<ProfilePage> {
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 430),
             child: _loading
-                ? const Center(
+                ? Center(
                     child: CircularProgressIndicator(
                         color: AppColors.brand, strokeWidth: 2))
                 : _error != null
@@ -175,7 +175,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               child: Row(
                                 children: [
                                   IconButton(
-                                    icon: const Icon(
+                                    icon: Icon(
                                         Icons.arrow_back_ios_new_rounded,
                                         size: 18,
                                         color: AppColors.textSecondary),
@@ -216,7 +216,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                   const SizedBox(height: 14),
                                   Text(
                                     _user?.displayName ?? widget.username,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       color: AppColors.textPrimary,
                                       fontSize: 22,
                                       fontWeight: FontWeight.w800,
@@ -226,7 +226,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                   const SizedBox(height: 4),
                                   Text(
                                     '@${widget.username}',
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       color: AppColors.textSecondary,
                                       fontSize: 14,
                                       fontWeight: FontWeight.w500,
@@ -322,7 +322,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                   const EdgeInsets.fromLTRB(20, 30, 20, 14),
                               child: Row(
                                 children: [
-                                  const Text(
+                                  Text(
                                     'AKTİF KUPONLAR',
                                     style: TextStyle(
                                       color: AppColors.textSecondary,
@@ -343,7 +343,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                       ),
                                       child: Text(
                                         '${_sharedCoupons.length}',
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           color: AppColors.brand,
                                           fontSize: 10,
                                           fontWeight: FontWeight.w700,
@@ -408,13 +408,13 @@ class _ErrorState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.cloud_off_rounded,
+            Icon(Icons.cloud_off_rounded,
                 color: AppColors.textTertiary, size: 40),
             const SizedBox(height: 14),
             Text(
               message,
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                   color: AppColors.textSecondary, fontSize: 13),
             ),
             const SizedBox(height: 20),
@@ -429,7 +429,7 @@ class _ErrorState extends StatelessWidget {
                   border: Border.all(
                       color: AppColors.brand.withOpacity(0.35), width: 0.5),
                 ),
-                child: const Text('Tekrar Dene',
+                child: Text('Tekrar Dene',
                     style: TextStyle(
                         color: AppColors.brand,
                         fontWeight: FontWeight.w600,
@@ -531,7 +531,7 @@ class _FollowButton extends StatelessWidget {
           ),
         ),
         child: loading
-            ? const Center(
+            ? Center(
                 child: SizedBox(
                   width: 16,
                   height: 16,
@@ -729,7 +729,7 @@ class _StatCell extends StatelessWidget {
         children: [
           Text(
             '$value',
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.textPrimary,
               fontSize: 22,
               fontWeight: FontWeight.w800,
@@ -769,13 +769,13 @@ class _EmptySharedCoupons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.fromLTRB(20, 16, 20, 0),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text('🏟️', style: TextStyle(fontSize: 32)),
-          SizedBox(height: 12),
+          const Text('🏟️', style: TextStyle(fontSize: 32)),
+          const SizedBox(height: 12),
           Text(
             'Henüz paylaşılan kupon yok.',
             style: TextStyle(
@@ -784,7 +784,7 @@ class _EmptySharedCoupons extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
           ),
-          SizedBox(height: 6),
+          const SizedBox(height: 6),
           Text(
             'Kupon paylaşıldığında burada görünür.',
             style: TextStyle(color: AppColors.textTertiary, fontSize: 12),
@@ -855,7 +855,7 @@ class _SharedCouponRowState extends State<_SharedCouponRow> {
           border:
               Border.all(color: AppColors.border, width: 0.5),
         ),
-        child: const Center(
+        child: Center(
           child: SizedBox(
             width: 18,
             height: 18,
@@ -885,14 +885,14 @@ class _SharedCouponRowState extends State<_SharedCouponRow> {
                 color: AppColors.brand.withOpacity(0.12),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: const Icon(Icons.receipt_long_rounded,
+              child: Icon(Icons.receipt_long_rounded,
                   color: AppColors.brand, size: 17),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
                 'Kupon #${widget.coupon.couponId}',
-                style: const TextStyle(
+                style: TextStyle(
                     color: AppColors.textPrimary,
                     fontSize: 13,
                     fontWeight: FontWeight.w700),
@@ -933,7 +933,7 @@ class _SharedCouponRowState extends State<_SharedCouponRow> {
                 Expanded(
                   child: Text(
                     d.title.isNotEmpty ? d.title : 'Kupon #${d.couponId}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppColors.textPrimary,
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
@@ -967,20 +967,20 @@ class _SharedCouponRowState extends State<_SharedCouponRow> {
             child: Row(
               children: [
                 if (d.siteName.isNotEmpty) ...[
-                  const Icon(Icons.language_rounded,
+                  Icon(Icons.language_rounded,
                       size: 11, color: AppColors.textTertiary),
                   const SizedBox(width: 4),
                   Text(d.siteName,
-                      style: const TextStyle(
+                      style: TextStyle(
                           color: AppColors.textTertiary, fontSize: 11)),
                   const SizedBox(width: 10),
                 ],
                 if (d.selections.isNotEmpty) ...[
-                  const Icon(Icons.format_list_numbered_rounded,
+                  Icon(Icons.format_list_numbered_rounded,
                       size: 11, color: AppColors.textTertiary),
                   const SizedBox(width: 4),
                   Text('${d.selections.length} seçim',
-                      style: const TextStyle(
+                      style: TextStyle(
                           color: AppColors.textTertiary, fontSize: 11)),
                 ],
               ],
@@ -1052,12 +1052,12 @@ class _LocalCouponCardState extends State<_LocalCouponCard> {
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.card,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Kuponu Paylaş', style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w700)),
+        title: Text('Kuponu Paylaş', style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w700)),
         content: TextField(
           controller: noteController,
           autofocus: true,
           maxLength: 120,
-          style: const TextStyle(color: AppColors.textPrimary, fontSize: 14),
+          style: TextStyle(color: AppColors.textPrimary, fontSize: 14),
           decoration: InputDecoration(
             hintText: 'Bir not ekle (opsiyonel)',
             hintStyle: TextStyle(color: AppColors.textTertiary.withOpacity(0.7)),
@@ -1068,8 +1068,8 @@ class _LocalCouponCardState extends State<_LocalCouponCard> {
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('İptal', style: TextStyle(color: AppColors.textTertiary))),
-          TextButton(onPressed: () { note = noteController.text.trim(); Navigator.pop(ctx, true); }, child: const Text('Paylaş', style: TextStyle(color: AppColors.brand, fontWeight: FontWeight.w700))),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text('İptal', style: TextStyle(color: AppColors.textTertiary))),
+          TextButton(onPressed: () { note = noteController.text.trim(); Navigator.pop(ctx, true); }, child: Text('Paylaş', style: TextStyle(color: AppColors.brand, fontWeight: FontWeight.w700))),
         ],
       ),
     );
@@ -1159,7 +1159,7 @@ class _LocalCouponCardState extends State<_LocalCouponCard> {
                 Expanded(
                   child: Text(
                     coupon.title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppColors.textPrimary,
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
@@ -1192,7 +1192,7 @@ class _LocalCouponCardState extends State<_LocalCouponCard> {
             padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
             child: Text(
               coupon.meta,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppColors.textTertiary,
                 fontSize: 11,
               ),
@@ -1232,7 +1232,7 @@ class _LocalCouponCardState extends State<_LocalCouponCard> {
                   ),
                 ),
                 child: _sharing
-                    ? const Center(
+                    ? Center(
                         child: SizedBox(
                           width: 14, height: 14,
                           child: CircularProgressIndicator(
@@ -1303,7 +1303,7 @@ class _MiniStat extends StatelessWidget {
         children: [
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.textTertiary,
               fontSize: 10,
             ),
@@ -1311,7 +1311,7 @@ class _MiniStat extends StatelessWidget {
           const SizedBox(height: 3),
           Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.textPrimary,
               fontSize: 12,
               fontWeight: FontWeight.w700,

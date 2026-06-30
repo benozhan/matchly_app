@@ -7,6 +7,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'l10n/app_localizations.dart';
 import 'core/app_theme.dart';
 import 'core/app_state.dart';
+import 'core/app_colors.dart';
 import 'features/auth/auth_page.dart';
 import 'features/home/home_page.dart';
 import 'features/profile/shared_coupon_detail_page.dart';
@@ -232,7 +233,7 @@ class _UsernameSetupPageState extends State<_UsernameSetupPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFEEF2F7),
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(28),
@@ -240,23 +241,25 @@ class _UsernameSetupPageState extends State<_UsernameSetupPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 40),
-              const Text('Kullanıcı adı seç', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: Color(0xFF0F1C2E))),
+              Text('Kullanıcı adı seç', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
               const SizedBox(height: 8),
-              const Text('Bu ad profilinde görünecek.', style: TextStyle(fontSize: 14, color: Color(0xFF7A8FA8))),
+              Text('Bu ad profilinde görünecek.', style: TextStyle(fontSize: 14, color: AppColors.textSecondary)),
               const SizedBox(height: 32),
               TextField(
                 controller: _controller,
                 autofocus: true,
+                style: TextStyle(color: AppColors.textPrimary),
                 decoration: InputDecoration(
                   hintText: 'kullanici_adi',
+                  hintStyle: TextStyle(color: AppColors.textTertiary),
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: AppColors.card,
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
                 ),
               ),
               if (_error != null) ...[
                 const SizedBox(height: 12),
-                Text(_error!, style: const TextStyle(color: Colors.red, fontSize: 13)),
+                Text(_error!, style: TextStyle(color: AppColors.red, fontSize: 13)),
               ],
               const SizedBox(height: 20),
               SizedBox(
@@ -265,13 +268,13 @@ class _UsernameSetupPageState extends State<_UsernameSetupPage> {
                 child: ElevatedButton(
                   onPressed: _loading ? null : _submit,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2D4A6E),
+                    backgroundColor: AppColors.brand,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   ),
                   child: _loading
                       ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                      : const Text('Devam Et', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                      : const Text('Devam Et', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.white)),
                 ),
               ),
             ],

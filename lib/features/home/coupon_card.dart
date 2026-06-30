@@ -116,7 +116,7 @@ class _CouponCardState extends State<CouponCard> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           if (fav) ...[
-                            const Icon(Icons.star_rounded,
+                            Icon(Icons.star_rounded,
                                 color: AppColors.amber, size: 14),
                             const SizedBox(width: 5),
                           ],
@@ -125,7 +125,7 @@ class _CouponCardState extends State<CouponCard> {
                               coupon.title,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 color: AppColors.textPrimary,
                                 fontSize: 16,
                                 fontWeight: FontWeight.w800,
@@ -140,7 +140,7 @@ class _CouponCardState extends State<CouponCard> {
                       const SizedBox(height: 4),
                       Text(
                         coupon.meta,
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: AppColors.textSecondary,
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
@@ -287,7 +287,7 @@ class _FooterStat extends StatelessWidget {
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             color: AppColors.textSecondary,
             fontSize: 9,
             fontWeight: FontWeight.w700,

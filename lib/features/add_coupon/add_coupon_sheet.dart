@@ -713,7 +713,7 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
         backgroundColor: AppColors.card,
         shape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text(
+        title: Text(
           'Seçimleri Temizle',
           style: TextStyle(
             color: AppColors.textPrimary,
@@ -721,19 +721,19 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
             fontWeight: FontWeight.w800,
           ),
         ),
-        content: const Text(
+        content: Text(
           'Tüm seçimler silinecek. Devam etmek istiyor musun?',
           style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Vazgeç',
+            child: Text('Vazgeç',
                 style: TextStyle(color: AppColors.textSecondary)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Sil',
+            child: Text('Sil',
                 style: TextStyle(
                     color: AppColors.red, fontWeight: FontWeight.w700)),
           ),
@@ -959,7 +959,7 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
   @override
   Widget build(BuildContext context) {
     final sheetContent = Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.background,
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
@@ -989,7 +989,7 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'Kupon Ekle',
                   style: TextStyle(
                     color: AppColors.textPrimary,
@@ -1021,7 +1021,7 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
               ],
             ),
             const SizedBox(height: 3),
-            const Text(
+            Text(
               'Seçimlerini ekle ve kaydet',
               style: TextStyle(
                 color: AppColors.textTertiary,
@@ -1069,7 +1069,7 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
                 children: [
                   Text(
                     '${selections.length} Seçim',
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppColors.textSecondary,
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
@@ -1079,7 +1079,7 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
                   const Spacer(),
                   GestureDetector(
                     onTap: _clearAllSelections,
-                    child: const Text(
+                    child: Text(
                       'Tüm Seçimleri Sil',
                       style: TextStyle(
                           color: AppColors.red,
@@ -1112,7 +1112,7 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
                         Container(
                           width: 6,
                           height: 6,
-                          decoration: const BoxDecoration(
+                          decoration: BoxDecoration(
                             color: AppColors.brand,
                             shape: BoxShape.circle,
                           ),
@@ -1139,7 +1139,7 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
                               color: AppColors.brand.withOpacity(0.12),
                               borderRadius: BorderRadius.circular(6),
                             ),
-                            child: const Icon(Icons.edit_outlined,
+                            child: Icon(Icons.edit_outlined,
                                 color: AppColors.brand, size: 15),
                           ),
                         ),
@@ -1152,7 +1152,7 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
                               color: AppColors.red.withOpacity(0.12),
                               borderRadius: BorderRadius.circular(6),
                             ),
-                            child: const Icon(Icons.delete_outline,
+                            child: Icon(Icons.delete_outline,
                                 color: AppColors.red, size: 15),
                           ),
                         ),
@@ -1304,7 +1304,7 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
                         ),
                       ),
                       const SizedBox(width: 12),
-                      const Text(
+                      Text(
                         'Bu seçim zaten eklendi',
                         style: TextStyle(
                           color: AppColors.textPrimary,
@@ -1361,7 +1361,7 @@ class _CouponSummaryCard extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
             child: Row(
               children: [
-                const Text(
+                Text(
                   'KUPON ÖZETİ',
                   style: TextStyle(
                     color: AppColors.textTertiary,
@@ -1381,7 +1381,7 @@ class _CouponSummaryCard extends StatelessWidget {
                     ),
                     child: Text(
                       '${selections.length} seçim',
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: AppColors.brand,
                         fontSize: 10,
                         fontWeight: FontWeight.w800,
@@ -1406,7 +1406,7 @@ class _CouponSummaryCard extends StatelessWidget {
                       color: AppColors.textTertiary.withOpacity(0.6),
                       size: 20),
                   const SizedBox(width: 10),
-                  const Text(
+                  Text(
                     'Henüz seçim eklenmedi',
                     style: TextStyle(
                       color: AppColors.textTertiary,
@@ -1436,7 +1436,7 @@ class _CouponSummaryCard extends StatelessWidget {
                                 children: [
                                   Text(
                                     s.teams,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       color: AppColors.textPrimary,
                                       fontSize: 13,
                                       fontWeight: FontWeight.w700,
@@ -1445,7 +1445,7 @@ class _CouponSummaryCard extends StatelessWidget {
                                   const SizedBox(height: 3),
                                   Text(
                                     s.betType,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       color: AppColors.textSecondary,
                                       fontSize: 11,
                                       fontWeight: FontWeight.w600,
@@ -1463,7 +1463,7 @@ class _CouponSummaryCard extends StatelessWidget {
                               ),
                               child: Text(
                                 '${i + 1}',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   color: AppColors.brand,
                                   fontSize: 11,
                                   fontWeight: FontWeight.w800,
@@ -1499,7 +1499,7 @@ class _CouponSummaryCard extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           'ORAN',
                           style: TextStyle(
                             color: AppColors.textTertiary,
@@ -1511,7 +1511,7 @@ class _CouponSummaryCard extends StatelessWidget {
                         const SizedBox(height: 4),
                         Text(
                           oddsDisplay,
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: AppColors.textPrimary,
                             fontSize: 15,
                             fontWeight: FontWeight.w900,
@@ -1531,7 +1531,7 @@ class _CouponSummaryCard extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           'BEKLENTİ',
                           style: TextStyle(
                             color: AppColors.textTertiary,
@@ -1649,7 +1649,7 @@ class _AddSelectionPanel extends StatelessWidget {
                   GestureDetector(
                     behavior: HitTestBehavior.opaque,
                     onTap: onBack,
-                    child: const Padding(
+                    child: Padding(
                       padding: EdgeInsets.symmetric(vertical: 8, horizontal: 4),
                       child: Icon(Icons.arrow_back_ios_new_rounded,
                           color: AppColors.textTertiary, size: 15),
@@ -1670,7 +1670,7 @@ class _AddSelectionPanel extends StatelessWidget {
                 const Spacer(),
                 GestureDetector(
                   onTap: onCancel,
-                  child: const Icon(Icons.close,
+                  child: Icon(Icons.close,
                       color: AppColors.textTertiary, size: 18),
                 ),
                 const SizedBox(width: 6),
@@ -1777,7 +1777,7 @@ class _PeriodOptionState extends State<_PeriodOption> {
               const SizedBox(height: 6),
               Text(
                 widget.label,
-                style: const TextStyle(color: AppColors.textPrimary, fontSize: 12.5, fontWeight: FontWeight.w700),
+                style: TextStyle(color: AppColors.textPrimary, fontSize: 12.5, fontWeight: FontWeight.w700),
               ),
             ],
           ),
@@ -1889,7 +1889,7 @@ class _MarketTileState extends State<_MarketTile> with SingleTickerProviderState
               Expanded(
                 child: Text(
                   widget.market.name,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.textPrimary,
                     fontSize: 12.5,
                     fontWeight: FontWeight.w700,
@@ -1937,7 +1937,7 @@ class _SearchBody extends StatelessWidget {
             controller: searchController,
             autofocus: true,
             onChanged: onSearchChanged,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.textPrimary,
               fontSize: 14,
               fontWeight: FontWeight.w600,
@@ -1945,8 +1945,8 @@ class _SearchBody extends StatelessWidget {
             decoration: InputDecoration(
               hintText: 'Takım veya lig ara',
               hintStyle:
-                  const TextStyle(color: AppColors.textTertiary, fontSize: 14),
-              prefixIcon: const Icon(Icons.search,
+                  TextStyle(color: AppColors.textTertiary, fontSize: 14),
+              prefixIcon: Icon(Icons.search,
                   color: AppColors.textTertiary, size: 18),
               filled: true,
               fillColor: AppColors.background,
@@ -1962,14 +1962,14 @@ class _SearchBody extends StatelessWidget {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
-                borderSide: const BorderSide(color: AppColors.brand),
+                borderSide: BorderSide(color: AppColors.brand),
               ),
             ),
           ),
         ),
         const SizedBox(height: 4),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 14),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14),
           child: Text(
             'Takım veya lig ara',
             style: TextStyle(color: AppColors.textTertiary, fontSize: 11),
@@ -1979,8 +1979,8 @@ class _SearchBody extends StatelessWidget {
 
         // ── Results ───────────────────────────────────────────────────────
         if (isLoading)
-          const Padding(
-            padding: EdgeInsets.fromLTRB(14, 12, 14, 12),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
             child: Center(
               child: SizedBox(
                 width: 20,
@@ -1997,7 +1997,7 @@ class _SearchBody extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(14, 8, 14, 10),
             child: Text(
               apiSucceeded ? 'Maç bulunamadı.' : 'Sonuç bulunamadı.',
-              style: const TextStyle(color: AppColors.textTertiary, fontSize: 13),
+              style: TextStyle(color: AppColors.textTertiary, fontSize: 13),
             ),
           )
         else
@@ -2060,7 +2060,7 @@ class _AnimatedMatchRowState extends State<_AnimatedMatchRow> {
             children: [
               Text(
                 m.teams,
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppColors.textPrimary,
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
@@ -2070,7 +2070,7 @@ class _AnimatedMatchRowState extends State<_AnimatedMatchRow> {
                 const SizedBox(height: 2),
                 Text(
                   m.sublabel,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.textTertiary,
                     fontSize: 11,
                     fontWeight: FontWeight.w500,
@@ -2177,7 +2177,7 @@ class _Chip extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: const TextStyle(
+        style: TextStyle(
           color: AppColors.brand,
           fontSize: 12,
           fontWeight: FontWeight.w700,
@@ -2232,8 +2232,8 @@ class _LeaguePickerSheetState extends State<_LeaguePickerSheet> {
               decoration: BoxDecoration(color: AppColors.gray, borderRadius: BorderRadius.circular(999)),
             ),
             const SizedBox(height: 16),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Text('Lig Seç', style: TextStyle(color: AppColors.textPrimary, fontSize: 20, fontWeight: FontWeight.w800, letterSpacing: -0.4)),
@@ -2246,11 +2246,11 @@ class _LeaguePickerSheetState extends State<_LeaguePickerSheet> {
                 controller: _searchController,
                 autofocus: false,
                 onChanged: _onSearch,
-                style: const TextStyle(color: AppColors.textPrimary, fontSize: 14),
+                style: TextStyle(color: AppColors.textPrimary, fontSize: 14),
                 decoration: InputDecoration(
                   hintText: 'Lig ara...',
-                  hintStyle: const TextStyle(color: AppColors.textTertiary, fontSize: 14),
-                  prefixIcon: const Icon(Icons.search_rounded, color: AppColors.textTertiary, size: 18),
+                  hintStyle: TextStyle(color: AppColors.textTertiary, fontSize: 14),
+                  prefixIcon: Icon(Icons.search_rounded, color: AppColors.textTertiary, size: 18),
                   filled: true,
                   fillColor: AppColors.card,
                   contentPadding: const EdgeInsets.symmetric(vertical: 10),
@@ -2263,7 +2263,7 @@ class _LeaguePickerSheetState extends State<_LeaguePickerSheet> {
             const SizedBox(height: 8),
             Expanded(
               child: _filtered.isEmpty
-                  ? const Center(child: Text('Lig bulunamadı', style: TextStyle(color: AppColors.textTertiary, fontSize: 14)))
+                  ? Center(child: Text('Lig bulunamadı', style: TextStyle(color: AppColors.textTertiary, fontSize: 14)))
                   : ListView.builder(
                       controller: scrollController,
                       padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
@@ -2300,7 +2300,7 @@ class _LeaguePickerSheetState extends State<_LeaguePickerSheet> {
                                   ),
                                 ),
                                 if (isSelected)
-                                  const Icon(Icons.check_rounded, color: AppColors.green, size: 16),
+                                  Icon(Icons.check_rounded, color: AppColors.green, size: 16),
                               ],
                             ),
                           ),
@@ -2410,7 +2410,7 @@ class MatchlyInput extends StatelessWidget {
       children: [
         Text(
           label.toUpperCase(),
-          style: const TextStyle(
+          style: TextStyle(
             color: AppColors.textTertiary,
             fontSize: 9,
             fontWeight: FontWeight.w700,
@@ -2421,16 +2421,16 @@ class MatchlyInput extends StatelessWidget {
         TextField(
           controller: controller,
           keyboardType: keyboardType,
-          style: const TextStyle(
+          style: TextStyle(
             color: AppColors.textPrimary,
             fontSize: 15,
             fontWeight: FontWeight.w600,
           ),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: const TextStyle(color: AppColors.textTertiary, fontSize: 15),
+            hintStyle: TextStyle(color: AppColors.textTertiary, fontSize: 15),
             prefixText: prefix,
-            prefixStyle: const TextStyle(color: AppColors.textPrimary, fontSize: 15, fontWeight: FontWeight.w600),
+            prefixStyle: TextStyle(color: AppColors.textPrimary, fontSize: 15, fontWeight: FontWeight.w600),
             isDense: true,
             contentPadding: const EdgeInsets.only(bottom: 8),
             filled: false,

@@ -78,7 +78,7 @@ class BottomNav extends StatelessWidget {
                         ),
                       ],
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.add_rounded,
                       color: AppColors.background,
                       size: 22,
@@ -173,7 +173,7 @@ class NavItem extends StatelessWidget {
           duration: const Duration(milliseconds: 200),
           width: active ? 4 : 0,
           height: active ? 4 : 0,
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             color: AppColors.brand,
             shape: BoxShape.circle,
           ),

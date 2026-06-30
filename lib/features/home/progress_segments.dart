@@ -42,14 +42,14 @@ class ProgressSegments extends StatelessWidget {
           children: [
             Text(
               '$completedCount / ${statuses.length}',
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppColors.textSecondary,
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
               ),
             ),
             const SizedBox(width: 4),
-            const Text(
+            Text(
               'tamamlandı',
               style: TextStyle(
                 color: AppColors.textSecondary,

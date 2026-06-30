@@ -62,7 +62,7 @@ class _GecmisPageState extends State<GecmisPage> {
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
       children: [
         // ── Header ────────────────────────────────────────────────────────────
-        const Text(
+        Text(
           'Geçmiş',
           style: TextStyle(
             color: AppColors.textPrimary,
@@ -127,7 +127,7 @@ class _GecmisPageState extends State<GecmisPage> {
                   child: Text(
                     'Daha Fazla Göster (${_allFiltered.length - _visibleCount} kupon)',
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppColors.brand,
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
@@ -170,13 +170,13 @@ class _GecmisSearchBar extends StatelessWidget {
       child: Row(
         children: [
           const SizedBox(width: 14),
-          const Icon(Icons.search_rounded, color: AppColors.textTertiary, size: 18),
+          Icon(Icons.search_rounded, color: AppColors.textTertiary, size: 18),
           const SizedBox(width: 8),
           Expanded(
             child: TextField(
               controller: controller,
               onChanged: onChanged,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppColors.textPrimary,
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
@@ -291,7 +291,7 @@ class _SumStat extends StatelessWidget {
           const SizedBox(height: 3),
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.textTertiary,
               fontSize: 10,
               fontWeight: FontWeight.w500,
@@ -374,7 +374,7 @@ class _HistoryCard extends StatelessWidget {
                             coupon.title,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: AppColors.textPrimary,
                               fontSize: 16,
                               fontWeight: FontWeight.w800,
@@ -389,7 +389,7 @@ class _HistoryCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       coupon.meta,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: AppColors.textTertiary,
                         fontSize: 11,
                         fontWeight: FontWeight.w500,
@@ -488,7 +488,7 @@ class _FooterStat extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text(label, style: const TextStyle(color: AppColors.textTertiary, fontSize: 9, fontWeight: FontWeight.w700, letterSpacing: 0.8)),
+        Text(label, style: TextStyle(color: AppColors.textTertiary, fontSize: 9, fontWeight: FontWeight.w700, letterSpacing: 0.8)),
         const SizedBox(height: 4),
         Text(value, style: TextStyle(color: valueColor ?? AppColors.textSecondary, fontSize: 13, fontWeight: FontWeight.w700, letterSpacing: -0.2)),
       ],
@@ -508,15 +508,15 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.symmetric(vertical: 52),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 52),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text('📭', style: TextStyle(fontSize: 36)),
-          SizedBox(height: 14),
+          const Text('📭', style: TextStyle(fontSize: 36)),
+          const SizedBox(height: 14),
           Text('Henüz geçmiş kupon yok', textAlign: TextAlign.center, style: TextStyle(color: AppColors.textSecondary, fontSize: 15, fontWeight: FontWeight.w600)),
-          SizedBox(height: 6),
+          const SizedBox(height: 6),
           Text('Yeni bir kupon oluşturduğunda burada görünecek.', textAlign: TextAlign.center, style: TextStyle(color: AppColors.textTertiary, fontSize: 12)),
         ],
       ),
@@ -529,15 +529,15 @@ class _SearchEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.symmetric(vertical: 52),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 52),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text('🔍', style: TextStyle(fontSize: 32)),
-          SizedBox(height: 14),
+          const Text('🔍', style: TextStyle(fontSize: 32)),
+          const SizedBox(height: 14),
           Text('Sonuç bulunamadı', textAlign: TextAlign.center, style: TextStyle(color: AppColors.textSecondary, fontSize: 15, fontWeight: FontWeight.w600)),
-          SizedBox(height: 6),
+          const SizedBox(height: 6),
           Text('Farklı bir arama terimi deneyin.', textAlign: TextAlign.center, style: TextStyle(color: AppColors.textTertiary, fontSize: 12)),
         ],
       ),

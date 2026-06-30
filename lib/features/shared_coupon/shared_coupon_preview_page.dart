@@ -79,14 +79,14 @@ class SharedCouponPreviewPage extends StatelessWidget {
                     children: [
                       IconButton(
                         onPressed: () => Navigator.of(context).pop(),
-                        icon: const Icon(
+                        icon: Icon(
                           Icons.arrow_back_ios_new_rounded,
                           color: AppColors.textPrimary,
                           size: 20,
                         ),
                       ),
                       const SizedBox(width: 4),
-                      const Text(
+                      Text(
                         'Paylaşılan Kupon',
                         style: TextStyle(
                           color: AppColors.textPrimary,
@@ -146,7 +146,7 @@ class _CouponPreviewBody extends StatelessWidget {
         // ── Hero card ─────────────────────────────────────────────────────
         Container(
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
+            gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
@@ -187,7 +187,7 @@ class _CouponPreviewBody extends StatelessWidget {
                           Expanded(
                             child: Text(
                               coupon.title,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 color: AppColors.textPrimary,
                                 fontSize: 22,
                                 fontWeight: FontWeight.w800,
@@ -210,7 +210,7 @@ class _CouponPreviewBody extends StatelessWidget {
                       // Site name
                       Text(
                         site,
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: AppColors.textTertiary,
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
@@ -358,7 +358,7 @@ class _LiveTrackingPlaceholder extends StatelessWidget {
                 width: 0.5,
               ),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.wifi_rounded,
               color: AppColors.green,
               size: 18,
@@ -369,7 +369,7 @@ class _LiveTrackingPlaceholder extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Canlı takip yakında aktif olacak',
                   style: TextStyle(
                     color: AppColors.textPrimary,
@@ -402,7 +402,7 @@ class _LiveTrackingPlaceholder extends StatelessWidget {
                 width: 0.5,
               ),
             ),
-            child: const Text(
+            child: Text(
               'Yakında',
               style: TextStyle(
                 color: AppColors.green,
@@ -441,14 +441,14 @@ class _NotFoundState extends StatelessWidget {
                 width: 0.5,
               ),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.link_off_rounded,
               color: AppColors.textTertiary,
               size: 28,
             ),
           ),
           const SizedBox(height: 20),
-          const Text(
+          Text(
             'Kupon bulunamadı',
             textAlign: TextAlign.center,
             style: TextStyle(
@@ -490,7 +490,7 @@ class _Stat extends StatelessWidget {
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             color: AppColors.textTertiary,
             fontSize: 9,
             fontWeight: FontWeight.w700,

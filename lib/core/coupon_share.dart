@@ -162,7 +162,7 @@ class _TopToastState extends State<_TopToast>
                       color: AppColors.green.withOpacity(0.15),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.check_rounded,
                       color: AppColors.green,
                       size: 15,
@@ -172,7 +172,7 @@ class _TopToastState extends State<_TopToast>
                   Expanded(
                     child: Text(
                       widget.message,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: AppColors.textPrimary,
                         fontSize: 13,
                         fontWeight: FontWeight.w600,

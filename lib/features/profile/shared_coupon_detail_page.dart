@@ -166,7 +166,7 @@ class _SharedCouponDetailPageState extends State<SharedCouponDetailPage> {
                       child: Row(
                         children: [
                           IconButton(
-                            icon: const Icon(Icons.arrow_back_ios_new_rounded,
+                            icon: Icon(Icons.arrow_back_ios_new_rounded,
                                 size: 18, color: AppColors.textSecondary),
                             onPressed: () => Navigator.of(context).maybePop(),
                           ),
@@ -175,15 +175,15 @@ class _SharedCouponDetailPageState extends State<SharedCouponDetailPage> {
                             SizedBox(
                               width: 36, height: 36,
                               child: _silentRefreshing
-                                  ? const Padding(
-                                      padding: EdgeInsets.all(9),
+                                  ? Padding(
+                                      padding: const EdgeInsets.all(9),
                                       child: CircularProgressIndicator(
                                           strokeWidth: 1.5,
                                           color: AppColors.textTertiary),
                                     )
                                   : IconButton(
                                       padding: EdgeInsets.zero,
-                                      icon: const Icon(Icons.refresh_rounded,
+                                      icon: Icon(Icons.refresh_rounded,
                                           size: 18, color: AppColors.textTertiary),
                                       onPressed: _silentRefresh,
                                     ),
@@ -209,7 +209,7 @@ class _SharedCouponDetailPageState extends State<SharedCouponDetailPage> {
                                   color: AppColors.brand.withOpacity(0.25),
                                   width: 0.5),
                             ),
-                            child: const Icon(Icons.confirmation_number_outlined,
+                            child: Icon(Icons.confirmation_number_outlined,
                                 size: 22, color: AppColors.brand),
                           ),
                           const SizedBox(width: 14),
@@ -219,7 +219,7 @@ class _SharedCouponDetailPageState extends State<SharedCouponDetailPage> {
                               children: [
                                 Text(
                                   'Kupon #$_shortId',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     color: AppColors.textPrimary,
                                     fontSize: 22,
                                     fontWeight: FontWeight.w800,
@@ -389,23 +389,23 @@ class _CommentsSection extends StatelessWidget {
         children: [
           Row(
             children: [
-              Text('@${comment.username}', style: const TextStyle(color: AppColors.brand, fontSize: 12, fontWeight: FontWeight.w700)),
+              Text('@${comment.username}', style: TextStyle(color: AppColors.brand, fontSize: 12, fontWeight: FontWeight.w700)),
               const SizedBox(width: 8),
-              Text(_timeAgo(comment.createdAt), style: const TextStyle(color: AppColors.textTertiary, fontSize: 11)),
+              Text(_timeAgo(comment.createdAt), style: TextStyle(color: AppColors.textTertiary, fontSize: 11)),
               const Spacer(),
               if (comment.userId == currentUserId)
                 GestureDetector(
                   onTap: () => onDelete(comment.id),
-                  child: const Icon(Icons.delete_outline, size: 16, color: AppColors.textTertiary),
+                  child: Icon(Icons.delete_outline, size: 16, color: AppColors.textTertiary),
                 ),
             ],
           ),
           const SizedBox(height: 4),
-          Text(comment.content, style: const TextStyle(color: AppColors.textPrimary, fontSize: 13)),
+          Text(comment.content, style: TextStyle(color: AppColors.textPrimary, fontSize: 13)),
           const SizedBox(height: 6),
           GestureDetector(
             onTap: () => onReply(comment.id, comment.username),
-            child: const Text('Yanıtla', style: TextStyle(color: AppColors.textTertiary, fontSize: 11, fontWeight: FontWeight.w600)),
+            child: Text('Yanıtla', style: TextStyle(color: AppColors.textTertiary, fontSize: 11, fontWeight: FontWeight.w600)),
           ),
         ],
       ),
@@ -425,10 +425,10 @@ class _CommentsSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Yorumlar', style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w800)),
+        Text('Yorumlar', style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w800)),
         const SizedBox(height: 12),
         if (comments.isEmpty)
-          const Text('Henüz yorum yok.', style: TextStyle(color: AppColors.textTertiary, fontSize: 13)),
+          Text('Henüz yorum yok.', style: TextStyle(color: AppColors.textTertiary, fontSize: 13)),
         ...topLevel.expand((comment) => [
           _buildCommentCard(comment),
           ...(repliesByParent[comment.id] ?? []).map((reply) => _buildCommentCard(reply, isReply: true)),
@@ -439,11 +439,11 @@ class _CommentsSection extends StatelessWidget {
             padding: const EdgeInsets.only(bottom: 8),
             child: Row(
               children: [
-                Text('@${replyToUsername ?? ''} yanıtlanıyor', style: const TextStyle(color: AppColors.brand, fontSize: 12, fontWeight: FontWeight.w600)),
+                Text('@${replyToUsername ?? ''} yanıtlanıyor', style: TextStyle(color: AppColors.brand, fontSize: 12, fontWeight: FontWeight.w600)),
                 const SizedBox(width: 8),
                 GestureDetector(
                   onTap: onCancelReply,
-                  child: const Icon(Icons.close, size: 14, color: AppColors.textTertiary),
+                  child: Icon(Icons.close, size: 14, color: AppColors.textTertiary),
                 ),
               ],
             ),
@@ -453,10 +453,10 @@ class _CommentsSection extends StatelessWidget {
             Expanded(
               child: TextField(
                 controller: ctrl,
-                style: const TextStyle(color: AppColors.textPrimary, fontSize: 13),
+                style: TextStyle(color: AppColors.textPrimary, fontSize: 13),
                 decoration: InputDecoration(
                   hintText: replyToCommentId != null ? 'Yanıt yaz...' : 'Yorum yaz...',
-                  hintStyle: const TextStyle(color: AppColors.textTertiary, fontSize: 13),
+                  hintStyle: TextStyle(color: AppColors.textTertiary, fontSize: 13),
                   filled: true,
                   fillColor: AppColors.card,
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
@@ -570,7 +570,7 @@ class _MetaRow extends StatelessWidget {
           SizedBox(
             width: 90,
             child: Text(label,
-                style: const TextStyle(
+                style: TextStyle(
                     color: AppColors.textTertiary,
                     fontSize: 12,
                     fontWeight: FontWeight.w500)),
@@ -607,7 +607,7 @@ class _CopyableRow extends StatelessWidget {
         Clipboard.setData(ClipboardData(text: value));
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Kopyalandı',
+            content: Text('Kopyalandı',
                 style: TextStyle(
                     color: AppColors.textPrimary, fontSize: 13)),
             backgroundColor: AppColors.card,
@@ -626,7 +626,7 @@ class _CopyableRow extends StatelessWidget {
             SizedBox(
               width: 90,
               child: Text(label,
-                  style: const TextStyle(
+                  style: TextStyle(
                       color: AppColors.textTertiary,
                       fontSize: 12,
                       fontWeight: FontWeight.w500)),
@@ -634,7 +634,7 @@ class _CopyableRow extends StatelessWidget {
             Expanded(
               child: Text(
                 value,
-                style: const TextStyle(
+                style: TextStyle(
                     color: AppColors.textSecondary,
                     fontSize: 11,
                     fontWeight: FontWeight.w500,
@@ -706,7 +706,7 @@ class _LocalDetails extends StatelessWidget {
                 Expanded(
                   child: Text(
                     coupon.title,
-                    style: const TextStyle(
+                    style: TextStyle(
                         color: AppColors.textPrimary,
                         fontSize: 15,
                         fontWeight: FontWeight.w700),
@@ -721,7 +721,7 @@ class _LocalDetails extends StatelessWidget {
                   ),
                   child: Text(
                     _siteName,
-                    style: const TextStyle(
+                    style: TextStyle(
                         color: AppColors.textTertiary,
                         fontSize: 11,
                         fontWeight: FontWeight.w600),
@@ -758,7 +758,7 @@ class _LocalDetails extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(m.teams,
-                          style: const TextStyle(
+                          style: TextStyle(
                               color: AppColors.textSecondary,
                               fontSize: 12,
                               fontWeight: FontWeight.w500),
@@ -767,7 +767,7 @@ class _LocalDetails extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     Text(m.selection,
-                        style: const TextStyle(
+                        style: TextStyle(
                             color: AppColors.textPrimary,
                             fontSize: 12,
                             fontWeight: FontWeight.w700)),
@@ -794,13 +794,13 @@ class _MiniStat extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label,
-            style: const TextStyle(
+            style: TextStyle(
                 color: AppColors.textTertiary,
                 fontSize: 10,
                 fontWeight: FontWeight.w500)),
         const SizedBox(height: 3),
         Text(value,
-            style: const TextStyle(
+            style: TextStyle(
                 color: AppColors.textPrimary,
                 fontSize: 13,
                 fontWeight: FontWeight.w700)),
@@ -862,7 +862,7 @@ class _FetchedDetails extends StatelessWidget {
                 Expanded(
                   child: Text(
                     detail.title,
-                    style: const TextStyle(
+                    style: TextStyle(
                         color: AppColors.textPrimary,
                         fontSize: 15,
                         fontWeight: FontWeight.w700),
@@ -879,7 +879,7 @@ class _FetchedDetails extends StatelessWidget {
                     ),
                     child: Text(
                       detail.siteName,
-                      style: const TextStyle(
+                      style: TextStyle(
                           color: AppColors.textTertiary,
                           fontSize: 11,
                           fontWeight: FontWeight.w600),
@@ -984,7 +984,7 @@ class _SelectionCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   sel.matchName,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.textSecondary,
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
@@ -1016,7 +1016,7 @@ class _SelectionCard extends StatelessWidget {
             children: [
               Text(
                 sel.betType,
-                style: const TextStyle(
+                style: TextStyle(
                     color: AppColors.textPrimary,
                     fontSize: 12,
                     fontWeight: FontWeight.w700),
@@ -1025,7 +1025,7 @@ class _SelectionCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 Text(
                   'Skor: ${sel.lastScore}',
-                  style: const TextStyle(
+                  style: TextStyle(
                       color: AppColors.textTertiary, fontSize: 11),
                 ),
               ],
@@ -1051,7 +1051,7 @@ class _LoadingDetail extends StatelessWidget {
         borderRadius: BorderRadius.circular(26),
         border: Border.all(color: AppColors.border, width: 0.5),
       ),
-      child: const Center(
+      child: Center(
         child: CircularProgressIndicator(
             color: AppColors.brand, strokeWidth: 2),
       ),
@@ -1082,7 +1082,7 @@ class _ErrorDetail extends StatelessWidget {
           Text(
             error ?? 'Kupon detayı yüklenemedi',
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
                 color: AppColors.textTertiary,
                 fontSize: 13,
                 fontWeight: FontWeight.w500),
@@ -1099,7 +1099,7 @@ class _ErrorDetail extends StatelessWidget {
                 border: Border.all(
                     color: AppColors.brand.withOpacity(0.3), width: 0.5),
               ),
-              child: const Text('Tekrar Dene',
+              child: Text('Tekrar Dene',
                   style: TextStyle(
                       color: AppColors.brand,
                       fontSize: 13,
