@@ -146,12 +146,6 @@ class _Market {
       line == null ? option : '$option $line';
 }
 
-class _MarketCategory {
-  final String title;
-  final List<_Market> markets;
-  const _MarketCategory({required this.title, required this.markets});
-}
-
 final _markets = [
   const _Market(name: 'Maç Sonucu', options: ['MS1', 'MSX', 'MS2']),
   const _Market(name: 'İlk Yarı Sonucu', options: ['İY 1', 'İY X', 'İY 2']),
@@ -188,39 +182,6 @@ final _markets = [
   ),
 ];
 
-final _categories = [
-  _MarketCategory(
-    title: 'Sonuç',
-    markets: _markets
-        .where((m) => m.name == 'Maç Sonucu' || m.name == 'İlk Yarı Sonucu')
-        .toList(),
-  ),
-  _MarketCategory(
-    title: 'Gol',
-    markets: _markets
-        .where((m) =>
-            m.name == 'Alt / Üst' ||
-            m.name == 'İlk Yarı Alt / Üst' ||
-            m.name == 'KG')
-        .toList(),
-  ),
-  _MarketCategory(
-    title: 'Korner',
-    markets: _markets
-        .where((m) =>
-            m.name == 'Korner Alt / Üst' ||
-            m.name == 'İlk Yarı Korner Alt / Üst')
-        .toList(),
-  ),
-  _MarketCategory(
-    title: 'Kart',
-    markets: _markets
-        .where((m) =>
-            m.name == 'Sarı Kart Alt / Üst' ||
-            m.name == 'İlk Yarı Sarı Kart Alt / Üst')
-        .toList(),
-  ),
-];
 
 // ─── Search state ─────────────────────────────────────────────────────────────
 

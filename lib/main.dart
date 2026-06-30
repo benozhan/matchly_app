@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:app_links/app_links.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'l10n/app_localizations.dart';
 import 'core/app_theme.dart';
@@ -120,7 +119,6 @@ class _MatchlyAppState extends State<MatchlyApp> {
     if (user != null) {
       // Google/Apple ile girişte username yoksa username ekranı göster
       final meta = user.userMetadata ?? {};
-      final email = user.email ?? '';
       final hasUsername = meta['username'] != null;
       if (!hasUsername && (user.appMetadata['provider'] == 'google' || user.appMetadata['provider'] == 'apple')) {
         setState(() => _needsUsername = true);

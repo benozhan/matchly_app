@@ -705,7 +705,6 @@ class _DailyHistory extends StatelessWidget {
   const _DailyHistory({required this.gunlukList, required this.fmt, required this.parseAmount});
 
   static const _days = ['', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
-  static const _months = ['', 'Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
 
   @override
   Widget build(BuildContext context) {
@@ -741,9 +740,7 @@ class _DailyHistory extends StatelessWidget {
             final yatti = coupons.where((c) => c.status == CouponStatus.risk).length;
             final yatirim = coupons.fold(0.0, (s, c) => s + parseAmount(c.stake));
             final kazanc = coupons.where((c) => c.status == CouponStatus.winning).fold(0.0, (s, c) => s + parseAmount(c.potential));
-            final net = kazanc - yatirim + coupons.where((c) => c.status == CouponStatus.winning).fold(0.0, (s, c) => s + parseAmount(c.stake));
             final netVal = kazanc - yatirim;
-            final isPos = netVal >= 0;
             final netColor = netVal > 0 ? AppColors.green : netVal < 0 ? AppColors.red : AppColors.textSecondary;
 
             return Container(

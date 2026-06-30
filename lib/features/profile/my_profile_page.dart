@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../models/coupon.dart';
-import '../../core/app_state.dart';
 import '../../services/auth_service.dart';
 import 'profile_page.dart';
 

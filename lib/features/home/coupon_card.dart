@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../core/app_colors.dart';
-import '../../core/coupon_share.dart';
 import '../../models/coupon.dart';
 import 'match_row.dart';
 import 'progress_segments.dart';

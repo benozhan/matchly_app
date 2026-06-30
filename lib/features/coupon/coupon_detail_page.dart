@@ -3,12 +3,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/app_colors.dart';
 import '../../services/comment_service.dart';
 import '../shared/reaction_bar.dart';
-
-import '../../core/app_colors.dart';
 import '../../core/coupon_share.dart';
 import '../../models/coupon.dart';
 import '../home/match_row.dart';
-import '../home/progress_segments.dart';
 import '../home/status_badge.dart';
 import '../shared_coupon/shared_coupon_preview_page.dart';
 

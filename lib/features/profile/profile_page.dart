@@ -2,14 +2,11 @@ import 'package:flutter/material.dart';
 import 'shared_coupon_detail_page.dart';
 import '../coupon/coupon_detail_page.dart';
 
-import 'package:image_picker/image_picker.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/app_colors.dart';
 import '../../models/coupon.dart';
 import '../../services/social_service.dart';
 import '../home/match_row.dart';
 import 'feed_page.dart';
-import 'user_list_page.dart';
 import 'user_search_page.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -579,7 +576,6 @@ class _Avatar extends StatefulWidget {
 }
 
 class _AvatarState extends State<_Avatar> {
-  bool _uploading = false;
   String? _localUrl;
 
   String get _initials {
@@ -590,47 +586,6 @@ class _AvatarState extends State<_Avatar> {
         : '?';
   }
 
-  Future<void> _pickAndUpload() async {
-    try {
-      final picker = ImagePicker();
-      final picked = await picker.pickImage(
-        source: ImageSource.gallery,
-        maxWidth: 512,
-        maxHeight: 512,
-        imageQuality: 85,
-      );
-      if (picked == null) return;
-      setState(() => _uploading = true);
-
-      final bytes = await picked.readAsBytes();
-      final ext = picked.path.split('.').last.toLowerCase();
-      final fileName = '${widget.username}_${DateTime.now().millisecondsSinceEpoch}.$ext';
-
-      final sb = Supabase.instance.client;
-      await sb.storage.from('avatars').uploadBinary(
-        fileName,
-        bytes,
-        fileOptions: FileOptions(contentType: 'image/$ext', upsert: true),
-      );
-
-      final url = sb.storage.from('avatars').getPublicUrl(fileName);
-      await SocialService.instance.updateAvatar(widget.username, url);
-
-      if (!mounted) return;
-      setState(() { _localUrl = url; _uploading = false; });
-      widget.onAvatarUpdated?.call(url);
-    } catch (e) {
-      if (!mounted) return;
-      setState(() => _uploading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Fotoğraf yüklenemedi: $e'),
-          backgroundColor: AppColors.card,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    }
-  }
 
   @override
   Widget build(BuildContext context) {

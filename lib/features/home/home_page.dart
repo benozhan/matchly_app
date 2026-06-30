@@ -14,10 +14,8 @@ import '../coupon/coupon_detail_page.dart';
 import '../ayarlar/ayarlar_page.dart';
 import '../profile/feed_page.dart';
 import '../istatistik/istatistik_page.dart';
-import '../shared_coupon/shared_coupon_preview_page.dart';
 import 'bottom_nav.dart';
 import 'notification_bell.dart';
-import '../../services/notification_service.dart';
 import 'coupon_card.dart';
 import 'section_header.dart';
 
@@ -27,8 +25,8 @@ enum _FilterTab { all, active, winning, losing }
 
 class _CouponEntry {
   Coupon coupon;
-  bool isFavorite;
-  _CouponEntry({required this.coupon, this.isFavorite = false});
+  bool isFavorite = false;
+  _CouponEntry({required this.coupon});
 }
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
@@ -466,14 +464,6 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
     return {'stake': stake, 'profit': profit, 'won': won, 'lost': lost, 'total': coupons.length};
   }
 
-  String _fmtMoney(double n) {
-    if (n == 0) return '–';
-    final prefix = n < 0 ? '-' : '+';
-    final abs = n.abs().toInt();
-    if (abs >= 1000) return '${prefix}₺${abs ~/ 1000}.${(abs % 1000).toString().padLeft(3, "0")}';
-    return '${prefix}₺${abs}';
-  }
-
   Map<String, dynamic> get _todayStats => _calcStats(_todayCoupons);
   Map<String, dynamic> get _yesterdayStats => _calcStats(_yesterdayCoupons);
 
@@ -483,17 +473,6 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
     if (entry.coupon.sharedId != null) return;
     setState(() => entry.coupon = entry.coupon.copyWith(sharedId: id));
     _pushCouponToBackend(entry.coupon, id);
-  }
-
-  void _saveHistorySharedId(Coupon coupon, String id) {
-    if (coupon.sharedId != null) return;
-    final idx = _historyEntries.indexWhere(
-      (e) => e.coupon.title == coupon.title && e.coupon.stake == coupon.stake,
-    );
-    if (idx == -1) return;
-    setState(() => _historyEntries[idx].coupon =
-        _historyEntries[idx].coupon.copyWith(sharedId: id));
-    _pushCouponToBackend(coupon, id);
   }
 
   /// Fire-and-forget: register the shared coupon and upload its full detail.
@@ -528,14 +507,7 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
     setState(() => entry.coupon = entry.coupon.copyWith(status: newStatus));
   }
 
-  void _updateHistoryStatus(Coupon coupon, CouponStatus newStatus) {
-    final idx = _historyEntries.indexWhere(
-      (e) => e.coupon.title == coupon.title && e.coupon.stake == coupon.stake,
-    );
-    if (idx == -1) return;
-    setState(() => _historyEntries[idx].coupon =
-        _historyEntries[idx].coupon.copyWith(status: newStatus));
-  }
+
 
   // ── actions ────────────────────────────────────────────────────────────────
 

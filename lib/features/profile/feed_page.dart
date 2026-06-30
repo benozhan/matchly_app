@@ -323,7 +323,6 @@ class _FeedCard extends StatefulWidget {
 
 class _FeedCardState extends State<_FeedCard> {
   CouponDetail? _detail;
-  bool _fetching = true;
 
   @override
   void initState() {
@@ -335,9 +334,9 @@ class _FeedCardState extends State<_FeedCard> {
     try {
       final d = await SocialService.instance
           .getCouponDetail(widget.item.couponId);
-      if (mounted) setState(() { _detail = d; _fetching = false; });
+      if (mounted) setState(() => _detail = d);
     } catch (_) {
-      if (mounted) setState(() => _fetching = false);
+      if (mounted) setState(() {});
     }
   }
 
