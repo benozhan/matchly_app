@@ -146,14 +146,14 @@ final _markets = [
     options: ['İY Korner Üst', 'İY Korner Alt'],
   ),
   const _Market(
-    name: 'Kart Alt / Üst',
+    name: 'Sarı Kart Alt / Üst',
     lines: ['2.5', '3.5', '4.5', '5.5', '6.5'],
-    options: ['Kart Üst', 'Kart Alt'],
+    options: ['Sarı Kart Üst', 'Sarı Kart Alt'],
   ),
   const _Market(
-    name: 'İlk Yarı Kart Alt / Üst',
+    name: 'İlk Yarı Sarı Kart Alt / Üst',
     lines: ['0.5', '1.5', '2.5', '3.5'],
-    options: ['İY Kart Üst', 'İY Kart Alt'],
+    options: ['İY Sarı Kart Üst', 'İY Sarı Kart Alt'],
   ),
 ];
 
@@ -185,8 +185,8 @@ final _categories = [
     title: 'Kart',
     markets: _markets
         .where((m) =>
-            m.name == 'Kart Alt / Üst' ||
-            m.name == 'İlk Yarı Kart Alt / Üst')
+            m.name == 'Sarı Kart Alt / Üst' ||
+            m.name == 'İlk Yarı Sarı Kart Alt / Üst')
         .toList(),
   ),
 ];
