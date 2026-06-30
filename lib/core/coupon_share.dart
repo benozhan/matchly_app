@@ -41,8 +41,8 @@ class CouponShare {
   // TODO(deep-links): matchly.app/coupon/{sharedId} should resolve to a live
   //   shared coupon screen showing real-time selection status updates.
   static String buildShareText(Coupon coupon, {required String sharedId}) {
-    final matches = coupon.matches.map((m) => '\${m.teams} — \${m.selection}').join('\n');
-    return '🎯 \${coupon.title}\n\$matches\n\nMatchly\'de takip et 👇\nhttps://matchlyweb.vercel.app/coupon/\$sharedId';
+    final matches = coupon.matches.map((m) => '${m.teams} — ${m.selection}').join('\n');
+    return '🎯 ${coupon.title}\n$matches\n\nMatchly\'de takip et 👇\nhttps://matchlyweb.vercel.app/coupon/$sharedId';
   }
 
   // ── ID generation ──────────────────────────────────────────────────────────

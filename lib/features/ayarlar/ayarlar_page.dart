@@ -47,7 +47,7 @@ class _AyarlarPageState extends State<AyarlarPage> {
           final h = profile['daily_report_hour'] as int? ?? 0;
           final m = profile['daily_report_minute'] as int? ?? 0;
           savedTime = TimeOfDay(hour: h, minute: m);
-          print('Gün sonu saati yüklendi: \$h:\$m');
+          print('Gün sonu saati yüklendi: $h:$m');
         } else {
           print('Profil bulunamadı');
         }

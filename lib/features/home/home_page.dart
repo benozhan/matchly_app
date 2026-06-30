@@ -113,7 +113,7 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
 
     // coupon_matches realtime
     _matchChannel = Supabase.instance.client
-        .channel('coupon_matches:\$userId')
+        .channel('coupon_matches:$userId')
         .onPostgresChanges(
           event: PostgresChangeEvent.update,
           schema: 'public',

@@ -584,7 +584,7 @@ class _AvatarState extends State<_Avatar> {
 
   String get _initials {
     final parts = widget.displayName.trim().split(' ');
-    if (parts.length >= 2) return '\${parts[0][0]}\${parts[1][0]}'.toUpperCase();
+    if (parts.length >= 2) return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
     return widget.displayName.isNotEmpty
         ? widget.displayName.substring(0, widget.displayName.length.clamp(0, 2)).toUpperCase()
         : '?';
@@ -1102,7 +1102,7 @@ class _LocalCouponCardState extends State<_LocalCouponCard> {
     setState(() => _sharing = true);
     try {
       final oddsMatch = RegExp(r'×([\d.,]+)').firstMatch(coupon.meta);
-      final oddsDisplay = oddsMatch != null ? '×\${oddsMatch.group(1)}' : '—';
+      final oddsDisplay = oddsMatch != null ? '×${oddsMatch.group(1)}' : '—';
       await SocialService.instance.saveCouponDetail(
         couponId:      couponId,
         ownerUsername: widget.ownerUsername,
