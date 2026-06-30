@@ -87,28 +87,33 @@ class _FeedPageState extends State<FeedPage> with AutomaticKeepAliveClientMixin 
         } catch (_) {
           hasFollowing = null;
         }
-
-        if (items.isEmpty && _currentUser != null) {
-          try {
-            final own = await SocialService.instance
-                .getSharedCoupons(widget.username);
-            if (own.isNotEmpty) {
-              final u = _currentUser!;
-              items = own
-                  .map((c) => FeedItem(
-                        type: 'SHARED_COUPON',
-                        username: u.username,
-                        displayName: u.displayName,
-                        couponId: c.couponId,
-                        createdAt: c.createdAt,
-                      ))
-                  .toList();
-              items.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-            }
-          } catch (_) {}
-        }
       } else {
         hasFollowing = true;
+      }
+
+      // Kullanıcının kendi public kuponlarını her zaman feed'e ekle
+      if (_currentUser != null) {
+        try {
+          final own = await SocialService.instance
+              .getSharedCoupons(widget.username);
+          if (own.isNotEmpty) {
+            final u = _currentUser!;
+            final ownIds = own.map((c) => c.couponId).toSet();
+            // Zaten feed'de varsa tekrar ekleme
+            items.removeWhere((i) => ownIds.contains(i.couponId) && i.username == u.username);
+            final ownItems = own
+                .map((c) => FeedItem(
+                      type: 'SHARED_COUPON',
+                      username: u.username,
+                      displayName: u.displayName,
+                      couponId: c.couponId,
+                      createdAt: c.createdAt,
+                    ))
+                .toList();
+            items = [...ownItems, ...items];
+            items.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+          }
+        } catch (_) {}
       }
 
       if (!mounted) return;
