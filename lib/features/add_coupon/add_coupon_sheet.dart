@@ -531,8 +531,9 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
 
   // ── computed ──────────────────────────────────────────────────────────────
 
-  double get _odds => double.tryParse(oddsController.text.trim()) ?? 0;
-  double get _stake => double.tryParse(stakeController.text.trim()) ?? 0;
+  double _parseNum(String s) => double.tryParse(s.trim().replaceAll(',', '.')) ?? 0;
+  double get _odds => _parseNum(oddsController.text);
+  double get _stake => _parseNum(stakeController.text);
 
   String get _potentialText {
     if (_stake <= 0 || _odds <= 0) return '–';
@@ -747,11 +748,11 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
       CouponShare.showTopToast(context, 'En az bir maç seçimi ekleyin');
       return;
     }
-    if (oddsController.text.trim().isEmpty || (double.tryParse(oddsController.text.trim()) ?? 0) <= 0) {
+    if (oddsController.text.trim().isEmpty || _parseNum(oddsController.text) <= 0) {
       CouponShare.showTopToast(context, 'Lütfen geçerli bir oran girin');
       return;
     }
-    if (stakeController.text.trim().isEmpty || (double.tryParse(stakeController.text.trim()) ?? 0) <= 0) {
+    if (stakeController.text.trim().isEmpty || _parseNum(stakeController.text) <= 0) {
       CouponShare.showTopToast(context, 'Lütfen bahis miktarı girin');
       return;
     }
@@ -995,7 +996,7 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
                 Expanded(
                   child: MatchlyInput(
                       controller: stakeController,
-                      label: 'Bahis',
+                      label: 'Bahis Miktarı',
                       hint: '120',
                       prefix: '₺',
                       keyboardType: const TextInputType.numberWithOptions(decimal: true)),

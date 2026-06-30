@@ -225,7 +225,7 @@ class _CouponCardState extends State<CouponCard> {
                               onTap: widget.onEdit,
                             ),
                             _ActionBtn(
-                              icon: widget.coupon.isPublic ? Icons.visibility_rounded : Icons.visibility_off_outlined,
+                              icon: widget.coupon.isPublic ? Icons.public_rounded : Icons.public_off_rounded,
                               color: widget.coupon.isPublic ? AppColors.brand : AppColors.textTertiary,
                               onTap: widget.onPublicToggle,
                             ),

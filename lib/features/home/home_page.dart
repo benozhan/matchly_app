@@ -542,24 +542,23 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
       builder: (_) => const AddCouponSheet(),
     );
     if (newCoupon == null) return;
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Row(
-            children: [
-              SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)),
-              SizedBox(width: 12),
-              Text('Kupon ekleniyor...'),
-            ],
-          ),
-          duration: Duration(seconds: 3),
-          behavior: SnackBarBehavior.floating,
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.showSnackBar(
+      const SnackBar(
+        content: Row(
+          children: [
+            SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)),
+            SizedBox(width: 12),
+            Text('Kupon ekleniyor...'),
+          ],
         ),
-      );
-    }
+        duration: Duration(seconds: 10),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
     final savedCoupon = await CouponStorageService.instance.saveCoupon(newCoupon);
     setState(() => _entries.insert(0, _CouponEntry(coupon: savedCoupon ?? newCoupon)));
-    if (mounted) ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    messenger.hideCurrentSnackBar();
     _loadUser(); // Arka planda yenile
   }
 
@@ -584,16 +583,16 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
       if (_scrollController.hasClients) {
         _scrollController.jumpTo(scrollOffset);
       }
-    });
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(newVal ? '✅ Akışta paylaşıldı' : '🔒 Akıştan kaldırıldı'),
           duration: const Duration(seconds: 2),
           behavior: SnackBarBehavior.floating,
         ),
       );
-    }
+      }
+    });
     await Supabase.instance.client
         .from('coupons')
         .update({'is_public': newVal})
@@ -698,6 +697,7 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
                                   color: AppColors.brand,
                                   child: ListView(
                                   controller: _scrollController,
+                                  key: const PageStorageKey('home_list'),
                                   padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
                                   children: [
 
@@ -919,7 +919,7 @@ class _HeroCard extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _TodayStat(label: 'Bugün', value: '${todayStats['total']} kupon'),
+                  _TodayStat(label: (todayStats['total'] as int) == 0 ? 'Dün' : 'Bugün', value: '${((todayStats['total'] as int) == 0 ? yesterdayStats['total'] : todayStats['total'])} kupon'),
                   _TodayStat(label: 'Yatırım', value: '₺${(todayStats['stake'] as double).toInt()}'),
                   _TodayStat(
                     label: 'Kar/Zarar',
