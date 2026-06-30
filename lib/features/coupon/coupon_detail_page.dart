@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../core/app_colors.dart';
+import '../../services/comment_service.dart';
 
 import '../../core/app_colors.dart';
 import '../../core/coupon_share.dart';
@@ -353,6 +356,10 @@ class _CouponDetailPageState extends State<CouponDetailPage> {
                           ),
                         ),
                       ),
+
+                      // ── Yorumlar ─────────────────────────────────────
+                      const SizedBox(height: 24),
+                      _CouponComments(couponId: widget.coupon.id ?? ''),
                     ],
                   ),
                 ),
@@ -361,6 +368,147 @@ class _CouponDetailPageState extends State<CouponDetailPage> {
           ),
         ),
       ),
+    );
+  }
+}
+
+// ─── Yorumlar widget ──────────────────────────────────────────────────────────
+
+String _fmtTimeAgo(DateTime dt) {
+  final diff = DateTime.now().difference(dt);
+  if (diff.inSeconds < 60) return 'Az önce';
+  if (diff.inMinutes < 60) return '${diff.inMinutes} dk önce';
+  if (diff.inHours < 24) return '${diff.inHours} sa önce';
+  if (diff.inDays < 7) return '${diff.inDays} gün önce';
+  return '${dt.day}.${dt.month}.${dt.year}';
+}
+
+class _CouponComments extends StatefulWidget {
+  final String couponId;
+  const _CouponComments({required this.couponId});
+
+  @override
+  State<_CouponComments> createState() => _CouponCommentsState();
+}
+
+class _CouponCommentsState extends State<_CouponComments> {
+  List<CouponComment> _comments = [];
+  final _ctrl = TextEditingController();
+  bool _loading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _load() async {
+    if (widget.couponId.isEmpty) return;
+    final comments = await CommentService.instance.getComments(widget.couponId);
+    if (mounted) setState(() => _comments = comments);
+  }
+
+  Future<void> _submit() async {
+    final text = _ctrl.text.trim();
+    if (text.isEmpty) return;
+    setState(() => _loading = true);
+    try {
+      final uid = Supabase.instance.client.auth.currentUser?.id;
+      String username = 'user';
+      if (uid != null) {
+        try {
+          final res = await Supabase.instance.client
+              .from('profiles').select('username').eq('id', uid).single();
+          username = res['username'] as String? ?? 'user';
+        } catch (_) {}
+      }
+      await CommentService.instance.addComment(widget.couponId, username, text);
+      _ctrl.clear();
+      await _load();
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final currentUserId = Supabase.instance.client.auth.currentUser?.id ?? '';
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('Yorumlar', style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w800)),
+        const SizedBox(height: 12),
+        ..._comments.map((c) => Container(
+          margin: const EdgeInsets.only(bottom: 8),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: AppColors.card,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.border, width: 0.5),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Text('@${c.username}', style: const TextStyle(color: AppColors.brand, fontSize: 12, fontWeight: FontWeight.w700)),
+                  const SizedBox(width: 8),
+                  Text(_fmtTimeAgo(c.createdAt), style: const TextStyle(color: AppColors.textTertiary, fontSize: 11)),
+                  const Spacer(),
+                  if (c.userId == currentUserId)
+                    GestureDetector(
+                      onTap: () async {
+                        await CommentService.instance.deleteComment(c.id);
+                        _load();
+                      },
+                      child: const Icon(Icons.delete_outline, size: 16, color: AppColors.textTertiary),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text(c.content, style: const TextStyle(color: AppColors.textPrimary, fontSize: 13)),
+            ],
+          ),
+        )),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _ctrl,
+                style: const TextStyle(color: AppColors.textPrimary, fontSize: 13),
+                decoration: InputDecoration(
+                  hintText: 'Yorum yaz...',
+                  hintStyle: const TextStyle(color: AppColors.textTertiary),
+                  isDense: true,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  filled: true,
+                  fillColor: AppColors.card,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: AppColors.border, width: 0.5)),
+                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: AppColors.border, width: 0.5)),
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            GestureDetector(
+              onTap: _loading ? null : _submit,
+              child: Container(
+                width: 40, height: 40,
+                decoration: BoxDecoration(color: AppColors.brand, borderRadius: BorderRadius.circular(10)),
+                child: _loading
+                    ? const Center(child: SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)))
+                    : const Icon(Icons.send_rounded, color: Colors.white, size: 18),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

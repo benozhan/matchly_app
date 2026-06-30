@@ -542,8 +542,24 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
       builder: (_) => const AddCouponSheet(),
     );
     if (newCoupon == null) return;
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Row(
+            children: [
+              SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)),
+              SizedBox(width: 12),
+              Text('Kupon ekleniyor...'),
+            ],
+          ),
+          duration: Duration(seconds: 3),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
     final savedCoupon = await CouponStorageService.instance.saveCoupon(newCoupon);
     setState(() => _entries.insert(0, _CouponEntry(coupon: savedCoupon ?? newCoupon)));
+    if (mounted) ScaffoldMessenger.of(context).hideCurrentSnackBar();
     _loadUser(); // Arka planda yenile
   }
 
@@ -562,7 +578,13 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
     final newVal = !entry.coupon.isPublic;
     final couponId = entry.coupon.id;
     if (couponId == null || _user == null) return;
+    final scrollOffset = _scrollController.hasClients ? _scrollController.offset : 0.0;
     setState(() => entry.coupon = entry.coupon.copyWith(isPublic: newVal));
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.jumpTo(scrollOffset);
+      }
+    });
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

@@ -110,7 +110,7 @@ class _SharedCouponDetailPageState extends State<SharedCouponDetailPage> {
       final dt = DateTime.parse(raw).toLocal();
       const months = ['', 'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
                       'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
-      return '${dt.day} ${months[dt.month]} ${dt.year},'
+  return '${dt.day}.${dt.month}.${dt.year}';
           ' ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
     } catch (_) { return raw; }
   }
@@ -310,10 +310,10 @@ class _SharedCouponDetailPageState extends State<SharedCouponDetailPage> {
 String _timeAgo(DateTime dt) {
   final diff = DateTime.now().difference(dt);
   if (diff.inSeconds < 60) return 'Az önce';
-  if (diff.inMinutes < 60) return '\${diff.inMinutes} dk önce';
-  if (diff.inHours < 24) return '\${diff.inHours} sa önce';
-  if (diff.inDays < 7) return '\${diff.inDays} gün önce';
-  return '\${dt.day}.\${dt.month}.\${dt.year}';
+  if (diff.inMinutes < 60) return '${diff.inMinutes} dk önce';
+  if (diff.inHours < 24) return '${diff.inHours} sa önce';
+  if (diff.inDays < 7) return '${diff.inDays} gün önce';
+  return '${dt.day}.${dt.month}.${dt.year}';
 }
 
 class _CommentsSection extends StatelessWidget {
