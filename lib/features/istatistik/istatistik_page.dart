@@ -328,7 +328,7 @@ class _IstatistikPageState extends State<IstatistikPage> {
                         children: [
                           Expanded(flex: 3, child: Text(lig, style: const TextStyle(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w600))),
                           Expanded(child: Text('$kupon kupon', style: const TextStyle(color: AppColors.textSecondary, fontSize: 11))),
-                          Expanded(child: Text('$kazanan✅ $kaybeden❌', style: const TextStyle(fontSize: 11, color: AppColors.textSecondary))),
+                          Expanded(child: Text('$kazanan ✅  $kaybeden ❌', style: const TextStyle(fontSize: 11, color: AppColors.textSecondary))),
                           Expanded(child: Text((net >= 0 ? '+' : '') + _fmt(net.abs()), style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: net >= 0 ? AppColors.green : AppColors.red))),
                         ],
                       ),
