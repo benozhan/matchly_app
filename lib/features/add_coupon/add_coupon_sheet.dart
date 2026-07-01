@@ -167,6 +167,10 @@ final _markets = [
   const _Market(name: 'Maç Sonucu', options: ['MS1', 'MSX', 'MS2']),
   const _Market(name: 'İlk Yarı Sonucu', options: ['İY 1', 'İY X', 'İY 2']),
   const _Market(
+    name: 'İY/MS',
+    options: ['1/1', '1/X', '1/2', 'X/1', 'X/X', 'X/2', '2/1', '2/X', '2/2'],
+  ),
+  const _Market(
     name: 'Alt / Üst',
     lines: ['0.5', '1.5', '2.5', '3.5', '4.5', '5.5', '6.5'],
     options: ['Üst', 'Alt'],
@@ -177,6 +181,7 @@ final _markets = [
     options: ['İY Üst', 'İY Alt'],
   ),
   const _Market(name: 'KG', options: ['KG Var', 'KG Yok']),
+  const _Market(name: 'İlk Yarı KG', options: ['İY KG Var', 'İY KG Yok']),
   const _Market(
     name: 'Korner Alt / Üst',
     lines: ['5.5', '6.5', '7.5', '8.5', '9.5', '10.5', '11.5', '12.5', '13.5'],
@@ -2016,6 +2021,7 @@ class _PeriodOptionState extends State<_PeriodOption> {
 // ─── Market group body ────────────────────────────────────────────────────────
 
 IconData _marketIcon(String name) {
+  if (name.contains('İY/MS')) return Icons.compare_arrows_rounded;
   if (name.contains('Maç Sonucu')) return Icons.flag_rounded;
   if (name.contains('Sonucu')) return Icons.schedule_rounded;
   if (name.contains('KG')) return Icons.swap_horiz_rounded;
@@ -2030,7 +2036,7 @@ IconData _marketIcon(String name) {
 _Market? _findIyVariant(_Market base) {
   final iyName = base.name == 'Maç Sonucu'
       ? 'İlk Yarı Sonucu'
-      : 'İlk Yarı $base.name';
+      : 'İlk Yarı ${base.name}';
   try {
     return _markets.firstWhere((m) => m.name == iyName);
   } catch (_) {
