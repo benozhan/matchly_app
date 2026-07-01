@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/app_colors.dart';
+import '../../l10n/app_localizations.dart';
 import '../../services/notification_service.dart';
 
 class NotificationBell extends StatelessWidget {
@@ -83,6 +84,7 @@ class _NotificationsSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     final notifications = NotificationService.instance.notifications;
 
     return Container(
@@ -109,7 +111,7 @@ class _NotificationsSheet extends StatelessWidget {
             child: Row(
               children: [
                 Text(
-                  'Bildirimler',
+                  t.notifications,
                   style: TextStyle(
                     color: AppColors.textPrimary,
                     fontSize: 20,
@@ -125,7 +127,7 @@ class _NotificationsSheet extends StatelessWidget {
             child: notifications.isEmpty
                 ? Center(
                     child: Text(
-                      'Henüz bildirim yok',
+                      t.noNotificationsYet,
                       style: TextStyle(color: AppColors.textTertiary, fontSize: 14),
                     ),
                   )

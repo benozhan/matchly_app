@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/app_colors.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/coupon.dart';
 
 class StatusBadge extends StatelessWidget {
@@ -30,7 +31,7 @@ class StatusBadge extends StatelessWidget {
           ),
           const SizedBox(width: 5),
           Text(
-            statusText(status, resolved: resolved),
+            statusText(context, status, resolved: resolved),
             style: TextStyle(
               color: color,
               fontSize: 11,
@@ -44,13 +45,14 @@ class StatusBadge extends StatelessWidget {
   }
 }
 
-String statusText(CouponStatus status, {bool resolved = false}) {
+String statusText(BuildContext context, CouponStatus status, {bool resolved = false}) {
+  final t = AppLocalizations.of(context)!;
   switch (status) {
-    case CouponStatus.winning:   return resolved ? 'Kazandı' : 'Kazanıyor';
-    case CouponStatus.risk:      return 'Kaybetti';
-    case CouponStatus.pending:   return 'Aktif';
-    case CouponStatus.void_:    return 'Geçersiz';
-    case CouponStatus.cancelled: return 'İptal';
+    case CouponStatus.winning:   return resolved ? t.won : t.winningStatusLabel;
+    case CouponStatus.risk:      return t.lost;
+    case CouponStatus.pending:   return t.active;
+    case CouponStatus.void_:    return t.voidStatusLabel;
+    case CouponStatus.cancelled: return t.cancelledLabel;
   }
 }
 

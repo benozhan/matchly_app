@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart' as intl;
 import '../../core/app_colors.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/coupon.dart';
 
 class DailyHistoryPage extends StatelessWidget {
@@ -26,10 +28,10 @@ class DailyHistoryPage extends StatelessWidget {
     return double.tryParse(m?.group(0) ?? '0') ?? 0;
   }
 
-  static const _days = ['', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
-
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
+    final locale = Localizations.localeOf(context).toString();
     final Map<String, List<Coupon>> gunlukMap = {};
     for (final c in allCoupons) {
       if (c.createdAt == null) continue;
@@ -44,11 +46,11 @@ class DailyHistoryPage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: AppColors.background,
         elevation: 0,
-        title: Text('Günlük Geçmiş', style: TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.w800)),
+        title: Text(t.dailyHistoryPageTitle, style: TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.w800)),
         iconTheme: IconThemeData(color: AppColors.textPrimary),
       ),
       body: gunlukList.isEmpty
-          ? Center(child: Text('Henüz geçmiş yok', style: TextStyle(color: AppColors.textTertiary)))
+          ? Center(child: Text(t.noHistoryYet, style: TextStyle(color: AppColors.textTertiary)))
           : ListView.builder(
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
               itemCount: gunlukList.length,
@@ -90,7 +92,7 @@ class DailyHistoryPage extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text('${dt.day}', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: AppColors.textPrimary, height: 1)),
-                            Text(_days[dt.weekday], style: TextStyle(fontSize: 9, color: AppColors.textTertiary)),
+                            Text(intl.DateFormat.E(locale).format(dt), style: TextStyle(fontSize: 9, color: AppColors.textTertiary)),
                           ],
                         ),
                       ),
@@ -106,7 +108,7 @@ class DailyHistoryPage extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    aktif > 0 ? '${coupons.length} kupon · $aktif aktif' : '${coupons.length} kupon',
+                                    aktif > 0 ? t.couponCountActive(coupons.length, aktif) : t.couponCountSuffix(coupons.length),
                                     style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                                   ),
                                   const SizedBox(height: 4),
@@ -114,11 +116,11 @@ class DailyHistoryPage extends StatelessWidget {
                                     children: [
                                       Container(width: 7, height: 7, decoration: BoxDecoration(color: AppColors.green, shape: BoxShape.circle)),
                                       const SizedBox(width: 3),
-                                      Text('$tuttu tuttu', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                                      Text(t.wonCountSuffix(tuttu), style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                                       const SizedBox(width: 8),
                                       Container(width: 7, height: 7, decoration: BoxDecoration(color: AppColors.red, shape: BoxShape.circle)),
                                       const SizedBox(width: 3),
-                                      Text('$yatti yattı', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                                      Text(t.lostCountSuffix(yatti), style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                                     ],
                                   ),
                                 ],
@@ -134,7 +136,7 @@ class DailyHistoryPage extends StatelessWidget {
                                     ),
                                     const SizedBox(height: 3),
                                     Text(
-                                      '${_fmt(yatirim)} yatırım · ${_fmt(kazanc)} kazanç',
+                                      t.investmentAndProfit(_fmt(yatirim), _fmt(kazanc)),
                                       style: TextStyle(fontSize: 10, color: AppColors.textTertiary),
                                     ),
                                   ],

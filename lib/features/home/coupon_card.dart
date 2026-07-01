@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/app_colors.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/coupon.dart';
 import 'match_row.dart';
 import 'progress_segments.dart';
@@ -60,6 +61,7 @@ class _CouponCardState extends State<CouponCard> {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     final fav = widget.isFavorite;
     final coupon = widget.coupon;
     final stakeDisplay = coupon.stake.replaceAll(' bahis', '').trim();
@@ -186,21 +188,21 @@ class _CouponCardState extends State<CouponCard> {
                             children: [
                               Expanded(
                                 child: _FooterStat(
-                                  label: 'BAHİS',
+                                  label: t.footerStakeLabel,
                                   value: stakeDisplay,
                                 ),
                               ),
                               _VertDivider(),
                               Expanded(
                                 child: _FooterStat(
-                                  label: 'ORAN',
+                                  label: t.oranLabel,
                                   value: oddsDisplay,
                                 ),
                               ),
                               _VertDivider(),
                               Expanded(
                                 child: _FooterStat(
-                                  label: 'BEKLENTİ',
+                                  label: t.beklentiLabel,
                                   value: potentialDisplay,
                                   valueColor: _potentialColor(coupon.status),
                                 ),

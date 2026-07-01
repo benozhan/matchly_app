@@ -87,14 +87,23 @@ class CouponStorageService {
         .eq('user_id', user.id)
         .order('created_at', ascending: false);
 
+    final couponIds = couponRows.map((r) => r['id'].toString()).toList();
+    final matchesByCoupon = <String, List<Map<String, dynamic>>>{};
+    if (couponIds.isNotEmpty) {
+      final allMatchRows = await _client
+          .from('coupon_matches')
+          .select()
+          .inFilter('coupon_id', couponIds)
+          .order('sort_order');
+      for (final m in allMatchRows) {
+        matchesByCoupon.putIfAbsent(m['coupon_id'].toString(), () => []).add(m);
+      }
+    }
+
     final coupons = <Coupon>[];
 
     for (final row in couponRows) {
-      final matchRows = await _client
-          .from('coupon_matches')
-          .select()
-          .eq('coupon_id', row['id'])
-          .order('sort_order');
+      final matchRows = matchesByCoupon[row['id'].toString()] ?? const [];
 
       final matches = matchRows.map<MatchItem>((m) {
         final rawMStatus = m['status'] as String? ?? 'pending';

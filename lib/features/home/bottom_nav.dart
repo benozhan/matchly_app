@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/app_colors.dart';
+import '../../l10n/app_localizations.dart';
 
 class BottomNav extends StatelessWidget {
   final VoidCallback onAddPressed;
@@ -16,6 +17,7 @@ class BottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.fromLTRB(18, 8, 18, 24),
       child: Container(
@@ -45,13 +47,13 @@ class BottomNav extends StatelessWidget {
           children: [
             _NavTab(
               icon: Icons.confirmation_number_outlined,
-              label: 'Kuponlarım',
+              label: t.navMyCoupons,
               active: activeIndex == 0,
               onTap: () => onTabChanged?.call(0),
             ),
             _NavTab(
               icon: Icons.dynamic_feed_rounded,
-              label: 'Akış',
+              label: t.navFeed,
               active: activeIndex == 1,
               onTap: () => onTabChanged?.call(1),
             ),
@@ -89,13 +91,13 @@ class BottomNav extends StatelessWidget {
             ),
             _NavTab(
               icon: Icons.bar_chart_rounded,
-              label: 'İstatistik',
+              label: t.navStatsLabel,
               active: activeIndex == 2,
               onTap: () => onTabChanged?.call(2),
             ),
             _NavTab(
               icon: Icons.settings_outlined,
-              label: 'Ayarlar',
+              label: t.settings,
               active: activeIndex == 3,
               onTap: () => onTabChanged?.call(3),
             ),

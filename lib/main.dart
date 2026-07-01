@@ -211,13 +211,14 @@ class _UsernameSetupPageState extends State<_UsernameSetupPage> {
   }
 
   Future<void> _submit() async {
+    final t = AppLocalizations.of(context)!;
     final username = _controller.text.trim().toLowerCase().replaceAll(' ', '_');
     if (username.isEmpty) {
-      setState(() => _error = 'Kullanıcı adı gerekli');
+      setState(() => _error = t.usernameRequiredError);
       return;
     }
     if (username.length < 3) {
-      setState(() => _error = 'En az 3 karakter olmalı');
+      setState(() => _error = t.usernameMinLengthError);
       return;
     }
     setState(() { _loading = true; _error = null; });
@@ -232,6 +233,7 @@ class _UsernameSetupPageState extends State<_UsernameSetupPage> {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -241,16 +243,16 @@ class _UsernameSetupPageState extends State<_UsernameSetupPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 40),
-              Text('Kullanıcı adı seç', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+              Text(t.chooseUsernameTitle, style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
               const SizedBox(height: 8),
-              Text('Bu ad profilinde görünecek.', style: TextStyle(fontSize: 14, color: AppColors.textSecondary)),
+              Text(t.chooseUsernameSubtitle, style: TextStyle(fontSize: 14, color: AppColors.textSecondary)),
               const SizedBox(height: 32),
               TextField(
                 controller: _controller,
                 autofocus: true,
                 style: TextStyle(color: AppColors.textPrimary),
                 decoration: InputDecoration(
-                  hintText: 'kullanici_adi',
+                  hintText: t.usernameHintPlaceholder,
                   hintStyle: TextStyle(color: AppColors.textTertiary),
                   filled: true,
                   fillColor: AppColors.card,
@@ -274,7 +276,7 @@ class _UsernameSetupPageState extends State<_UsernameSetupPage> {
                   ),
                   child: _loading
                       ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                      : const Text('Devam Et', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.white)),
+                      : Text(t.continueButton, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.white)),
                 ),
               ),
             ],

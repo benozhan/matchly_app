@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart' as intl;
 import 'daily_history_page.dart';
 
 import '../../core/app_colors.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/coupon.dart';
 import '../coupon/coupon_detail_page.dart';
 import '../home/status_badge.dart';
@@ -65,6 +67,7 @@ class _IstatistikPageState extends State<IstatistikPage> {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     final allCoupons = _filtered;
     final total = allCoupons.length;
     final kazanan = allCoupons
@@ -161,7 +164,7 @@ class _IstatistikPageState extends State<IstatistikPage> {
       children: [
         // ── Header ───────────────────────────────────────────────────────────
         Text(
-          'İstatistik',
+          t.navStatsLabel,
           style: TextStyle(
             color: AppColors.textPrimary,
             fontSize: 28,
@@ -171,7 +174,7 @@ class _IstatistikPageState extends State<IstatistikPage> {
         ),
         const SizedBox(height: 4),
         Text(
-          'Kupon performans özeti',
+          t.statsPageSubtitle,
           style: TextStyle(
             color: AppColors.textTertiary,
             fontSize: 13,
@@ -245,25 +248,25 @@ class _IstatistikPageState extends State<IstatistikPage> {
                 children: [
                   _SumStat(
                     value: '$total',
-                    label: 'Toplam',
+                    label: t.totalLabel,
                     color: AppColors.textSecondary,
                   ),
                   _SDivider(),
                   _SumStat(
                     value: '$kazanan',
-                    label: 'Kazanan',
+                    label: t.wonLabel,
                     color: AppColors.green,
                   ),
                   _SDivider(),
                   _SumStat(
                     value: '$kaybeden',
-                    label: 'Kaybeden',
+                    label: t.lostLabel,
                     color: AppColors.red,
                   ),
                   _SDivider(),
                   _SumStat(
                     value: '$basari%',
-                    label: 'Başarı',
+                    label: t.successRateLabel,
                     color: const Color(0xFFF0E8DA),
                   ),
                 ],
@@ -281,7 +284,7 @@ class _IstatistikPageState extends State<IstatistikPage> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
                   child: Text(
-                    'DURUM DAĞILIMI',
+                    t.statusDistributionTitle,
                     style: TextStyle(
                       color: AppColors.textTertiary.withOpacity(0.7),
                       fontSize: 10,
@@ -303,28 +306,28 @@ class _IstatistikPageState extends State<IstatistikPage> {
                   child: Column(
                     children: [
                       _StatusRow(
-                        label: 'Kazanan',
+                        label: t.wonLabel,
                         count: kazanan,
                         color: AppColors.green,
                         total: resolved > 0 ? resolved : 1,
                       ),
                       const SizedBox(height: 10),
                       _StatusRow(
-                        label: 'Kaybeden',
+                        label: t.lostLabel,
                         count: kaybeden,
                         color: AppColors.red,
                         total: resolved > 0 ? resolved : 1,
                       ),
                       const SizedBox(height: 10),
                       _StatusRow(
-                        label: 'İptal',
+                        label: t.cancelledLabel,
                         count: iptal,
                         color: const Color(0xFF636366),
                         total: total > 0 ? total : 1,
                       ),
                       const SizedBox(height: 10),
                       _StatusRow(
-                        label: 'Aktif',
+                        label: t.active,
                         count: aktif,
                         color: const Color(0xFF8E8E93),
                         total: total > 0 ? total : 1,
@@ -345,7 +348,7 @@ class _IstatistikPageState extends State<IstatistikPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Net Kar / Zarar',
+                  t.netProfitLossTitle,
                   style: TextStyle(
                     color: AppColors.textSecondary,
                     fontSize: 12,
@@ -358,7 +361,7 @@ class _IstatistikPageState extends State<IstatistikPage> {
                   children: [
                     Expanded(
                       child: _NetStat(
-                        label: 'Toplam Kazanç',
+                        label: t.totalWinningsLabel,
                         value: _fmt(toplamKazanc),
                         color: AppColors.green,
                       ),
@@ -366,7 +369,7 @@ class _IstatistikPageState extends State<IstatistikPage> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: _NetStat(
-                        label: 'Toplam Kayıp',
+                        label: t.totalLossLabel,
                         value: _fmt(toplamKayip),
                         color: AppColors.red,
                       ),
@@ -374,7 +377,7 @@ class _IstatistikPageState extends State<IstatistikPage> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: _NetStat(
-                        label: 'Net',
+                        label: t.netLabel,
                         value:
                             (netKarZarar >= 0 ? '+' : '') +
                             _fmt(netKarZarar.abs()),
@@ -410,7 +413,7 @@ class _IstatistikPageState extends State<IstatistikPage> {
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
                     child: Text(
-                      'Site Bazlı',
+                      t.siteBasedTitle,
                       style: TextStyle(
                         color: AppColors.textSecondary,
                         fontSize: 12,
@@ -446,7 +449,7 @@ class _IstatistikPageState extends State<IstatistikPage> {
                           ),
                           Expanded(
                             child: Text(
-                              '$kupon kupon',
+                              t.couponCountSuffix(kupon),
                               style: TextStyle(
                                 color: AppColors.textSecondary,
                                 fontSize: 11,
@@ -525,7 +528,7 @@ class _IstatistikPageState extends State<IstatistikPage> {
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
                     child: Text(
-                      'SON PERFORMANS',
+                      t.recentPerformanceTitle,
                       style: TextStyle(
                         color: AppColors.textTertiary.withOpacity(0.7),
                         fontSize: 10,
@@ -756,6 +759,7 @@ class _RecentRow extends StatelessWidget {
 class _EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 52),
       child: Column(
@@ -764,7 +768,7 @@ class _EmptyState extends StatelessWidget {
           const Text('📊', style: TextStyle(fontSize: 36)),
           const SizedBox(height: 14),
           Text(
-            'Henüz istatistik yok',
+            t.noStatsYetTitle,
             textAlign: TextAlign.center,
             style: TextStyle(
               color: AppColors.textSecondary,
@@ -774,7 +778,7 @@ class _EmptyState extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            'Kupon ekledikçe burada görünecek.',
+            t.noStatsYetSubtitle,
             textAlign: TextAlign.center,
             style: TextStyle(color: AppColors.textTertiary, fontSize: 12),
           ),
@@ -843,10 +847,10 @@ class _DailyHistory extends StatelessWidget {
     required this.parseAmount,
   });
 
-  static const _days = ['', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
-
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
+    final locale = Localizations.localeOf(context).toString();
     final show = gunlukList.take(7).toList();
     return Container(
       decoration: BoxDecoration(
@@ -863,7 +867,7 @@ class _DailyHistory extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'GÜNLÜK GEÇMİŞ',
+                  t.dailyHistoryTitle,
                   style: TextStyle(
                     color: AppColors.textTertiary.withOpacity(0.7),
                     fontSize: 10,
@@ -872,7 +876,7 @@ class _DailyHistory extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  'Son ${show.length} gün',
+                  t.lastNDays(show.length),
                   style: TextStyle(color: AppColors.textTertiary, fontSize: 11),
                 ),
               ],
@@ -948,7 +952,7 @@ class _DailyHistory extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          _days[dt.weekday],
+                          intl.DateFormat.E(locale).format(dt),
                           style: TextStyle(
                             fontSize: 9,
                             color: AppColors.textTertiary,
@@ -967,7 +971,7 @@ class _DailyHistory extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              '${coupons.length} kupon',
+                              t.couponCountSuffix(coupons.length),
                               style: TextStyle(
                                 fontSize: 12,
                                 color: AppColors.textSecondary,
@@ -986,7 +990,7 @@ class _DailyHistory extends StatelessWidget {
                                 ),
                                 const SizedBox(width: 3),
                                 Text(
-                                  '$tuttu tuttu',
+                                  t.wonCountSuffix(tuttu),
                                   style: TextStyle(
                                     fontSize: 11,
                                     color: AppColors.textSecondary,
@@ -1003,7 +1007,7 @@ class _DailyHistory extends StatelessWidget {
                                 ),
                                 const SizedBox(width: 3),
                                 Text(
-                                  '$yatti yattı',
+                                  t.lostCountSuffix(yatti),
                                   style: TextStyle(
                                     fontSize: 11,
                                     color: AppColors.textSecondary,
@@ -1026,7 +1030,7 @@ class _DailyHistory extends StatelessWidget {
                             ),
                             const SizedBox(height: 3),
                             Text(
-                              '${fmt(yatirim)} yatırım · ${fmt(kazanc)} kazanç',
+                              t.investmentAndProfit(fmt(yatirim), fmt(kazanc)),
                               style: TextStyle(
                                 fontSize: 10,
                                 color: AppColors.textTertiary,
@@ -1054,7 +1058,7 @@ class _DailyHistory extends StatelessWidget {
               ),
               child: Center(
                 child: Text(
-                  'Tüm geçmişi gör →',
+                  t.viewAllHistory,
                   style: TextStyle(fontSize: 11, color: AppColors.brand),
                 ),
               ),

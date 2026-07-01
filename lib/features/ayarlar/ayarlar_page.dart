@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/app_colors.dart';
 import '../../core/app_state.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/coupon.dart';
 import '../../services/auth_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -61,18 +62,19 @@ class _AyarlarPageState extends State<AyarlarPage> {
   }
 
   Future<void> _changeUsername(BuildContext context) async {
+    final t = AppLocalizations.of(context)!;
     final ctrl = TextEditingController(text: _user?.username ?? '');
     final result = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.card,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Kullanıcı Adı Değiştir', style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w800)),
+        title: Text(t.changeUsername, style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w800)),
         content: TextField(
           controller: ctrl,
           style: TextStyle(color: AppColors.textPrimary),
           decoration: InputDecoration(
-            hintText: 'Yeni kullanıcı adı',
+            hintText: t.newUsernameHint,
             hintStyle: TextStyle(color: AppColors.textTertiary),
             filled: true,
             fillColor: AppColors.background,
@@ -80,8 +82,8 @@ class _AyarlarPageState extends State<AyarlarPage> {
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: Text('İptal', style: TextStyle(color: AppColors.textSecondary))),
-          TextButton(onPressed: () => Navigator.pop(ctx, ctrl.text.trim()), child: Text('Kaydet', style: TextStyle(color: AppColors.brand, fontWeight: FontWeight.w700))),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(t.cancelLabel, style: TextStyle(color: AppColors.textSecondary))),
+          TextButton(onPressed: () => Navigator.pop(ctx, ctrl.text.trim()), child: Text(t.saveLabel, style: TextStyle(color: AppColors.brand, fontWeight: FontWeight.w700))),
         ],
       ),
     );
@@ -96,6 +98,7 @@ class _AyarlarPageState extends State<AyarlarPage> {
   }
 
   Future<void> _changePassword(BuildContext context) async {
+    final t = AppLocalizations.of(context)!;
     final oldCtrl = TextEditingController();
     final newCtrl = TextEditingController();
     final confirmCtrl = TextEditingController();
@@ -107,15 +110,15 @@ class _AyarlarPageState extends State<AyarlarPage> {
         builder: (ctx, setS) => AlertDialog(
           backgroundColor: AppColors.card,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: Text("Şifre Değiştir", style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w800)),
+          title: Text(t.changePassword, style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w800)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _PwField(ctrl: oldCtrl, hint: "Mevcut şifre"),
+              _PwField(ctrl: oldCtrl, hint: t.currentPasswordHint),
               const SizedBox(height: 10),
-              _PwField(ctrl: newCtrl, hint: "Yeni şifre (min 8 karakter, rakam içermeli)"),
+              _PwField(ctrl: newCtrl, hint: t.newPasswordHint),
               const SizedBox(height: 10),
-              _PwField(ctrl: confirmCtrl, hint: "Yeni şifre tekrar"),
+              _PwField(ctrl: confirmCtrl, hint: t.passwordConfirmHint),
               if (dialogError != null) ...[
                 const SizedBox(height: 8),
                 Text(dialogError!, style: TextStyle(color: AppColors.red, fontSize: 12)),
@@ -123,27 +126,27 @@ class _AyarlarPageState extends State<AyarlarPage> {
             ],
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx), child: Text("İptal", style: TextStyle(color: AppColors.textSecondary))),
+            TextButton(onPressed: () => Navigator.pop(ctx), child: Text(t.cancelLabel, style: TextStyle(color: AppColors.textSecondary))),
             TextButton(
               onPressed: () async {
                 final oldP = oldCtrl.text.trim();
                 final newP = newCtrl.text.trim();
                 final conf = confirmCtrl.text.trim();
-                if (oldP.isEmpty) { setS(() => dialogError = "Mevcut şifre gerekli"); return; }
-                if (newP.length < 8) { setS(() => dialogError = "En az 8 karakter olmalı"); return; }
-                if (!newP.contains(RegExp(r"[0-9]"))) { setS(() => dialogError = "En az bir rakam içermeli"); return; }
-                if (newP != conf) { setS(() => dialogError = "Şifreler eşleşmiyor"); return; }
+                if (oldP.isEmpty) { setS(() => dialogError = t.currentPasswordRequiredError); return; }
+                if (newP.length < 8) { setS(() => dialogError = t.newPasswordMinLengthError); return; }
+                if (!newP.contains(RegExp(r"[0-9]"))) { setS(() => dialogError = t.newPasswordNeedsDigitError); return; }
+                if (newP != conf) { setS(() => dialogError = t.passwordsDontMatchError); return; }
                 try {
                   final email = Supabase.instance.client.auth.currentUser?.email ?? "";
                   await Supabase.instance.client.auth.signInWithPassword(email: email, password: oldP);
                   await Supabase.instance.client.auth.updateUser(UserAttributes(password: newP));
                   if (ctx.mounted) Navigator.pop(ctx);
-                  if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Şifre güncellendi ✓")));
+                  if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.passwordUpdatedMessage)));
                 } catch (e) {
-                  setS(() => dialogError = "Mevcut şifre yanlış");
+                  setS(() => dialogError = t.currentPasswordWrongError);
                 }
               },
-              child: Text("Kaydet", style: TextStyle(color: AppColors.brand, fontWeight: FontWeight.w700)),
+              child: Text(t.saveLabel, style: TextStyle(color: AppColors.brand, fontWeight: FontWeight.w700)),
             ),
           ],
         ),
@@ -152,16 +155,17 @@ class _AyarlarPageState extends State<AyarlarPage> {
   }
 
   Future<void> _signOut() async {
+    final t = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.card,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Çıkış Yap', style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w800)),
-        content: Text('Hesabından çıkmak istediğine emin misin?', style: TextStyle(color: AppColors.textSecondary, fontSize: 14)),
+        title: Text(t.signOutLabel, style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w800)),
+        content: Text(t.signOutConfirmBody, style: TextStyle(color: AppColors.textSecondary, fontSize: 14)),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text('İptal', style: TextStyle(color: AppColors.textSecondary))),
-          TextButton(onPressed: () => Navigator.pop(ctx, true), child: Text('Çıkış Yap', style: TextStyle(color: AppColors.red, fontWeight: FontWeight.w700))),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(t.cancelLabel, style: TextStyle(color: AppColors.textSecondary))),
+          TextButton(onPressed: () => Navigator.pop(ctx, true), child: Text(t.signOutLabel, style: TextStyle(color: AppColors.red, fontWeight: FontWeight.w700))),
         ],
       ),
     );
@@ -198,7 +202,7 @@ class _AyarlarPageState extends State<AyarlarPage> {
     ScaffoldMessenger.of(ctx).showSnackBar(
       SnackBar(
         content: Text(
-          'Bu özellik yakında geliyor',
+          AppLocalizations.of(ctx)!.comingSoonMessage,
           style: TextStyle(color: AppColors.textPrimary, fontSize: 13),
         ),
         backgroundColor: AppColors.card,
@@ -209,8 +213,38 @@ class _AyarlarPageState extends State<AyarlarPage> {
     );
   }
 
+  void _showLegalInfo(BuildContext ctx) {
+    final t = AppLocalizations.of(ctx)!;
+    showDialog(
+      context: ctx,
+      builder: (dialogCtx) => AlertDialog(
+        backgroundColor: AppColors.card,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(
+          t.legalInfoTitle,
+          style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w800),
+        ),
+        content: Text(
+          t.legalInfoBody,
+          style: TextStyle(color: AppColors.textSecondary, fontSize: 13, height: 1.5),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogCtx).pop(),
+            child: Text(
+              t.okLabel,
+              style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
+    final isEnglish = AppState.instance.locale.languageCode == 'en';
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
       children: [
@@ -273,7 +307,7 @@ class _AyarlarPageState extends State<AyarlarPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        _user?.displayName ?? 'Kullanıcı',
+                        _user?.displayName ?? t.defaultUserFallback,
                         style: TextStyle(
                           color: AppColors.textPrimary,
                           fontSize: 15,
@@ -305,7 +339,7 @@ class _AyarlarPageState extends State<AyarlarPage> {
 
         // ── Header ───────────────────────────────────────────────────────────
         Text(
-          'Ayarlar',
+          t.settings,
           style: TextStyle(
             color: AppColors.textPrimary,
             fontSize: 28,
@@ -315,7 +349,7 @@ class _AyarlarPageState extends State<AyarlarPage> {
         ),
         const SizedBox(height: 4),
         Text(
-          'Uygulama tercihleri',
+          t.ayarlarSubtitle,
           style: TextStyle(
             color: AppColors.textTertiary,
             fontSize: 13,
@@ -325,7 +359,7 @@ class _AyarlarPageState extends State<AyarlarPage> {
         const SizedBox(height: 16),
 
         // ── Hesap ────────────────────────────────────────────────────────────
-        _SectionLabel('HESAP'),
+        _SectionLabel(t.sectionAccount),
         const SizedBox(height: 8),
         Container(
           decoration: _sectionDeco(),
@@ -333,14 +367,14 @@ class _AyarlarPageState extends State<AyarlarPage> {
             children: [
               _ValueRow(
                 icon: Icons.person_outline_rounded,
-                title: 'Kullanıcı Adı Değiştir',
+                title: t.changeUsername,
                 value: '@${_user?.username ?? ''}',
                 onTap: () => _changeUsername(context),
               ),
               _RowDivider(),
               _ValueRow(
                 icon: Icons.lock_outline_rounded,
-                title: 'Şifre Değiştir',
+                title: t.changePassword,
                 value: '••••••••',
                 onTap: () => _changePassword(context),
               ),
@@ -350,14 +384,14 @@ class _AyarlarPageState extends State<AyarlarPage> {
         const SizedBox(height: 16),
 
         // ── Geçmiş ───────────────────────────────────────────────────────────
-        _SectionLabel('GEÇMİŞ'),
+        _SectionLabel(t.sectionHistory),
         const SizedBox(height: 8),
         Container(
           decoration: _sectionDeco(),
           child: _ActionRow(
             icon: Icons.history_rounded,
-            title: 'Kupon Geçmişi',
-            subtitle: 'Tamamlanan kuponları görüntüle',
+            title: t.couponHistory,
+            subtitle: t.couponHistorySubtitle,
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (ctx) => Scaffold(
@@ -370,7 +404,7 @@ class _AyarlarPageState extends State<AyarlarPage> {
                       icon: Icon(Icons.arrow_back_rounded, color: AppColors.textPrimary),
                       onPressed: () => Navigator.of(ctx).pop(),
                     ),
-                    title: Text('Kupon Geçmişi', style: TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.w700)),
+                    title: Text(t.couponHistory, style: TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.w700)),
                   ),
                   body: Theme(
                     data: Theme.of(ctx).copyWith(
@@ -397,7 +431,7 @@ class _AyarlarPageState extends State<AyarlarPage> {
         const SizedBox(height: 16),
 
         // ── Genel ────────────────────────────────────────────────────────────
-        _SectionLabel('GENEL'),
+        _SectionLabel(t.sectionGeneral),
         const SizedBox(height: 8),
         Container(
           decoration: _sectionDeco(),
@@ -405,37 +439,44 @@ class _AyarlarPageState extends State<AyarlarPage> {
             children: [
               _ToggleRow(
                 icon: Icons.notifications_outlined,
-                title: 'Bildirimler',
-                subtitle: 'Kupon güncellemeleri',
+                title: t.notifications,
+                subtitle: t.notificationsSubtitle,
                 value: _bildirimler,
                 onChanged: (v) => setState(() => _bildirimler = v),
               ),
               _RowDivider(),
               _ToggleRow(
                 icon: Icons.dark_mode_outlined,
-                title: 'Karanlık Tema',
-                subtitle: 'Uygulama görünümü',
+                title: t.darkThemeLabel,
+                subtitle: t.darkThemeSubtitle,
                 value: _karanlikTema,
                 onChanged: (v) { setState(() => _karanlikTema = v); AppState.instance.toggleTheme(); },
               ),
               _RowDivider(),
               _ToggleRow(
                 icon: Icons.sync_outlined,
-                title: 'Otomatik Güncelleme',
-                subtitle: 'Arka planda veri yenile',
+                title: t.autoUpdateLabel,
+                subtitle: t.autoUpdateSubtitle,
                 value: _otomatikGuncelleme,
                 onChanged: (v) => setState(() => _otomatikGuncelleme = v),
               ),
               _RowDivider(),
               _ValueRow(
+                icon: Icons.language_rounded,
+                title: t.language,
+                value: isEnglish ? t.englishLabel : t.turkishLabel,
+                onTap: () => AppState.instance.toggleLocale(),
+              ),
+              _RowDivider(),
+              _ValueRow(
                 icon: Icons.notifications_outlined,
-                title: 'Gün Sonu Raporu',
+                title: t.dailyReportLabel,
                 value: _gunSonuSaati.format(context),
                 onTap: () async {
                   final picked = await showTimePicker(
                     context: context,
                     initialTime: _gunSonuSaati,
-                    helpText: 'Rapor saatini seç',
+                    helpText: t.pickReportTimeHelp,
                   );
                   if (picked != null) {
                     setState(() => _gunSonuSaati = picked);
@@ -455,7 +496,7 @@ class _AyarlarPageState extends State<AyarlarPage> {
         const SizedBox(height: 16),
 
         // ── Kuponlar ─────────────────────────────────────────────────────────
-        _SectionLabel('KUPONLAR'),
+        _SectionLabel(t.sectionCoupons),
         const SizedBox(height: 8),
         Container(
           decoration: _sectionDeco(),
@@ -463,15 +504,17 @@ class _AyarlarPageState extends State<AyarlarPage> {
             children: [
               _ValueRow(
                 icon: Icons.payments_outlined,
-                title: 'Varsayılan Bahis',
+                title: t.defaultStakeLabel,
                 value: '₺100',
+                comingSoon: true,
                 onTap: () => _showComingSoon(context),
               ),
               _RowDivider(),
               _ValueRow(
                 icon: Icons.store_outlined,
-                title: 'Varsayılan Site',
+                title: t.defaultSiteLabel,
                 value: 'Bilyoner',
+                comingSoon: true,
                 onTap: () => _showComingSoon(context),
               ),
             ],
@@ -480,7 +523,7 @@ class _AyarlarPageState extends State<AyarlarPage> {
         const SizedBox(height: 16),
 
         // ── Veriler ──────────────────────────────────────────────────────────
-        _SectionLabel('VERİLER'),
+        _SectionLabel(t.sectionData),
         const SizedBox(height: 8),
         Container(
           decoration: _sectionDeco(),
@@ -488,16 +531,17 @@ class _AyarlarPageState extends State<AyarlarPage> {
             children: [
               _ActionRow(
                 icon: Icons.delete_outline_rounded,
-                title: 'Verileri Temizle',
-                subtitle: 'Tüm kuponları sil',
+                title: t.clearDataLabel,
+                subtitle: t.clearDataSubtitle,
                 destructive: true,
+                comingSoon: true,
                 onTap: () => _showComingSoon(context),
               ),
               _RowDivider(),
               _ActionRow(
                 icon: Icons.logout_rounded,
-                title: 'Çıkış Yap',
-                subtitle: 'Hesabından çıkış yap',
+                title: t.signOutLabel,
+                subtitle: t.signOutSubtitle,
                 destructive: true,
                 onTap: _signOut,
               ),
@@ -507,7 +551,7 @@ class _AyarlarPageState extends State<AyarlarPage> {
         const SizedBox(height: 16),
 
         // ── Hakkında ─────────────────────────────────────────────────────────
-        _SectionLabel('HAKKINDA'),
+        _SectionLabel(t.sectionAbout),
         const SizedBox(height: 8),
         Container(
           decoration: _sectionDeco(),
@@ -515,14 +559,22 @@ class _AyarlarPageState extends State<AyarlarPage> {
             children: [
               _ValueRow(
                 icon: Icons.info_outline_rounded,
-                title: 'Matchly',
+                title: t.appName,
                 value: '',
+                comingSoon: true,
                 onTap: () => _showComingSoon(context),
               ),
               _RowDivider(),
-              const _ValueRow(
+              _ValueRow(
+                icon: Icons.gavel_rounded,
+                title: t.legalInfoTitle,
+                value: '',
+                onTap: () => _showLegalInfo(context),
+              ),
+              _RowDivider(),
+              _ValueRow(
                 icon: Icons.tag_rounded,
-                title: 'Sürüm',
+                title: t.versionLabel,
                 value: '1.0.0',
               ),
             ],
@@ -666,12 +718,14 @@ class _ValueRow extends StatelessWidget {
   final String title;
   final String value;
   final VoidCallback? onTap;
+  final bool comingSoon;
 
   const _ValueRow({
     required this.icon,
     required this.title,
     required this.value,
     this.onTap,
+    this.comingSoon = false,
   });
 
   @override
@@ -686,11 +740,36 @@ class _ValueRow extends StatelessWidget {
             _RowIcon(icon: icon),
             const SizedBox(width: 12),
             Expanded(
-              child: Text(title,
-                  style: TextStyle(
-                      color: AppColors.textPrimary,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600)),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Flexible(
+                    child: Text(title,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                            color: AppColors.textPrimary,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600)),
+                  ),
+                  if (comingSoon) ...[
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: AppColors.border,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        AppLocalizations.of(context)!.comingSoonBadge,
+                        style: TextStyle(
+                            color: AppColors.textTertiary,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
             ),
             if (value.isNotEmpty) ...[
               Text(value,
@@ -717,6 +796,7 @@ class _ActionRow extends StatelessWidget {
   final String title;
   final String subtitle;
   final bool destructive;
+  final bool comingSoon;
   final VoidCallback? onTap;
 
   const _ActionRow({
@@ -724,6 +804,7 @@ class _ActionRow extends StatelessWidget {
     required this.title,
     this.subtitle = '',
     this.destructive = false,
+    this.comingSoon = false,
     this.onTap,
   });
 
@@ -742,11 +823,36 @@ class _ActionRow extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title,
-                      style: TextStyle(
-                          color: destructive ? AppColors.red : AppColors.textPrimary,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600)),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Flexible(
+                        child: Text(title,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                                color: destructive ? AppColors.red : AppColors.textPrimary,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600)),
+                      ),
+                      if (comingSoon) ...[
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: AppColors.border,
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: Text(
+                            AppLocalizations.of(context)!.comingSoonBadge,
+                            style: TextStyle(
+                                color: AppColors.textTertiary,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
                   if (subtitle.isNotEmpty) ...[
                     const SizedBox(height: 2),
                     Text(subtitle,

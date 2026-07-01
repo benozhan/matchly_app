@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/app_colors.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/coupon.dart';
 import 'status_badge.dart';
 
@@ -14,6 +15,7 @@ class ProgressSegments extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     final completedCount =
         statuses.where((status) => status != CouponStatus.pending).length;
 
@@ -50,7 +52,7 @@ class ProgressSegments extends StatelessWidget {
             ),
             const SizedBox(width: 4),
             Text(
-              'tamamlandı',
+              t.progressCompletedLabel,
               style: TextStyle(
                 color: AppColors.textSecondary,
                 fontSize: 12,

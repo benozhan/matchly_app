@@ -8,6 +8,7 @@ import '../../services/ai_coupon_service.dart';
 import '../../core/coupon_share.dart';
 
 import '../../core/app_colors.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/coupon.dart';
 import '../../services/match_search_service.dart';
 
@@ -204,7 +205,8 @@ enum _SearchState { idle, loading, success, error }
 
 // ─── League name localisation ─────────────────────────────────────────────────
 
-String _trLeague(String raw) {
+String _trLeague(String raw, String langCode) {
+  if (langCode == 'en') return raw;
   const map = {
     'fifa world cup': 'Dünya Kupası',
     'world cup': 'Dünya Kupası',
@@ -226,9 +228,9 @@ String _trLeague(String raw) {
 
 // ─── Date format ──────────────────────────────────────────────────────────────
 
-/// Converts "2026-06-26 02:00" → "26 Haz 02:00"
-String _trDate(String raw) {
-  const months = [
+/// Converts "2026-06-26 02:00" → "26 Haz 02:00" (or "26 Jun 02:00" in English)
+String _trDate(String raw, String langCode) {
+  const monthsTr = [
     '',
     'Oca',
     'Şub',
@@ -243,6 +245,22 @@ String _trDate(String raw) {
     'Kas',
     'Ara',
   ];
+  const monthsEn = [
+    '',
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
+  final months = langCode == 'en' ? monthsEn : monthsTr;
   // Expect "YYYY-MM-DD HH:MM" or "YYYY-MM-DDTHH:MM"
   final re = RegExp(r'(\d{4})-(\d{2})-(\d{2})[ T](\d{2}:\d{2})');
   final m = re.firstMatch(raw);
@@ -258,7 +276,8 @@ String _trDate(String raw) {
 // AUTO-GENERATED from kuponbot/country_names.py — do not edit by hand.
 // To update: run  python3 kuponbot/gen_dart_countries.py  and paste the output.
 
-String _trTeam(String raw) {
+String _trTeam(String raw, String langCode) {
+  if (langCode == 'en') return raw;
   const map = <String, String>{
     'afghanistan': 'Afganistan',
     'albania': 'Arnavutluk',
@@ -738,13 +757,14 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
   }
 
   Future<void> _clearAllSelections() async {
+    final t = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.card,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
-          'Seçimleri Temizle',
+          t.clearSelectionsDialogTitle,
           style: TextStyle(
             color: AppColors.textPrimary,
             fontSize: 16,
@@ -752,21 +772,21 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
           ),
         ),
         content: Text(
-          'Tüm seçimler silinecek. Devam etmek istiyor musun?',
+          t.clearSelectionsDialogBody,
           style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
             child: Text(
-              'Vazgeç',
+              t.giveUpLabel,
               style: TextStyle(color: AppColors.textSecondary),
             ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             child: Text(
-              'Sil',
+              t.deleteLabel,
               style: TextStyle(
                 color: AppColors.red,
                 fontWeight: FontWeight.w700,
@@ -782,6 +802,7 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
   // ── save ──────────────────────────────────────────────────────────────────
 
   Future<void> _analyzeWithAI() async {
+    final t = AppLocalizations.of(context)!;
     final picker = ImagePicker();
     final picked = await picker.pickImage(
       source: ImageSource.gallery,
@@ -796,7 +817,7 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
       );
       if (result == null) {
         if (mounted)
-          CouponShare.showTopToast(context, 'Kupon okunamadı, tekrar deneyin');
+          CouponShare.showTopToast(context, t.couponReadFailedToast);
         return;
       }
 
@@ -813,18 +834,18 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
 
       if (result.unmatchedMatches.isNotEmpty) {
         final names = result.unmatchedMatches.map((m) => m.original).join(', ');
-        if (mounted) CouponShare.showTopToast(context, 'Bulunamadı: $names');
+        if (mounted) CouponShare.showTopToast(context, t.notFoundToast(names));
       }
 
       if (result.matchedMatches.isEmpty) {
         if (mounted)
           CouponShare.showTopToast(
             context,
-            'Hiçbir maç eşleştirilemedi, manuel ekleyin',
+            t.noMatchMatchedToast,
           );
       }
     } catch (e) {
-      if (mounted) CouponShare.showTopToast(context, 'Hata: $e');
+      if (mounted) CouponShare.showTopToast(context, t.genericErrorToast('$e'));
     } finally {
       if (mounted) setState(() => _aiLoading = false);
     }
@@ -833,19 +854,20 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
   bool _saving = false;
 
   Future<void> _saveCoupon() async {
+    final t = AppLocalizations.of(context)!;
     if (_saving) return;
     if (selections.isEmpty) {
-      CouponShare.showTopToast(context, 'En az bir maç seçimi ekleyin');
+      CouponShare.showTopToast(context, t.addAtLeastOneSelection);
       return;
     }
     if (oddsController.text.trim().isEmpty ||
         _parseNum(oddsController.text) <= 0) {
-      CouponShare.showTopToast(context, 'Lütfen geçerli bir oran girin');
+      CouponShare.showTopToast(context, t.enterValidOdds);
       return;
     }
     if (stakeController.text.trim().isEmpty ||
         _parseNum(stakeController.text) <= 0) {
-      CouponShare.showTopToast(context, 'Lütfen bahis miktarı girin');
+      CouponShare.showTopToast(context, t.enterStakeAmount);
       return;
     }
     final autoTitle = selections.isNotEmpty
@@ -911,6 +933,7 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
   // ── search ────────────────────────────────────────────────────────────────
 
   void _doSearch(String q) {
+    final langCode = Localizations.localeOf(context).languageCode;
     _searchDebounce?.cancel();
     setState(() => _searchState = _SearchState.loading);
     final delay = q.trim().isEmpty
@@ -978,9 +1001,9 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
               _apiResults = results
                   .map(
                     (r) => _MatchDisplay(
-                      teams: '${_trTeam(r.home)} – ${_trTeam(r.away)}',
-                      league: _trLeague(r.league),
-                      time: _trDate(r.time),
+                      teams: '${_trTeam(r.home, langCode)} – ${_trTeam(r.away, langCode)}',
+                      league: _trLeague(r.league, langCode),
+                      time: _trDate(r.time, langCode),
                     ),
                   )
                   .toList();
@@ -1037,6 +1060,7 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     final sheetContent = Container(
       decoration: BoxDecoration(
         color: AppColors.background,
@@ -1069,7 +1093,7 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Kupon Ekle',
+                  t.addCouponTitle,
                   style: TextStyle(
                     color: AppColors.textPrimary,
                     fontSize: 24,
@@ -1103,18 +1127,18 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
                               ),
                             ),
                           )
-                        : const Row(
+                        : Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(
+                              const Icon(
                                 Icons.auto_awesome,
                                 color: Colors.white,
                                 size: 14,
                               ),
-                              SizedBox(width: 6),
+                              const SizedBox(width: 6),
                               Text(
-                                'AI ile Ekle',
-                                style: TextStyle(
+                                t.aiAddButton,
+                                style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 12,
                                   fontWeight: FontWeight.w700,
@@ -1128,7 +1152,7 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
             ),
             const SizedBox(height: 3),
             Text(
-              'Seçimlerini ekle ve kaydet',
+              t.addCouponSubtitle,
               style: TextStyle(color: AppColors.textTertiary, fontSize: 12),
             ),
             const SizedBox(height: 20),
@@ -1136,8 +1160,8 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
             // Fields
             MatchlyInput(
               controller: titleController,
-              label: 'Kupon adı',
-              hint: 'Akşam Kuponu',
+              label: t.couponNameLabel,
+              hint: t.couponNameHint,
             ),
             const SizedBox(height: 10),
             _LeagueSelector(
@@ -1150,7 +1174,7 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
                 Expanded(
                   child: MatchlyInput(
                     controller: stakeController,
-                    label: 'Bahis Miktarı',
+                    label: t.stakeAmountLabel,
                     hint: '120',
                     prefix: '₺',
                     keyboardType: const TextInputType.numberWithOptions(
@@ -1162,7 +1186,7 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
                 Expanded(
                   child: MatchlyInput(
                     controller: oddsController,
-                    label: 'Oran',
+                    label: t.oddsFieldLabel,
                     hint: '4.20',
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
@@ -1178,7 +1202,7 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
               Row(
                 children: [
                   Text(
-                    '${selections.length} Seçim',
+                    t.selectionsCountLabel(selections.length),
                     style: TextStyle(
                       color: AppColors.textSecondary,
                       fontSize: 11,
@@ -1190,7 +1214,7 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
                   GestureDetector(
                     onTap: _clearAllSelections,
                     child: Text(
-                      'Tüm Seçimleri Sil',
+                      t.clearAllSelections,
                       style: TextStyle(
                         color: AppColors.red,
                         fontSize: 11,
@@ -1320,9 +1344,9 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
                       borderRadius: BorderRadius.circular(14),
                     ),
                   ),
-                  child: const Text(
-                    '+ Seçim Ekle',
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+                  child: Text(
+                    t.addSelectionButton,
+                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
                   ),
                 ),
               ),
@@ -1362,9 +1386,9 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
                           color: Colors.black,
                         ),
                       )
-                    : const Text(
-                        'Kaydet',
-                        style: TextStyle(
+                    : Text(
+                        t.saveLabel,
+                        style: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w900,
                         ),
@@ -1427,7 +1451,7 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
                       ),
                       const SizedBox(width: 12),
                       Text(
-                        'Bu seçim zaten eklendi',
+                        t.duplicateSelectionToast,
                         style: TextStyle(
                           color: AppColors.textPrimary,
                           fontSize: 13,
@@ -1461,6 +1485,7 @@ class _CouponSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -1484,7 +1509,7 @@ class _CouponSummaryCard extends StatelessWidget {
             child: Row(
               children: [
                 Text(
-                  'KUPON ÖZETİ',
+                  t.couponSummaryTitle,
                   style: TextStyle(
                     color: AppColors.textTertiary,
                     fontSize: 10,
@@ -1504,7 +1529,7 @@ class _CouponSummaryCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
-                      '${selections.length} seçim',
+                      t.selectionsCountChip(selections.length),
                       style: TextStyle(
                         color: AppColors.brand,
                         fontSize: 10,
@@ -1532,7 +1557,7 @@ class _CouponSummaryCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 10),
                   Text(
-                    'Henüz seçim eklenmedi',
+                    t.noSelectionYet,
                     style: TextStyle(
                       color: AppColors.textTertiary,
                       fontSize: 13,
@@ -1624,7 +1649,7 @@ class _CouponSummaryCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'ORAN',
+                          t.oranLabel,
                           style: TextStyle(
                             color: AppColors.textTertiary,
                             fontSize: 9,
@@ -1652,7 +1677,7 @@ class _CouponSummaryCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'BEKLENTİ',
+                          t.beklentiLabel,
                           style: TextStyle(
                             color: AppColors.textTertiary,
                             fontSize: 9,
@@ -1727,37 +1752,38 @@ class _AddSelectionPanel extends StatelessWidget {
     required this.onCancel,
   });
 
-  String get _title {
+  String _title(AppLocalizations t) {
     if (isEditing) {
       switch (step) {
         case _AddStep.search:
-          return 'Maç Seç';
+          return t.selectMatchTitle;
         case _AddStep.market:
-          return 'Düzenle · Market';
+          return t.editMarketTitle;
         case _AddStep.period:
-          return 'Düzenle · Zaman';
+          return t.editTimeTitle;
         case _AddStep.line:
-          return 'Düzenle · Hat Seç';
+          return t.editLineTitle;
         case _AddStep.option:
-          return 'Düzenle · Seçenek';
+          return t.editOptionTitle;
       }
     }
     switch (step) {
       case _AddStep.search:
-        return 'Maç Seç';
+        return t.selectMatchTitle;
       case _AddStep.market:
-        return 'Market';
+        return t.marketTitle;
       case _AddStep.period:
-        return 'Zaman';
+        return t.timeTitle;
       case _AddStep.line:
-        return 'Hat Seç';
+        return t.lineTitle;
       case _AddStep.option:
-        return 'Seçenek';
+        return t.optionTitle;
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     return Container(
       decoration: BoxDecoration(
         color: AppColors.card,
@@ -1791,7 +1817,7 @@ class _AddSelectionPanel extends StatelessWidget {
                   const SizedBox(width: 6),
                 ],
                 Text(
-                  _title,
+                  _title(t),
                   style: TextStyle(
                     color: isEditing
                         ? AppColors.brand
@@ -1911,13 +1937,14 @@ class _PeriodBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.fromLTRB(14, 0, 14, 10),
       child: Row(
         children: [
           Expanded(
             child: _PeriodOption(
-              label: 'Maç sonu',
+              label: t.matchEndLabel,
               icon: Icons.sports_soccer_rounded,
               onTap: () => onSelected(false),
             ),
@@ -1925,7 +1952,7 @@ class _PeriodBody extends StatelessWidget {
           const SizedBox(width: 8),
           Expanded(
             child: _PeriodOption(
-              label: 'İlk yarı',
+              label: t.firstHalfLabel,
               icon: Icons.schedule_rounded,
               onTap: () => onSelected(true),
             ),
@@ -2121,6 +2148,7 @@ class _SearchBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -2137,7 +2165,7 @@ class _SearchBody extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
             decoration: InputDecoration(
-              hintText: 'Takım veya lig ara',
+              hintText: t.searchTeamOrLeagueHint,
               hintStyle: TextStyle(color: AppColors.textTertiary, fontSize: 14),
               prefixIcon: Icon(
                 Icons.search,
@@ -2169,7 +2197,7 @@ class _SearchBody extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 14),
           child: Text(
-            'Takım veya lig ara',
+            t.searchTeamOrLeagueHint,
             style: TextStyle(color: AppColors.textTertiary, fontSize: 11),
           ),
         ),
@@ -2194,7 +2222,7 @@ class _SearchBody extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(14, 8, 14, 10),
             child: Text(
-              apiSucceeded ? 'Maç bulunamadı.' : 'Sonuç bulunamadı.',
+              apiSucceeded ? t.noMatchFound : t.noResultFound,
               style: TextStyle(color: AppColors.textTertiary, fontSize: 13),
             ),
           )
@@ -2403,6 +2431,7 @@ class _LeaguePickerSheetState extends State<_LeaguePickerSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     return DraggableScrollableSheet(
       initialChildSize: 0.75,
       maxChildSize: 0.92,
@@ -2426,7 +2455,7 @@ class _LeaguePickerSheetState extends State<_LeaguePickerSheet> {
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  'Lig Seç',
+                  t.leagueSelectTitle,
                   style: TextStyle(
                     color: AppColors.textPrimary,
                     fontSize: 20,
@@ -2445,7 +2474,7 @@ class _LeaguePickerSheetState extends State<_LeaguePickerSheet> {
                 onChanged: _onSearch,
                 style: TextStyle(color: AppColors.textPrimary, fontSize: 14),
                 decoration: InputDecoration(
-                  hintText: 'Lig ara...',
+                  hintText: t.leagueSearchHint,
                   hintStyle: TextStyle(
                     color: AppColors.textTertiary,
                     fontSize: 14,
@@ -2480,7 +2509,7 @@ class _LeaguePickerSheetState extends State<_LeaguePickerSheet> {
               child: _filtered.isEmpty
                   ? Center(
                       child: Text(
-                        'Lig bulunamadı',
+                        t.leagueNotFound,
                         style: TextStyle(
                           color: AppColors.textTertiary,
                           fontSize: 14,
@@ -2576,6 +2605,7 @@ class _LeagueSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     return GestureDetector(
       onTap: () => _openPicker(context),
       child: Container(
@@ -2594,7 +2624,7 @@ class _LeagueSelector extends StatelessWidget {
           children: [
             Expanded(
               child: Text(
-                selected.isEmpty ? 'Lig seç' : selected,
+                selected.isEmpty ? t.selectLeaguePlaceholder : selected,
                 style: TextStyle(
                   color: selected.isEmpty
                       ? AppColors.textTertiary

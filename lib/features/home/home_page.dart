@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/app_colors.dart';
 import '../../core/coupon_share.dart';
+import '../../l10n/app_localizations.dart';
 import '../../services/social_service.dart';
 import '../../services/auth_service.dart';
 import '../../services/coupon_storage_service.dart';
@@ -366,15 +367,16 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
   // ── computed ───────────────────────────────────────────────────────────────
 
   String _tabLabel(_FilterTab tab) {
+    final t = AppLocalizations.of(context)!;
     switch (tab) {
       case _FilterTab.all:
-        return 'Tümü';
+        return t.tabAll;
       case _FilterTab.active:
-        return 'Aktif';
+        return t.active;
       case _FilterTab.winning:
-        return 'Kazanan';
+        return t.wonLabel;
       case _FilterTab.losing:
-        return 'Kaybeden';
+        return t.lostLabel;
     }
   }
 
@@ -455,18 +457,19 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
   }
 
   String get _emptyMessage {
-    if (_searchQuery.isNotEmpty) return 'Arama sonucu bulunamadı';
+    final t = AppLocalizations.of(context)!;
+    if (_searchQuery.isNotEmpty) return t.searchNoResults;
     if (_siteFilter != 'Tümü') return '$_siteFilter kuponu bulunamadı';
     if (_leagueFilter != 'Tümü') return '$_leagueFilter kuponu bulunamadı';
     switch (_activeTab) {
       case _FilterTab.all:
-        return 'Henüz kupon eklenmedi';
+        return t.noCouponsYet;
       case _FilterTab.active:
-        return 'Aktif kupon bulunamadı';
+        return t.noActiveCoupons;
       case _FilterTab.winning:
-        return 'Kazanan kupon bulunamadı';
+        return t.noWinningCoupons;
       case _FilterTab.losing:
-        return 'Kaybeden kupon bulunamadı';
+        return t.noLosingCoupons;
     }
   }
 
@@ -650,10 +653,11 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
         _scrollController.jumpTo(scrollOffset);
       }
       if (mounted) {
+        final t = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              newVal ? '✅ Akışta paylaşıldı' : '🔒 Akıştan kaldırıldı',
+              newVal ? t.sharedToFeedMessage : t.removedFromFeedMessage,
             ),
             duration: const Duration(seconds: 2),
             behavior: SnackBarBehavior.floating,
@@ -683,13 +687,14 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
   }
 
   Future<void> _deleteEntry(_CouponEntry entry) async {
+    final t = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.card,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
-          'Kuponu Sil',
+          t.deleteCouponTitle,
           style: TextStyle(
             color: AppColors.textPrimary,
             fontSize: 16,
@@ -697,21 +702,21 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
           ),
         ),
         content: Text(
-          'Bu kupon kalıcı olarak silinecek.',
+          t.deleteCouponBody,
           style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
             child: Text(
-              'İptal',
+              t.cancelLabel,
               style: TextStyle(color: AppColors.textSecondary),
             ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             child: Text(
-              'Sil',
+              t.deleteLabel,
               style: TextStyle(
                 color: AppColors.red,
                 fontWeight: FontWeight.w700,
@@ -755,6 +760,7 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     final filtered = _filteredEntries;
     final activeCount = _tabCount(_FilterTab.active);
 
@@ -788,7 +794,7 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
-                                    'Matchly',
+                                    t.appName,
                                     style: TextStyle(
                                       color: AppColors.textPrimary,
                                       fontSize: 22,
@@ -934,6 +940,7 @@ class _HeroCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(26, 38, 26, 32),
@@ -953,7 +960,7 @@ class _HeroCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
-            'TOPLAM BEKLENTİ',
+            t.heroTotalPotential,
             style: TextStyle(
               color: Colors.white.withOpacity(0.65),
               fontSize: 10,
@@ -993,20 +1000,20 @@ class _HeroCard extends StatelessWidget {
             children: [
               _StatDot(
                 value: '$activeCount',
-                label: 'aktif',
+                label: t.activeStatLabel,
                 color: const Color(0xFF6B6860),
               ),
               const _Sep(),
               _StatDot(
                 value: '%$winRatePct',
-                label: 'başarı',
+                label: t.successStatLabel,
                 color: AppColors.green,
               ),
               const _Sep(),
               _StatDot(
                 value:
                     '${netProfit >= 0 ? '+' : '-'}₺${netProfit.abs().toInt()}',
-                label: 'net',
+                label: t.netStatLabel,
                 color: netProfit >= 0 ? AppColors.green : AppColors.red,
               ),
             ],
@@ -1025,16 +1032,17 @@ class _HeroCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   _TodayStat(
-                    label: (todayStats['total'] as int) == 0 ? 'Dün' : 'Bugün',
-                    value:
-                        '${((todayStats['total'] as int) == 0 ? yesterdayStats['total'] : todayStats['total'])} kupon',
+                    label: (todayStats['total'] as int) == 0 ? t.yesterdayLabel : t.todayLabel,
+                    value: t.couponCountSuffix(
+                      (todayStats['total'] as int) == 0 ? yesterdayStats['total'] as int : todayStats['total'] as int,
+                    ),
                   ),
                   _TodayStat(
-                    label: 'Yatırım',
+                    label: t.investmentLabel,
                     value: '₺${(todayStats['stake'] as double).toInt()}',
                   ),
                   _TodayStat(
-                    label: 'Kar/Zarar',
+                    label: t.profitLossLabel,
                     value: () {
                       final p = todayStats['profit'] as double;
                       if (p == 0) return '–';
@@ -1065,15 +1073,15 @@ class _HeroCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     _TodayStat(
-                      label: 'Dün',
-                      value: '${yesterdayStats['total']} kupon',
+                      label: t.yesterdayLabel,
+                      value: t.couponCountSuffix(yesterdayStats['total'] as int),
                     ),
                     _TodayStat(
-                      label: 'Yatırım',
+                      label: t.investmentLabel,
                       value: '₺${(yesterdayStats['stake'] as double).toInt()}',
                     ),
                     _TodayStat(
-                      label: 'Kar/Zarar',
+                      label: t.profitLossLabel,
                       value: () {
                         final p = yesterdayStats['profit'] as double;
                         if (p == 0) return '–';
@@ -1198,6 +1206,7 @@ class _HomeSearchBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     const accent = Color(0xFFF0E8DA);
     return Container(
       height: 44,
@@ -1221,7 +1230,7 @@ class _HomeSearchBar extends StatelessWidget {
                 fontWeight: FontWeight.w500,
               ),
               decoration: InputDecoration(
-                hintText: 'Kupon ara...',
+                hintText: t.searchHint,
                 hintStyle: TextStyle(
                   color: AppColors.textTertiary.withOpacity(0.8),
                   fontSize: 14,
@@ -1339,6 +1348,7 @@ class _FiltersSheetState extends State<_FiltersSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     return Container(
       decoration: BoxDecoration(
         color: AppColors.card,
@@ -1365,7 +1375,7 @@ class _FiltersSheetState extends State<_FiltersSheet> {
             child: Row(
               children: [
                 Text(
-                  'Filtreler',
+                  t.filtersTitle,
                   style: TextStyle(
                     color: AppColors.textPrimary,
                     fontSize: 18,
@@ -1391,7 +1401,7 @@ class _FiltersSheetState extends State<_FiltersSheet> {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  child: const Text('Sıfırla'),
+                  child: Text(t.resetLabel),
                 ),
               ],
             ),
@@ -1403,14 +1413,14 @@ class _FiltersSheetState extends State<_FiltersSheet> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _FilterSection(
-                  label: 'SİTE',
+                  label: t.filterSiteLabel,
                   options: widget.siteOptions,
                   selected: _site,
                   onSelect: _selectSite,
                 ),
                 const SizedBox(height: 20),
                 _FilterSection(
-                  label: 'LİG',
+                  label: t.filterLeagueLabel,
                   options: widget.leagueOptions,
                   selected: _league,
                   onSelect: _selectLeague,
@@ -1665,7 +1675,7 @@ class _EmptyState extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Kuponlarını takip etmek için + butonuna dokun.',
+            AppLocalizations.of(context)!.emptyStateHint,
             textAlign: TextAlign.center,
             style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
           ),

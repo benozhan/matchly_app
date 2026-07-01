@@ -7,6 +7,7 @@ import 'dart:convert';
 import '../../services/social_service.dart';
 
 import '../../core/app_colors.dart';
+import '../../l10n/app_localizations.dart';
 
 class AuthPage extends StatefulWidget {
   const AuthPage({super.key, required this.onSignedIn});
@@ -92,26 +93,27 @@ class _AuthPageState extends State<AuthPage> {
     final email    = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
+    final t = AppLocalizations.of(context)!;
     if (!_isLogin && username.isEmpty) {
-      setState(() => _error = 'Kullanıcı adı gerekli');
+      setState(() => _error = t.usernameRequiredError);
       return;
     }
 
     if (email.isEmpty || password.isEmpty) {
-      setState(() => _error = 'E-posta ve şifre gerekli');
+      setState(() => _error = t.emailPasswordRequiredError);
       return;
     }
     if (!_isLogin) {
       if (password.length < 8) {
-        setState(() => _error = 'Şifre en az 8 karakter olmalı');
+        setState(() => _error = t.passwordMinLengthError);
         return;
       }
       if (!password.contains(RegExp(r'[0-9]'))) {
-        setState(() => _error = 'Şifre en az bir rakam içermeli');
+        setState(() => _error = t.passwordNeedsDigitError);
         return;
       }
       if (password != _passwordConfirmController.text.trim()) {
-        setState(() => _error = 'Şifreler eşleşmiyor');
+        setState(() => _error = t.passwordsDontMatchError);
         return;
       }
     }
@@ -146,7 +148,7 @@ class _AuthPageState extends State<AuthPage> {
     } on AuthException catch (e) {
       setState(() => _error = e.message);
     } catch (_) {
-      setState(() => _error = 'Bir hata oluştu');
+      setState(() => _error = t.error);
     } finally {
       if (mounted) {
         setState(() => _loading = false);
@@ -156,7 +158,8 @@ class _AuthPageState extends State<AuthPage> {
 
   @override
   Widget build(BuildContext context) {
-    final title = _isLogin ? 'Giriş yap' : 'Hesap oluştur';
+    final t = AppLocalizations.of(context)!;
+    final title = _isLogin ? t.signIn : t.signUp;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -179,7 +182,7 @@ class _AuthPageState extends State<AuthPage> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Kuponlarını hesabına kaydet.',
+                  t.authTagline,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: AppColors.textSecondary,
@@ -202,7 +205,7 @@ class _AuthPageState extends State<AuthPage> {
                 if (!_isLogin) ...[
                   _AuthField(
                     controller: _usernameController,
-                    hint: 'Kullanıcı adı',
+                    hint: t.username,
                     icon: Icons.alternate_email_rounded,
                   ),
                   const SizedBox(height: 12),
@@ -213,7 +216,7 @@ class _AuthPageState extends State<AuthPage> {
                     children: [
                       _AuthField(
                         controller: _emailController,
-                        hint: 'E-posta',
+                        hint: t.email,
                         icon: Icons.mail_outline_rounded,
                         keyboardType: TextInputType.emailAddress,
                         autofillHints: const [AutofillHints.email],
@@ -221,7 +224,7 @@ class _AuthPageState extends State<AuthPage> {
                       const SizedBox(height: 12),
                       _AuthField(
                         controller: _passwordController,
-                        hint: 'Şifre',
+                        hint: t.password,
                         icon: Icons.lock_outline_rounded,
                         obscureText: true,
                         autofillHints: const [AutofillHints.password],
@@ -230,7 +233,7 @@ class _AuthPageState extends State<AuthPage> {
                         const SizedBox(height: 12),
                         _AuthField(
                           controller: _passwordConfirmController,
-                          hint: 'Şifre tekrar',
+                          hint: t.passwordConfirmHint,
                           icon: Icons.lock_outline_rounded,
                           obscureText: true,
                         ),
@@ -287,7 +290,7 @@ class _AuthPageState extends State<AuthPage> {
                   Expanded(child: Divider(color: AppColors.border)),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: Text('veya', style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+                    child: Text(t.orDivider, style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
                   ),
                   Expanded(child: Divider(color: AppColors.border)),
                 ]),
@@ -299,7 +302,7 @@ class _AuthPageState extends State<AuthPage> {
                   child: OutlinedButton.icon(
                     onPressed: _loading ? null : _signInWithApple,
                     icon: const Icon(Icons.apple, size: 20),
-                    label: const Text('Apple ile Devam Et', style: TextStyle(fontWeight: FontWeight.w700)),
+                    label: Text(t.continueWithApple, style: const TextStyle(fontWeight: FontWeight.w700)),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.textPrimary,
                       side: BorderSide(color: AppColors.border),
@@ -315,7 +318,7 @@ class _AuthPageState extends State<AuthPage> {
                   child: OutlinedButton.icon(
                     onPressed: _loading ? null : _signInWithGoogle,
                     icon: const Text('G', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Color(0xFF4285F4))),
-                    label: const Text('Google ile Devam Et', style: TextStyle(fontWeight: FontWeight.w700)),
+                    label: Text(t.continueWithGoogle, style: const TextStyle(fontWeight: FontWeight.w700)),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.textPrimary,
                       side: BorderSide(color: AppColors.border),
@@ -334,8 +337,8 @@ class _AuthPageState extends State<AuthPage> {
                           }),
                   child: Text(
                     _isLogin
-                        ? 'Hesabın yok mu? Kayıt ol'
-                        : 'Zaten hesabın var mı? Giriş yap',
+                        ? t.noAccountSignUp
+                        : t.haveAccountSignIn,
                     style: TextStyle(
                       color: AppColors.textSecondary,
                       fontWeight: FontWeight.w600,
