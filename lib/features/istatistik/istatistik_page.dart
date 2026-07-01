@@ -3,6 +3,7 @@ import 'daily_history_page.dart';
 
 import '../../core/app_colors.dart';
 import '../../models/coupon.dart';
+import '../coupon/coupon_detail_page.dart';
 import '../home/status_badge.dart';
 
 class IstatistikPage extends StatefulWidget {
@@ -453,12 +454,37 @@ class _IstatistikPageState extends State<IstatistikPage> {
                             ),
                           ),
                           Expanded(
-                            child: Text(
-                              '$kazanan ✅  $kaybeden ❌',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: AppColors.textSecondary,
-                              ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.check_circle_rounded,
+                                  size: 12,
+                                  color: AppColors.green,
+                                ),
+                                const SizedBox(width: 3),
+                                Text(
+                                  '$kazanan',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Icon(
+                                  Icons.cancel_rounded,
+                                  size: 12,
+                                  color: AppColors.red,
+                                ),
+                                const SizedBox(width: 3),
+                                Text(
+                                  '$kaybeden',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                           Expanded(
@@ -678,27 +704,41 @@ class _RecentRow extends StatelessWidget {
 
     return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
-          child: Row(
-            children: [
-              Icon(icon, color: iconColor, size: 18),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  coupon.title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
+        GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => CouponDetailPage(coupon: coupon, resolved: true),
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
+            child: Row(
+              children: [
+                Icon(icon, color: iconColor, size: 18),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    coupon.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              StatusBadge(status: coupon.status, resolved: true),
-            ],
+                const SizedBox(width: 8),
+                StatusBadge(status: coupon.status, resolved: true),
+                const SizedBox(width: 4),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  size: 16,
+                  color: AppColors.textTertiary,
+                ),
+              ],
+            ),
           ),
         ),
         if (!isLast)
@@ -833,10 +873,7 @@ class _DailyHistory extends StatelessWidget {
                 ),
                 Text(
                   'Son ${show.length} gün',
-                  style: TextStyle(
-                    color: AppColors.textTertiary,
-                    fontSize: 11,
-                  ),
+                  style: TextStyle(color: AppColors.textTertiary, fontSize: 11),
                 ),
               ],
             ),

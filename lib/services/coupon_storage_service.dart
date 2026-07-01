@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/coupon.dart';
+import 'social_service.dart';
 
 class CouponStorageService {
   CouponStorageService._();
@@ -68,6 +69,9 @@ class CouponStorageService {
     try {
       await _client.from('coupon_matches').delete().eq('coupon_id', couponId);
       await _client.from('coupons').delete().eq('id', couponId).eq('user_id', user.id);
+      // Paylaşılmış olabilir — sosyal kaydı da temizle ki feed'lerde
+      // silinmiş kupon yetim "pending" satırı olarak kalmasın.
+      await SocialService.instance.deleteSharedCoupon(couponId);
     } catch (e) {
       debugPrint('deleteCoupon error: $e');
     }

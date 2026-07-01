@@ -142,6 +142,17 @@ class SocialService {
     return null;
   }
 
+  /// Removes a coupon's shared/social records (if any) so a deleted coupon
+  /// doesn't linger as a stale "pending" entry in followers' feeds.
+  /// Fire-and-forget safe — swallows errors, coupon deletion isn't blocked.
+  Future<void> deleteSharedCoupon(String couponId) async {
+    try {
+      await _client
+          .delete(Uri.parse('$_kBaseUrl/social/shared-coupons/$couponId'))
+          .timeout(_kTimeout);
+    } catch (_) {}
+  }
+
   /// Saves full coupon detail to the backend. Fire-and-forget.
   Future<void> saveCouponDetail({
     required String couponId,

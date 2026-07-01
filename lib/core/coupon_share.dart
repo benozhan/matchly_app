@@ -7,8 +7,6 @@ import 'package:share_plus/share_plus.dart';
 import '../models/coupon.dart';
 import 'app_colors.dart';
 
-// TODO(deep-links): Replace clipboard copy with native share sheet
-//   (share_plus) once matchly.app/coupon/{sharedId} routing is live.
 // TODO(live-shared-coupon): When a recipient opens the link, show a live
 //   shared coupon screen with real-time selection status — requires
 //   WebSocket feed keyed on sharedId.
@@ -28,7 +26,7 @@ class CouponShare {
   /// existing one. Returns the [sharedId] that was used so the caller can
   /// persist it back to the coupon model.
   static Future<String> share(BuildContext context, Coupon coupon) async {
-    final id   = coupon.sharedId ?? coupon.id ?? _generateId();
+    final id = coupon.sharedId ?? coupon.id ?? _generateId();
     final text = buildShareText(coupon, sharedId: id);
     await SharePlus.instance.share(ShareParams(text: text));
     return id;
@@ -36,13 +34,15 @@ class CouponShare {
 
   /// Generates the share text for [coupon] using [sharedId] as the link key.
   ///
-  /// Intentionally minimal — the link itself will open a live shared coupon
-  /// screen once deep link routing is implemented server-side.
-  // TODO(deep-links): matchly.app/coupon/{sharedId} should resolve to a live
-  //   shared coupon screen showing real-time selection status updates.
+  /// Uses the app's custom URL scheme (registered in Info.plist, handled in
+  /// main.dart's deep link listener) so tapping the link opens Matchly
+  /// directly to this coupon — requires the recipient to already have the
+  /// app installed.
   static String buildShareText(Coupon coupon, {required String sharedId}) {
-    final matches = coupon.matches.map((m) => '${m.teams} — ${m.selection}').join('\n');
-    return '🎯 ${coupon.title}\n$matches\n\nMatchly\'de takip et 👇\nhttps://matchlyweb.vercel.app/coupon/$sharedId';
+    final matches = coupon.matches
+        .map((m) => '${m.teams} — ${m.selection}')
+        .join('\n');
+    return '🎯 ${coupon.title}\n$matches\n\nMatchly\'de takip et 👇\nmatchly:///coupon/$sharedId';
   }
 
   // ── ID generation ──────────────────────────────────────────────────────────

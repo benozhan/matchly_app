@@ -13,6 +13,7 @@ import '../add_coupon/add_coupon_sheet.dart';
 import '../coupon/coupon_detail_page.dart';
 import '../ayarlar/ayarlar_page.dart';
 import '../profile/feed_page.dart';
+import '../profile/shared_coupon_detail_page.dart';
 import '../istatistik/istatistik_page.dart';
 import 'bottom_nav.dart';
 import 'notification_bell.dart';
@@ -40,7 +41,6 @@ class MatchlyHomePage extends StatefulWidget {
 }
 
 class _MatchlyHomePageState extends State<MatchlyHomePage> {
-
   // ── active coupons ─────────────────────────────────────────────────────────
 
   final List<_CouponEntry> _entries = [];
@@ -51,8 +51,8 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
 
   // ── UI state ───────────────────────────────────────────────────────────────
 
-  _FilterTab _activeTab   = _FilterTab.active;
-  int        _navIndex    = 0;
+  _FilterTab _activeTab = _FilterTab.active;
+  int _navIndex = 0;
   final ScrollController _scrollController = ScrollController();
 
   // ── supabase realtime ─────────────────────────────────────────────────────
@@ -90,7 +90,11 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
                   );
                   final matches = (matchRows as List).map<MatchItem>((m) {
                     final mStatus = CouponStatus.values.firstWhere(
-                      (s) => s.name == ((m['status'] ?? 'pending') == 'void' ? 'void_' : (m['status'] ?? 'pending')),
+                      (s) =>
+                          s.name ==
+                          ((m['status'] ?? 'pending') == 'void'
+                              ? 'void_'
+                              : (m['status'] ?? 'pending')),
                       orElse: () => CouponStatus.pending,
                     );
                     return MatchItem(
@@ -101,7 +105,9 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
                       status: mStatus,
                     );
                   }).toList();
-                  entry.coupon = entry.coupon.copyWithMatches(matches).copyWith(status: status);
+                  entry.coupon = entry.coupon
+                      .copyWithMatches(matches)
+                      .copyWith(status: status);
                 }
               }
             });
@@ -132,7 +138,11 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
                 if (entry.coupon.id.toString() == couponId.toString()) {
                   final matches = (matchRows as List).map<MatchItem>((m) {
                     final mStatus = CouponStatus.values.firstWhere(
-                      (s) => s.name == ((m['status'] ?? 'pending') == 'void' ? 'void_' : (m['status'] ?? 'pending')),
+                      (s) =>
+                          s.name ==
+                          ((m['status'] ?? 'pending') == 'void'
+                              ? 'void_'
+                              : (m['status'] ?? 'pending')),
                       orElse: () => CouponStatus.pending,
                     );
                     return MatchItem(
@@ -158,8 +168,8 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
   RealtimeChannel? _couponChannel;
   RealtimeChannel? _matchChannel;
 
-  String _searchQuery  = '';
-  String _siteFilter   = 'Tümü';
+  String _searchQuery = '';
+  String _siteFilter = 'Tümü';
   String _leagueFilter = 'Tümü';
 
   AppUser? _user;
@@ -168,8 +178,14 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
 
   late TextEditingController _searchController;
 
-  static const _siteOptions   = ['Tümü', 'Bilyoner', 'Misli', 'Nesine', 'Betano'];
-  static const _leagueOptions = ['Tümü', 'Dünya Kupası', 'Şampiyonlar Ligi', 'Premier Lig', 'Diğer'];
+  static const _siteOptions = ['Tümü', 'Bilyoner', 'Misli', 'Nesine', 'Betano'];
+  static const _leagueOptions = [
+    'Tümü',
+    'Dünya Kupası',
+    'Şampiyonlar Ligi',
+    'Premier Lig',
+    'Diğer',
+  ];
 
   @override
   void initState() {
@@ -205,17 +221,32 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
         orElse: () => null,
       ),
     );
-    if (entry == null) {
-      debugPrint('[Home] Kupon bulunamadı: $couponId, entries: ${_entries.length}');
+    if (entry != null) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => CouponDetailPage(
+            coupon: entry.coupon,
+            resolved: entry.coupon.status != CouponStatus.pending,
+            allCoupons: _entries.map((e) => e.coupon).toList(),
+          ),
+        ),
+      );
       return;
     }
-    Navigator.of(context).push(MaterialPageRoute(
-      builder: (_) => CouponDetailPage(
-        coupon: entry.coupon,
-        resolved: entry.coupon.status != CouponStatus.pending,
-        allCoupons: _entries.map((e) => e.coupon).toList(),
+    // Kendi listemizde yok — başkasının paylaştığı kupon olabilir,
+    // paylaşılan kupon detay sayfasına düş.
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => SharedCouponDetailPage(
+          sharedCoupon: SharedCoupon(
+            id: couponId,
+            couponId: couponId,
+            isPublic: true,
+            createdAt: DateTime.now().toIso8601String(),
+          ),
+        ),
       ),
-    ));
+    );
   }
 
   Future<void> _loadUser() async {
@@ -234,7 +265,10 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
     // Her açılışta social DB'ye kullanıcıyı kaydet (yeni kayıt veya eksik kayıt için)
     if (user != null) {
       try {
-        await SocialService.instance.ensureUser(user.username, user.displayName);
+        await SocialService.instance.ensureUser(
+          user.username,
+          user.displayName,
+        );
       } catch (_) {}
     }
 
@@ -268,7 +302,10 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
 
   void _startLiveScoreTimer() {
     _fetchLiveScores();
-    _liveTimer = Timer.periodic(const Duration(seconds: 30), (_) => _fetchLiveScores());
+    _liveTimer = Timer.periodic(
+      const Duration(seconds: 30),
+      (_) => _fetchLiveScores(),
+    );
   }
 
   Future<void> _fetchLiveScores() async {
@@ -291,7 +328,8 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
       final live = _liveMatches[m.teams];
       if (live == null) return m;
       final selNorm = m.selection.toLowerCase();
-      final isCornerOrCard = selNorm.contains('korner') || selNorm.contains('kart');
+      final isCornerOrCard =
+          selNorm.contains('korner') || selNorm.contains('kart');
       // Korner/kart bahislerinde backend'den gelen detaylı skoru koru, maç skoruyla override etme
       if (isCornerOrCard) {
         return MatchItem(
@@ -319,7 +357,8 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
   static String _detectLeague(Coupon c) {
     final t = '${c.title} ${c.meta}'.toLowerCase();
     if (t.contains('dünya kupası')) return 'Dünya Kupası';
-    if (t.contains('şampiyonlar') || t.contains('champions')) return 'Şampiyonlar Ligi';
+    if (t.contains('şampiyonlar') || t.contains('champions'))
+      return 'Şampiyonlar Ligi';
     if (t.contains('premier')) return 'Premier Lig';
     return 'Diğer';
   }
@@ -328,10 +367,14 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
 
   String _tabLabel(_FilterTab tab) {
     switch (tab) {
-      case _FilterTab.all:     return 'Tümü';
-      case _FilterTab.active:  return 'Aktif';
-      case _FilterTab.winning: return 'Kazanan';
-      case _FilterTab.losing:  return 'Kaybeden';
+      case _FilterTab.all:
+        return 'Tümü';
+      case _FilterTab.active:
+        return 'Aktif';
+      case _FilterTab.winning:
+        return 'Kazanan';
+      case _FilterTab.losing:
+        return 'Kaybeden';
     }
   }
 
@@ -345,9 +388,11 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
         final c = e.coupon;
         if (c.title.toLowerCase().contains(q)) return true;
         if (_parseSite(c).toLowerCase().contains(q)) return true;
-        return c.matches.any((m) =>
-            m.teams.toLowerCase().contains(q) ||
-            m.selection.toLowerCase().contains(q));
+        return c.matches.any(
+          (m) =>
+              m.teams.toLowerCase().contains(q) ||
+              m.selection.toLowerCase().contains(q),
+        );
       }).toList();
     }
 
@@ -356,7 +401,9 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
     }
 
     if (_leagueFilter != 'Tümü') {
-      list = list.where((e) => _detectLeague(e.coupon) == _leagueFilter).toList();
+      list = list
+          .where((e) => _detectLeague(e.coupon) == _leagueFilter)
+          .toList();
     }
 
     return list;
@@ -365,20 +412,35 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
   int _tabCount(_FilterTab tab) {
     final pre = _preFiltered;
     switch (tab) {
-      case _FilterTab.all:     return pre.length;
-      case _FilterTab.active:  return pre.where((e) => e.coupon.status == CouponStatus.pending).length;
-      case _FilterTab.winning: return pre.where((e) => e.coupon.status == CouponStatus.winning).length;
-      case _FilterTab.losing:  return pre.where((e) => e.coupon.status == CouponStatus.risk).length;
+      case _FilterTab.all:
+        return pre.length;
+      case _FilterTab.active:
+        return pre.where((e) => e.coupon.status == CouponStatus.pending).length;
+      case _FilterTab.winning:
+        return pre.where((e) => e.coupon.status == CouponStatus.winning).length;
+      case _FilterTab.losing:
+        return pre.where((e) => e.coupon.status == CouponStatus.risk).length;
     }
   }
 
   List<_CouponEntry> get _filteredEntries {
     var list = _preFiltered;
     switch (_activeTab) {
-      case _FilterTab.all:     break;
-      case _FilterTab.active:  list = list.where((e) => e.coupon.status == CouponStatus.pending).toList();  break;
-      case _FilterTab.winning: list = list.where((e) => e.coupon.status == CouponStatus.winning).toList(); break;
-      case _FilterTab.losing:  list = list.where((e) => e.coupon.status == CouponStatus.risk).toList();    break;
+      case _FilterTab.all:
+        break;
+      case _FilterTab.active:
+        list = list
+            .where((e) => e.coupon.status == CouponStatus.pending)
+            .toList();
+        break;
+      case _FilterTab.winning:
+        list = list
+            .where((e) => e.coupon.status == CouponStatus.winning)
+            .toList();
+        break;
+      case _FilterTab.losing:
+        list = list.where((e) => e.coupon.status == CouponStatus.risk).toList();
+        break;
     }
     list.sort((a, b) {
       if (a.isFavorite != b.isFavorite) return a.isFavorite ? -1 : 1;
@@ -394,13 +456,17 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
 
   String get _emptyMessage {
     if (_searchQuery.isNotEmpty) return 'Arama sonucu bulunamadı';
-    if (_siteFilter   != 'Tümü') return '$_siteFilter kuponu bulunamadı';
+    if (_siteFilter != 'Tümü') return '$_siteFilter kuponu bulunamadı';
     if (_leagueFilter != 'Tümü') return '$_leagueFilter kuponu bulunamadı';
     switch (_activeTab) {
-      case _FilterTab.all:     return 'Henüz kupon eklenmedi';
-      case _FilterTab.active:  return 'Aktif kupon bulunamadı';
-      case _FilterTab.winning: return 'Kazanan kupon bulunamadı';
-      case _FilterTab.losing:  return 'Kaybeden kupon bulunamadı';
+      case _FilterTab.all:
+        return 'Henüz kupon eklenmedi';
+      case _FilterTab.active:
+        return 'Aktif kupon bulunamadı';
+      case _FilterTab.winning:
+        return 'Kazanan kupon bulunamadı';
+      case _FilterTab.losing:
+        return 'Kaybeden kupon bulunamadı';
     }
   }
 
@@ -409,7 +475,8 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
     for (final e in _entries) {
       if (e.coupon.status != CouponStatus.pending) continue;
       final m = RegExp(r'₺(\d+(?:[.,]\d+)?)').firstMatch(e.coupon.potential);
-      if (m != null) total += double.tryParse(m.group(1)!.replaceAll(',', '.')) ?? 0;
+      if (m != null)
+        total += double.tryParse(m.group(1)!.replaceAll(',', '.')) ?? 0;
     }
     return total;
   }
@@ -417,10 +484,10 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
   String get _totalPotentialText {
     final n = _totalPotential.toInt();
     if (n <= 0) return '–';
-    if (n >= 1000) return '₺${n ~/ 1000}.${(n % 1000).toString().padLeft(3, '0')}';
+    if (n >= 1000)
+      return '₺${n ~/ 1000}.${(n % 1000).toString().padLeft(3, '0')}';
     return '₺$n';
   }
-
 
   // ── Bugünkü istatistikler ──────────────────────────────────────────────────
   DateTime get _effectiveToday {
@@ -434,7 +501,9 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
     final today = _effectiveToday;
     return _entries.map((e) => e.coupon).where((c) {
       if (c.createdAt == null) return false;
-      return c.createdAt!.year == today.year && c.createdAt!.month == today.month && c.createdAt!.day == today.day;
+      return c.createdAt!.year == today.year &&
+          c.createdAt!.month == today.month &&
+          c.createdAt!.day == today.day;
     }).toList();
   }
 
@@ -442,7 +511,9 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
     final yesterday = _effectiveToday.subtract(const Duration(days: 1));
     return _entries.map((e) => e.coupon).where((c) {
       if (c.createdAt == null) return false;
-      return c.createdAt!.year == yesterday.year && c.createdAt!.month == yesterday.month && c.createdAt!.day == yesterday.day;
+      return c.createdAt!.year == yesterday.year &&
+          c.createdAt!.month == yesterday.month &&
+          c.createdAt!.day == yesterday.day;
     }).toList();
   }
 
@@ -450,10 +521,18 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
     double stake = 0, profit = 0;
     int won = 0, lost = 0;
     for (final c in coupons) {
-      final s = double.tryParse(RegExp(r'₺([\d]+)').firstMatch(c.stake)?.group(1) ?? '0') ?? 0;
+      final s =
+          double.tryParse(
+            RegExp(r'₺([\d]+)').firstMatch(c.stake)?.group(1) ?? '0',
+          ) ??
+          0;
       stake += s;
       if (c.status == CouponStatus.winning) {
-        final p = double.tryParse(RegExp(r'₺([\d]+)').firstMatch(c.potential)?.group(1) ?? '0') ?? 0;
+        final p =
+            double.tryParse(
+              RegExp(r'₺([\d]+)').firstMatch(c.potential)?.group(1) ?? '0',
+            ) ??
+            0;
         profit += p - s;
         won++;
       } else if (c.status == CouponStatus.risk) {
@@ -461,7 +540,13 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
         lost++;
       }
     }
-    return {'stake': stake, 'profit': profit, 'won': won, 'lost': lost, 'total': coupons.length};
+    return {
+      'stake': stake,
+      'profit': profit,
+      'won': won,
+      'lost': lost,
+      'total': coupons.length,
+    };
   }
 
   Map<String, dynamic> get _todayStats => _calcStats(_todayCoupons);
@@ -484,20 +569,24 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
     );
     final oddsMatch = RegExp(r'×([\d.,]+)').firstMatch(coupon.meta);
     SocialService.instance.saveCouponDetail(
-      couponId:      id,
+      couponId: id,
       ownerUsername: owner,
-      title:         coupon.title,
-      siteName:      coupon.meta.split('·').first.trim(),
-      stake:         coupon.stake,
-      odds:          oddsMatch != null ? '×${oddsMatch.group(1)}' : '',
-      potential:     coupon.potential,
-      status:        coupon.status.name,
-      selections:    coupon.matches.map((m) => {
-        'matchName': m.teams,
-        'betType':   m.selection,
-        'status':    m.status.name,
-        'lastScore': m.score,
-      }).toList(),
+      title: coupon.title,
+      siteName: coupon.meta.split('·').first.trim(),
+      stake: coupon.stake,
+      odds: oddsMatch != null ? '×${oddsMatch.group(1)}' : '',
+      potential: coupon.potential,
+      status: coupon.status.name,
+      selections: coupon.matches
+          .map(
+            (m) => {
+              'matchName': m.teams,
+              'betType': m.selection,
+              'status': m.status.name,
+              'lastScore': m.score,
+            },
+          )
+          .toList(),
     );
   }
 
@@ -506,8 +595,6 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
   void _updateActiveStatus(_CouponEntry entry, CouponStatus newStatus) {
     setState(() => entry.coupon = entry.coupon.copyWith(status: newStatus));
   }
-
-
 
   // ── actions ────────────────────────────────────────────────────────────────
 
@@ -554,7 +641,9 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
     final newVal = !entry.coupon.isPublic;
     final couponId = entry.coupon.id;
     if (couponId == null || _user == null) return;
-    final scrollOffset = _scrollController.hasClients ? _scrollController.offset : 0.0;
+    final scrollOffset = _scrollController.hasClients
+        ? _scrollController.offset
+        : 0.0;
     setState(() => entry.coupon = entry.coupon.copyWith(isPublic: newVal));
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
@@ -562,12 +651,14 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
       }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(newVal ? '✅ Akışta paylaşıldı' : '🔒 Akıştan kaldırıldı'),
-          duration: const Duration(seconds: 2),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+          SnackBar(
+            content: Text(
+              newVal ? '✅ Akışta paylaşıldı' : '🔒 Akıştan kaldırıldı',
+            ),
+            duration: const Duration(seconds: 2),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       }
     });
     await Supabase.instance.client
@@ -600,9 +691,10 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
         title: Text(
           'Kuponu Sil',
           style: TextStyle(
-              color: AppColors.textPrimary,
-              fontSize: 16,
-              fontWeight: FontWeight.w800),
+            color: AppColors.textPrimary,
+            fontSize: 16,
+            fontWeight: FontWeight.w800,
+          ),
         ),
         content: Text(
           'Bu kupon kalıcı olarak silinecek.',
@@ -611,13 +703,20 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text('İptal',
-                style: TextStyle(color: AppColors.textSecondary)),
+            child: Text(
+              'İptal',
+              style: TextStyle(color: AppColors.textSecondary),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text('Sil',
-                style: TextStyle(color: AppColors.red, fontWeight: FontWeight.w700)),
+            child: Text(
+              'Sil',
+              style: TextStyle(
+                color: AppColors.red,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
           ),
         ],
       ),
@@ -638,18 +737,26 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
   }
 
   List<Coupon> get _allCoupons => [
-        ..._entries.map((e) => e.coupon),
-        ..._historyEntries.map((e) => e.coupon),
-      ];
+    ..._entries.map((e) => e.coupon),
+    ..._historyEntries.map((e) => e.coupon),
+  ];
+
+  Map<String, dynamic> get _allTimeStats => _calcStats(_allCoupons);
+
+  int get _winRatePct {
+    final s = _allTimeStats;
+    final resolved = (s['won'] as int) + (s['lost'] as int);
+    return resolved > 0 ? ((s['won'] as int) / resolved * 100).round() : 0;
+  }
+
+  double get _netProfit => _allTimeStats['profit'] as double;
 
   // ── build ──────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
-    final filtered     = _filteredEntries;
-    final activeCount  = _tabCount(_FilterTab.active);
-    final winningCount = _tabCount(_FilterTab.winning);
-    final losingCount  = _tabCount(_FilterTab.losing);
+    final filtered = _filteredEntries;
+    final activeCount = _tabCount(_FilterTab.active);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -664,126 +771,133 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
                   child: _navIndex == 1
                       ? FeedPage(username: _currentUsername)
                       : _navIndex == 2
-                          ? IstatistikPage(
-                              allCoupons: _allCoupons,
-                            )
-                          : _navIndex == 3
-                              ? AyarlarPage(coupons: _allCoupons)
-                              : RefreshIndicator(
-                                  onRefresh: () => _loadUser(),
-                                  color: AppColors.brand,
-                                  child: ListView(
-                                  controller: _scrollController,
-                                  key: const PageStorageKey('home_list'),
-                                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
-                                  children: [
-
-                                    // ── Header row ──────────────────────────
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          'Matchly',
-                                          style: TextStyle(
-                                            color: AppColors.textPrimary,
-                                            fontSize: 22,
-                                            fontWeight: FontWeight.w900,
-                                            letterSpacing: -0.5,
-                                          ),
-                                        ),
-                                        const NotificationBell(),
-                                      ],
+                      ? IstatistikPage(allCoupons: _allCoupons)
+                      : _navIndex == 3
+                      ? AyarlarPage(coupons: _allCoupons)
+                      : RefreshIndicator(
+                          onRefresh: () => _loadUser(),
+                          color: AppColors.brand,
+                          child: ListView(
+                            controller: _scrollController,
+                            key: const PageStorageKey('home_list'),
+                            padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
+                            children: [
+                              // ── Header row ──────────────────────────
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Matchly',
+                                    style: TextStyle(
+                                      color: AppColors.textPrimary,
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.w900,
+                                      letterSpacing: -0.5,
                                     ),
-                                    const SizedBox(height: 16),
+                                  ),
+                                  const NotificationBell(),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
 
-                                    // ── Hero card ────────────────────────────
-                                    _HeroCard(
-                                      totalPotential: _totalPotentialText,
-                                      activeCount: activeCount,
-                                      winningCount: winningCount,
-                                      losingCount: losingCount,
-                                      todayStats: _todayStats,
-                                      yesterdayStats: _yesterdayStats,
-                                    ),
-                                    const SizedBox(height: 22),
+                              // ── Hero card ────────────────────────────
+                              _HeroCard(
+                                totalPotential: _totalPotentialText,
+                                activeCount: activeCount,
+                                winRatePct: _winRatePct,
+                                netProfit: _netProfit,
+                                todayStats: _todayStats,
+                                yesterdayStats: _yesterdayStats,
+                              ),
+                              const SizedBox(height: 22),
 
-                                    // ── Search bar ───────────────────────────
-                                    _HomeSearchBar(
-                                      controller: _searchController,
-                                      onChanged: (v) =>
-                                          setState(() => _searchQuery = v),
-                                      onClear: () => setState(() {
-                                        _searchQuery = '';
-                                        _searchController.clear();
-                                      }),
-                                      onFilterTap: _openFiltersSheet,
-                                      hasActiveFilters: _siteFilter != 'Tümü' ||
-                                          _leagueFilter != 'Tümü',
-                                    ),
-                                    const SizedBox(height: 14),
+                              // ── Search bar ───────────────────────────
+                              _HomeSearchBar(
+                                controller: _searchController,
+                                onChanged: (v) =>
+                                    setState(() => _searchQuery = v),
+                                onClear: () => setState(() {
+                                  _searchQuery = '';
+                                  _searchController.clear();
+                                }),
+                                onFilterTap: _openFiltersSheet,
+                                hasActiveFilters:
+                                    _siteFilter != 'Tümü' ||
+                                    _leagueFilter != 'Tümü',
+                              ),
+                              const SizedBox(height: 14),
 
-                                    // ── Filter tabs ──────────────────────────
-                                    _FilterTabBar(
-                                      activeTab: _activeTab,
-                                      tabLabel: _tabLabel,
-                                      tabCount: _tabCount,
-                                      onTabSelected: (tab) =>
-                                          setState(() => _activeTab = tab),
-                                    ),
-                                    const SizedBox(height: 18),
+                              // ── Filter tabs ──────────────────────────
+                              _FilterTabBar(
+                                activeTab: _activeTab,
+                                tabLabel: _tabLabel,
+                                tabCount: _tabCount,
+                                onTabSelected: (tab) =>
+                                    setState(() => _activeTab = tab),
+                              ),
+                              const SizedBox(height: 18),
 
-                                    // ── Section label ────────────────────────
-                                    SectionHeader(
-                                      title: _tabLabel(_activeTab).toUpperCase(),
-                                      live: _activeTab == _FilterTab.all ||
-                                          _activeTab == _FilterTab.active,
-                                    ),
-                                    const SizedBox(height: 10),
+                              // ── Section label ────────────────────────
+                              SectionHeader(
+                                title: _tabLabel(_activeTab).toUpperCase(),
+                                live:
+                                    _activeTab == _FilterTab.all ||
+                                    _activeTab == _FilterTab.active,
+                              ),
+                              const SizedBox(height: 10),
 
-                                    // ── List / empty state ───────────────────
-                                    if (filtered.isEmpty)
-                                      _EmptyState(message: _emptyMessage)
-                                    else
-                                      ...filtered.map(
-                                        (entry) => Padding(
-                                          padding:
-                                              const EdgeInsets.only(bottom: 18),
-                                          child: CouponCard(
-                                            coupon: entry.coupon.copyWithMatches(_enrichMatches(entry.coupon.matches)),
-                                            isFavorite: entry.isFavorite,
-                                            onTap: () =>
-                                                Navigator.of(context).push(
-                                              MaterialPageRoute(
-                                                builder: (_) => CouponDetailPage(
-                                                  coupon: entry.coupon.copyWithMatches(_enrichMatches(entry.coupon.matches)),
-                                                  onSharedIdGenerated: (id) =>
-                                                      _saveActiveSharedId(
-                                                          entry, id),
-                                                  onStatusChanged: (s) =>
-                                                      _updateActiveStatus(
-                                                          entry, s),
-                                                  allCoupons: _allCoupons,
+                              // ── List / empty state ───────────────────
+                              if (filtered.isEmpty)
+                                _EmptyState(message: _emptyMessage)
+                              else
+                                ...filtered.map(
+                                  (entry) => Padding(
+                                    padding: const EdgeInsets.only(bottom: 18),
+                                    child: CouponCard(
+                                      coupon: entry.coupon.copyWithMatches(
+                                        _enrichMatches(entry.coupon.matches),
+                                      ),
+                                      isFavorite: entry.isFavorite,
+                                      onTap: () => Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (_) => CouponDetailPage(
+                                            coupon: entry.coupon
+                                                .copyWithMatches(
+                                                  _enrichMatches(
+                                                    entry.coupon.matches,
+                                                  ),
                                                 ),
-                                              ),
-                                            ),
-                                            onFavoriteToggle: () => setState(
-                                                () => entry.isFavorite =
-                                                    !entry.isFavorite),
-                                            onEdit: () => _editEntry(entry),
-                                            onShare: () => CouponShare.share(
-                                              context,
-                                              entry.coupon,
-                                            ).then((id) =>
-                                                _saveActiveSharedId(entry, id)),
-                                            onDelete: () =>
-                                                _deleteEntry(entry),
-                                            onPublicToggle: () => _togglePublic(entry),
+                                            onSharedIdGenerated: (id) =>
+                                                _saveActiveSharedId(entry, id),
+                                            onStatusChanged: (s) =>
+                                                _updateActiveStatus(entry, s),
+                                            allCoupons: _allCoupons,
                                           ),
                                         ),
                                       ),
-                                  ],
+                                      onFavoriteToggle: () => setState(
+                                        () => entry.isFavorite =
+                                            !entry.isFavorite,
+                                      ),
+                                      onEdit: () => _editEntry(entry),
+                                      onShare: () =>
+                                          CouponShare.share(
+                                            context,
+                                            entry.coupon,
+                                          ).then(
+                                            (id) =>
+                                                _saveActiveSharedId(entry, id),
+                                          ),
+                                      onDelete: () => _deleteEntry(entry),
+                                      onPublicToggle: () =>
+                                          _togglePublic(entry),
+                                    ),
+                                  ),
                                 ),
-                                ),
+                            ],
+                          ),
+                        ),
                 ),
                 BottomNav(
                   onAddPressed: _openAddSheet,
@@ -804,16 +918,16 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
 class _HeroCard extends StatelessWidget {
   final String totalPotential;
   final int activeCount;
-  final int winningCount;
-  final int losingCount;
+  final int winRatePct;
+  final double netProfit;
   final Map<String, dynamic> todayStats;
   final Map<String, dynamic> yesterdayStats;
 
   const _HeroCard({
     required this.totalPotential,
     required this.activeCount,
-    required this.winningCount,
-    required this.losingCount,
+    required this.winRatePct,
+    required this.netProfit,
     required this.todayStats,
     required this.yesterdayStats,
   });
@@ -877,14 +991,28 @@ class _HeroCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _StatDot(count: activeCount,  label: 'aktif',     color: const Color(0xFF6B6860)),
+              _StatDot(
+                value: '$activeCount',
+                label: 'aktif',
+                color: const Color(0xFF6B6860),
+              ),
               const _Sep(),
-              _StatDot(count: winningCount, label: 'kazanıyor', color: AppColors.green),
+              _StatDot(
+                value: '%$winRatePct',
+                label: 'başarı',
+                color: AppColors.green,
+              ),
               const _Sep(),
-              _StatDot(count: losingCount,  label: 'kaybetti',  color: AppColors.red),
+              _StatDot(
+                value:
+                    '${netProfit >= 0 ? '+' : '-'}₺${netProfit.abs().toInt()}',
+                label: 'net',
+                color: netProfit >= 0 ? AppColors.green : AppColors.red,
+              ),
             ],
           ),
-          if ((todayStats['total'] as int) > 0 || (yesterdayStats['total'] as int) > 0) ...[
+          if ((todayStats['total'] as int) > 0 ||
+              (yesterdayStats['total'] as int) > 0) ...[
             const SizedBox(height: 12),
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 4),
@@ -896,8 +1024,15 @@ class _HeroCard extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _TodayStat(label: (todayStats['total'] as int) == 0 ? 'Dün' : 'Bugün', value: '${((todayStats['total'] as int) == 0 ? yesterdayStats['total'] : todayStats['total'])} kupon'),
-                  _TodayStat(label: 'Yatırım', value: '₺${(todayStats['stake'] as double).toInt()}'),
+                  _TodayStat(
+                    label: (todayStats['total'] as int) == 0 ? 'Dün' : 'Bugün',
+                    value:
+                        '${((todayStats['total'] as int) == 0 ? yesterdayStats['total'] : todayStats['total'])} kupon',
+                  ),
+                  _TodayStat(
+                    label: 'Yatırım',
+                    value: '₺${(todayStats['stake'] as double).toInt()}',
+                  ),
                   _TodayStat(
                     label: 'Kar/Zarar',
                     value: () {
@@ -909,8 +1044,8 @@ class _HeroCard extends StatelessWidget {
                     valueColor: (todayStats['profit'] as double) > 0
                         ? Colors.greenAccent
                         : (todayStats['profit'] as double) < 0
-                            ? Colors.redAccent
-                            : Colors.white,
+                        ? Colors.redAccent
+                        : Colors.white,
                   ),
                 ],
               ),
@@ -918,7 +1053,10 @@ class _HeroCard extends StatelessWidget {
             if ((yesterdayStats['total'] as int) > 0) ...[
               const SizedBox(height: 10),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.07),
                   borderRadius: BorderRadius.circular(12),
@@ -926,8 +1064,14 @@ class _HeroCard extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    _TodayStat(label: 'Dün', value: '${yesterdayStats['total']} kupon'),
-                    _TodayStat(label: 'Yatırım', value: '₺${(yesterdayStats['stake'] as double).toInt()}'),
+                    _TodayStat(
+                      label: 'Dün',
+                      value: '${yesterdayStats['total']} kupon',
+                    ),
+                    _TodayStat(
+                      label: 'Yatırım',
+                      value: '₺${(yesterdayStats['stake'] as double).toInt()}',
+                    ),
                     _TodayStat(
                       label: 'Kar/Zarar',
                       value: () {
@@ -939,8 +1083,8 @@ class _HeroCard extends StatelessWidget {
                       valueColor: (yesterdayStats['profit'] as double) > 0
                           ? Colors.greenAccent
                           : (yesterdayStats['profit'] as double) < 0
-                              ? Colors.redAccent
-                              : Colors.white,
+                          ? Colors.redAccent
+                          : Colors.white,
                     ),
                   ],
                 ),
@@ -963,28 +1107,61 @@ class _TodayStat extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text(label, style: const TextStyle(color: Colors.white60, fontSize: 9, fontWeight: FontWeight.w600, letterSpacing: 0.5)),
+        Text(
+          label,
+          style: const TextStyle(
+            color: Colors.white60,
+            fontSize: 9,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.5,
+          ),
+        ),
         const SizedBox(height: 3),
-        Text(value, style: TextStyle(color: valueColor ?? Colors.white, fontSize: 12, fontWeight: FontWeight.w800)),
+        Text(
+          value,
+          style: TextStyle(
+            color: valueColor ?? Colors.white,
+            fontSize: 12,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
       ],
     );
   }
 }
 
 class _StatDot extends StatelessWidget {
-  final int count;
+  final String value;
   final String label;
   final Color color;
-  const _StatDot({required this.count, required this.label, required this.color});
+  const _StatDot({
+    required this.value,
+    required this.label,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text('$count', style: TextStyle(color: color, fontSize: 13, fontWeight: FontWeight.w700)),
+        Text(
+          value,
+          style: TextStyle(
+            color: color,
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
         const SizedBox(width: 3),
-        Text(label, style: TextStyle(color: AppColors.textTertiary, fontSize: 12, fontWeight: FontWeight.w500)),
+        Text(
+          label,
+          style: TextStyle(
+            color: AppColors.textTertiary,
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
       ],
     );
   }
@@ -994,9 +1171,12 @@ class _Sep extends StatelessWidget {
   const _Sep();
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 7),
-        child: Text('·', style: TextStyle(color: AppColors.textTertiary, fontSize: 12)),
-      );
+    padding: const EdgeInsets.symmetric(horizontal: 7),
+    child: Text(
+      '·',
+      style: TextStyle(color: AppColors.textTertiary, fontSize: 12),
+    ),
+  );
 }
 
 // ─── Search bar ───────────────────────────────────────────────────────────────
@@ -1035,10 +1215,18 @@ class _HomeSearchBar extends StatelessWidget {
             child: TextField(
               controller: controller,
               onChanged: onChanged,
-              style: TextStyle(color: AppColors.textPrimary, fontSize: 14, fontWeight: FontWeight.w500),
+              style: TextStyle(
+                color: AppColors.textPrimary,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
               decoration: InputDecoration(
                 hintText: 'Kupon ara...',
-                hintStyle: TextStyle(color: AppColors.textTertiary.withOpacity(0.8), fontSize: 14, fontWeight: FontWeight.w400),
+                hintStyle: TextStyle(
+                  color: AppColors.textTertiary.withOpacity(0.8),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                ),
                 border: InputBorder.none,
                 isDense: true,
                 contentPadding: EdgeInsets.zero,
@@ -1050,7 +1238,11 @@ class _HomeSearchBar extends StatelessWidget {
               onTap: onClear,
               child: Padding(
                 padding: const EdgeInsets.only(left: 8, right: 4),
-                child: Icon(Icons.close_rounded, color: AppColors.textTertiary, size: 16),
+                child: Icon(
+                  Icons.close_rounded,
+                  color: AppColors.textTertiary,
+                  size: 16,
+                ),
               ),
             ),
           // Filter button
@@ -1122,7 +1314,7 @@ class _FiltersSheetState extends State<_FiltersSheet> {
   @override
   void initState() {
     super.initState();
-    _site   = widget.siteFilter;
+    _site = widget.siteFilter;
     _league = widget.leagueFilter;
   }
 
@@ -1137,7 +1329,10 @@ class _FiltersSheetState extends State<_FiltersSheet> {
   }
 
   void _reset() {
-    setState(() { _site = 'Tümü'; _league = 'Tümü'; });
+    setState(() {
+      _site = 'Tümü';
+      _league = 'Tümü';
+    });
     widget.onSiteChanged('Tümü');
     widget.onLeagueChanged('Tümü');
   }
@@ -1185,10 +1380,16 @@ class _FiltersSheetState extends State<_FiltersSheet> {
                     foregroundColor: _hasActive
                         ? const Color(0xFFF0E8DA)
                         : AppColors.textTertiary,
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                    textStyle: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   child: const Text('Sıfırla'),
                 ),
@@ -1260,25 +1461,30 @@ class _FilterSection extends StatelessWidget {
           ),
           child: Column(
             children: options.asMap().entries.map((entry) {
-              final i          = entry.key;
-              final opt        = entry.value;
+              final i = entry.key;
+              final opt = entry.value;
               final isSelected = opt == selected;
-              final isFirst    = i == 0;
-              final isLast     = i == options.length - 1;
+              final isFirst = i == 0;
+              final isLast = i == options.length - 1;
               return Column(
                 children: [
                   Material(
                     color: Colors.transparent,
                     child: InkWell(
                       borderRadius: BorderRadius.vertical(
-                        top:    isFirst ? const Radius.circular(16) : Radius.zero,
-                        bottom: isLast  ? const Radius.circular(16) : Radius.zero,
+                        top: isFirst ? const Radius.circular(16) : Radius.zero,
+                        bottom: isLast
+                            ? const Radius.circular(16)
+                            : Radius.zero,
                       ),
                       onTap: () => onSelect(opt),
                       highlightColor: AppColors.border,
-                      splashColor:    AppColors.border,
+                      splashColor: AppColors.border,
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 13,
+                        ),
                         child: Row(
                           children: [
                             Text(
@@ -1338,7 +1544,7 @@ class _FilterTabBar extends StatelessWidget {
 
   Widget _pill(_FilterTab tab) {
     final isActive = tab == activeTab;
-    final count    = tabCount(tab);
+    final count = tabCount(tab);
 
     return GestureDetector(
       onTap: () => onTabSelected(tab),
@@ -1354,7 +1560,12 @@ class _FilterTabBar extends StatelessWidget {
             width: 0.6,
           ),
           boxShadow: isActive
-              ? [BoxShadow(color: AppColors.brand.withOpacity(0.20), blurRadius: 12)]
+              ? [
+                  BoxShadow(
+                    color: AppColors.brand.withOpacity(0.20),
+                    blurRadius: 12,
+                  ),
+                ]
               : null,
         ),
         child: Center(
@@ -1372,9 +1583,14 @@ class _FilterTabBar extends StatelessWidget {
               if (count > 0) ...[
                 const SizedBox(width: 4),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 5,
+                    vertical: 1,
+                  ),
                   decoration: BoxDecoration(
-                    color: isActive ? Colors.white.withOpacity(0.20) : AppColors.border,
+                    color: isActive
+                        ? Colors.white.withOpacity(0.20)
+                        : AppColors.border,
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Text(
@@ -1431,13 +1647,21 @@ class _EmptyState extends StatelessWidget {
               color: AppColors.brand.withOpacity(0.10),
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.receipt_long_rounded, size: 36, color: AppColors.brand),
+            child: Icon(
+              Icons.receipt_long_rounded,
+              size: 36,
+              color: AppColors.brand,
+            ),
           ),
           const SizedBox(height: 20),
           Text(
             message,
             textAlign: TextAlign.center,
-            style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w700),
+            style: TextStyle(
+              color: AppColors.textPrimary,
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+            ),
           ),
           const SizedBox(height: 8),
           Text(

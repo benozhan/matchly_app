@@ -100,11 +100,28 @@ const _leagues = [
 ];
 
 const _popularLeagues = [
-  'süper lig', 'premier lig', 'premier league', 'la liga', 'serie a',
-  'bundesliga', 'ligue 1', 'şampiyonlar ligi', 'champions league',
-  'avrupa ligi', 'europa league', 'dünya kupası', 'world cup',
-  'türkiye', 'i̇ngiltere', 'ingiltere', 'i̇spanya', 'ispanya',
-  'i̇talya', 'italya', 'almanya', 'fransa',
+  'süper lig',
+  'premier lig',
+  'premier league',
+  'la liga',
+  'serie a',
+  'bundesliga',
+  'ligue 1',
+  'şampiyonlar ligi',
+  'champions league',
+  'avrupa ligi',
+  'europa league',
+  'dünya kupası',
+  'world cup',
+  'türkiye',
+  'i̇ngiltere',
+  'ingiltere',
+  'i̇spanya',
+  'ispanya',
+  'i̇talya',
+  'italya',
+  'almanya',
+  'fransa',
 ];
 
 int _leaguePriority(String league) {
@@ -115,7 +132,10 @@ int _leaguePriority(String league) {
   return 999;
 }
 
-List<_MatchDisplay> _sortMatches(List<_MatchDisplay> matches, List<String> recentTeams) {
+List<_MatchDisplay> _sortMatches(
+  List<_MatchDisplay> matches,
+  List<String> recentTeams,
+) {
   final list = [...matches];
   list.sort((a, b) {
     final aRecent = recentTeams.contains(a.teams);
@@ -134,11 +154,7 @@ class _Market {
   final List<String>? lines;
   final List<String> options;
 
-  const _Market({
-    required this.name,
-    this.lines,
-    required this.options,
-  });
+  const _Market({required this.name, this.lines, required this.options});
 
   bool get hasLines => lines != null;
 
@@ -182,7 +198,6 @@ final _markets = [
   ),
 ];
 
-
 // ─── Search state ─────────────────────────────────────────────────────────────
 
 enum _SearchState { idle, loading, success, error }
@@ -191,20 +206,20 @@ enum _SearchState { idle, loading, success, error }
 
 String _trLeague(String raw) {
   const map = {
-    'fifa world cup':           'Dünya Kupası',
-    'world cup':                'Dünya Kupası',
-    'uefa champions league':    'Şampiyonlar Ligi',
-    'champions league':         'Şampiyonlar Ligi',
-    'uefa europa league':       'UEFA Avrupa Ligi',
-    'europa league':            'UEFA Avrupa Ligi',
-    'uefa conference league':   'Konferans Ligi',
-    'premier league':           'Premier Lig',
-    'la liga':                  'La Liga',
-    'serie a':                  'Serie A',
-    'bundesliga':               'Bundesliga',
-    'ligue 1':                  'Ligue 1',
-    'süper lig':                'Süper Lig',
-    'super lig':                'Süper Lig',
+    'fifa world cup': 'Dünya Kupası',
+    'world cup': 'Dünya Kupası',
+    'uefa champions league': 'Şampiyonlar Ligi',
+    'champions league': 'Şampiyonlar Ligi',
+    'uefa europa league': 'UEFA Avrupa Ligi',
+    'europa league': 'UEFA Avrupa Ligi',
+    'uefa conference league': 'Konferans Ligi',
+    'premier league': 'Premier Lig',
+    'la liga': 'La Liga',
+    'serie a': 'Serie A',
+    'bundesliga': 'Bundesliga',
+    'ligue 1': 'Ligue 1',
+    'süper lig': 'Süper Lig',
+    'super lig': 'Süper Lig',
   };
   return map[raw.toLowerCase()] ?? raw;
 }
@@ -214,16 +229,27 @@ String _trLeague(String raw) {
 /// Converts "2026-06-26 02:00" → "26 Haz 02:00"
 String _trDate(String raw) {
   const months = [
-    '', 'Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz',
-    'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara',
+    '',
+    'Oca',
+    'Şub',
+    'Mar',
+    'Nis',
+    'May',
+    'Haz',
+    'Tem',
+    'Ağu',
+    'Eyl',
+    'Eki',
+    'Kas',
+    'Ara',
   ];
   // Expect "YYYY-MM-DD HH:MM" or "YYYY-MM-DDTHH:MM"
   final re = RegExp(r'(\d{4})-(\d{2})-(\d{2})[ T](\d{2}:\d{2})');
   final m = re.firstMatch(raw);
   if (m == null) return raw;
   final month = int.tryParse(m.group(2)!) ?? 0;
-  final day   = int.tryParse(m.group(3)!) ?? 0;
-  final time  = m.group(4)!;
+  final day = int.tryParse(m.group(3)!) ?? 0;
+  final time = m.group(4)!;
   if (month < 1 || month > 12) return raw;
   return '$day ${months[month]} $time';
 }
@@ -419,11 +445,7 @@ class _MatchDisplay {
   final String league;
   final String time;
 
-  const _MatchDisplay({
-    required this.teams,
-    this.league = '',
-    this.time   = '',
-  });
+  const _MatchDisplay({required this.teams, this.league = '', this.time = ''});
 
   /// "Dünya Kupası • 26 Haz 02:00"
   String get sublabel {
@@ -471,7 +493,7 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
 
   // ── API search state ──────────────────────────────────────────────────────
   List<_MatchDisplay> _apiResults = [];
-  _SearchState _searchState       = _SearchState.idle;
+  _SearchState _searchState = _SearchState.idle;
   Timer? _searchDebounce;
 
   bool get _isApiLoading => _searchState == _SearchState.loading;
@@ -496,8 +518,10 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
     titleController.text = c.title;
     final metaParts = c.meta.split(' · ');
     if (metaParts.isNotEmpty) siteController.text = metaParts[0];
-    stakeController.text =
-        c.stake.replaceAll('₺', '').replaceAll(' bahis', '').trim();
+    stakeController.text = c.stake
+        .replaceAll('₺', '')
+        .replaceAll(' bahis', '')
+        .trim();
     final oddsMatch = RegExp(r'×(.+)$').firstMatch(c.meta);
     if (oddsMatch != null) oddsController.text = oddsMatch.group(1)!.trim();
     for (final m in c.matches) {
@@ -523,7 +547,8 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
 
   // ── computed ──────────────────────────────────────────────────────────────
 
-  double _parseNum(String s) => double.tryParse(s.trim().replaceAll(',', '.')) ?? 0;
+  double _parseNum(String s) =>
+      double.tryParse(s.trim().replaceAll(',', '.')) ?? 0;
   double get _odds => _parseNum(oddsController.text);
   double get _stake => _parseNum(stakeController.text);
 
@@ -538,9 +563,7 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
 
   String get _oddsDisplay {
     if (_odds <= 0) return '–';
-    return _odds % 1 == 0
-        ? _odds.toInt().toString()
-        : _odds.toStringAsFixed(2);
+    return _odds % 1 == 0 ? _odds.toInt().toString() : _odds.toStringAsFixed(2);
   }
 
   // ── toast ─────────────────────────────────────────────────────────────────
@@ -621,8 +644,12 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
           pendingMarket = null;
           break;
         case _AddStep.line:
-          final iyVariant = pendingMarket != null ? _findIyVariant(pendingMarket!) : null;
-          final hasIy = iyVariant != null || (pendingMarket?.name.startsWith('İlk Yarı') ?? false);
+          final iyVariant = pendingMarket != null
+              ? _findIyVariant(pendingMarket!)
+              : null;
+          final hasIy =
+              iyVariant != null ||
+              (pendingMarket?.name.startsWith('İlk Yarı') ?? false);
           if (hasIy) {
             addStep = _AddStep.period;
           } else {
@@ -634,8 +661,12 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
           if (pendingMarket?.hasLines ?? false) {
             addStep = _AddStep.line;
           } else {
-            final iyVariant = pendingMarket != null ? _findIyVariant(pendingMarket!) : null;
-            final hasIy = iyVariant != null || (pendingMarket?.name.startsWith('İlk Yarı') ?? false);
+            final iyVariant = pendingMarket != null
+                ? _findIyVariant(pendingMarket!)
+                : null;
+            final hasIy =
+                iyVariant != null ||
+                (pendingMarket?.name.startsWith('İlk Yarı') ?? false);
             addStep = hasIy ? _AddStep.period : _AddStep.market;
           }
           break;
@@ -711,8 +742,7 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.card,
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
           'Seçimleri Temizle',
           style: TextStyle(
@@ -728,14 +758,20 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text('Vazgeç',
-                style: TextStyle(color: AppColors.textSecondary)),
+            child: Text(
+              'Vazgeç',
+              style: TextStyle(color: AppColors.textSecondary),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text('Sil',
-                style: TextStyle(
-                    color: AppColors.red, fontWeight: FontWeight.w700)),
+            child: Text(
+              'Sil',
+              style: TextStyle(
+                color: AppColors.red,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
           ),
         ],
       ),
@@ -747,14 +783,20 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
 
   Future<void> _analyzeWithAI() async {
     final picker = ImagePicker();
-    final picked = await picker.pickImage(source: ImageSource.gallery, imageQuality: 85);
+    final picked = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 85,
+    );
     if (picked == null) return;
 
     setState(() => _aiLoading = true);
     try {
-      final result = await AiCouponService.instance.analyzeCouponImage(File(picked.path));
+      final result = await AiCouponService.instance.analyzeCouponImage(
+        File(picked.path),
+      );
       if (result == null) {
-        if (mounted) CouponShare.showTopToast(context, 'Kupon okunamadı, tekrar deneyin');
+        if (mounted)
+          CouponShare.showTopToast(context, 'Kupon okunamadı, tekrar deneyin');
         return;
       }
 
@@ -775,9 +817,12 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
       }
 
       if (result.matchedMatches.isEmpty) {
-        if (mounted) CouponShare.showTopToast(context, 'Hiçbir maç eşleştirilemedi, manuel ekleyin');
+        if (mounted)
+          CouponShare.showTopToast(
+            context,
+            'Hiçbir maç eşleştirilemedi, manuel ekleyin',
+          );
       }
-
     } catch (e) {
       if (mounted) CouponShare.showTopToast(context, 'Hata: $e');
     } finally {
@@ -793,11 +838,13 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
       CouponShare.showTopToast(context, 'En az bir maç seçimi ekleyin');
       return;
     }
-    if (oddsController.text.trim().isEmpty || _parseNum(oddsController.text) <= 0) {
+    if (oddsController.text.trim().isEmpty ||
+        _parseNum(oddsController.text) <= 0) {
       CouponShare.showTopToast(context, 'Lütfen geçerli bir oran girin');
       return;
     }
-    if (stakeController.text.trim().isEmpty || _parseNum(stakeController.text) <= 0) {
+    if (stakeController.text.trim().isEmpty ||
+        _parseNum(stakeController.text) <= 0) {
       CouponShare.showTopToast(context, 'Lütfen bahis miktarı girin');
       return;
     }
@@ -813,22 +860,26 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
     final stake = stakeController.text.trim().isEmpty
         ? '₺0 bahis'
         : '₺${stakeController.text.trim()} bahis';
-    final odds =
-        oddsController.text.trim().isEmpty ? '1.00' : oddsController.text.trim();
+    final odds = oddsController.text.trim().isEmpty
+        ? '1.00'
+        : oddsController.text.trim();
     final potentialRaw = _potentialText;
-    final potential =
-        potentialRaw == '–' ? 'Bekliyor' : '$potentialRaw beklenti';
+    final potential = potentialRaw == '–'
+        ? 'Bekliyor'
+        : '$potentialRaw beklenti';
 
     final matches = selections.isNotEmpty
         ? selections
-            .map((s) => MatchItem(
+              .map(
+                (s) => MatchItem(
                   teams: s.teams,
                   selection: s.betType,
                   score: '–:–',
                   minute: '-',
                   status: CouponStatus.pending,
-                ))
-            .toList()
+                ),
+              )
+              .toList()
         : [
             const MatchItem(
               teams: 'Maç seçilmedi',
@@ -850,7 +901,9 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
     );
 
     setState(() => _saving = true);
-    final savedCoupon = await CouponStorageService.instance.saveCoupon(newCoupon);
+    final savedCoupon = await CouponStorageService.instance.saveCoupon(
+      newCoupon,
+    );
     if (!mounted) return;
     Navigator.pop(context, savedCoupon ?? newCoupon);
   }
@@ -867,16 +920,25 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
       try {
         if (q.trim().isEmpty) {
           // Boş arama: canlı + yaklaşan maçları getir
-          final liveMatches = await MatchSearchService.instance.getLiveMatches();
+          final liveMatches = await MatchSearchService.instance
+              .getLiveMatches();
           if (!mounted) return;
-          final filtered = liveMatches.where((m) => m.home.isNotEmpty && m.away.isNotEmpty).toList();
+          final filtered = liveMatches
+              .where((m) => m.home.isNotEmpty && m.away.isNotEmpty)
+              .toList();
           setState(() {
             _apiResults = filtered.map((m) {
-              final statusLabel = m.isLive ? '🔴 Canlı ${m.minute}' : m.isPost ? 'Bitti' : '';
+              final statusLabel = m.isLive
+                  ? '🔴 Canlı ${m.minute}'
+                  : m.isPost
+                  ? 'Bitti'
+                  : '';
               return _MatchDisplay(
                 teams: '${m.home} – ${m.away}',
                 league: statusLabel,
-                time: m.isLive || m.isPost ? '${m.homeScore} - ${m.awayScore}' : '',
+                time: m.isLive || m.isPost
+                    ? '${m.homeScore} - ${m.awayScore}'
+                    : '',
               );
             }).toList();
             _searchState = _SearchState.success;
@@ -887,27 +949,41 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
           if (!mounted) return;
           // Eğer VPS'ten sonuç gelmediyse canlı maçlarda filtrele
           if (results.isEmpty) {
-            final liveMatches = await MatchSearchService.instance.getLiveMatches();
+            final liveMatches = await MatchSearchService.instance
+                .getLiveMatches();
             final ql = q.toLowerCase();
-            final filtered = liveMatches.where((m) =>
-              m.home.toLowerCase().contains(ql) ||
-              m.away.toLowerCase().contains(ql)
-            ).toList();
+            final filtered = liveMatches
+                .where(
+                  (m) =>
+                      m.home.toLowerCase().contains(ql) ||
+                      m.away.toLowerCase().contains(ql),
+                )
+                .toList();
             setState(() {
-              _apiResults = filtered.map((m) => _MatchDisplay(
-                teams: '${m.home} – ${m.away}',
-                league: m.isLive ? '🔴 Canlı' : '',
-                time: m.isLive || m.isPost ? '${m.homeScore} - ${m.awayScore}' : '',
-              )).toList();
+              _apiResults = filtered
+                  .map(
+                    (m) => _MatchDisplay(
+                      teams: '${m.home} – ${m.away}',
+                      league: m.isLive ? '🔴 Canlı' : '',
+                      time: m.isLive || m.isPost
+                          ? '${m.homeScore} - ${m.awayScore}'
+                          : '',
+                    ),
+                  )
+                  .toList();
               _searchState = _SearchState.success;
             });
           } else {
             setState(() {
-              _apiResults = results.map((r) => _MatchDisplay(
-                teams: '${_trTeam(r.home)} – ${_trTeam(r.away)}',
-                league: _trLeague(r.league),
-                time: _trDate(r.time),
-              )).toList();
+              _apiResults = results
+                  .map(
+                    (r) => _MatchDisplay(
+                      teams: '${_trTeam(r.home)} – ${_trTeam(r.away)}',
+                      league: _trLeague(r.league),
+                      time: _trDate(r.time),
+                    ),
+                  )
+                  .toList();
               _searchState = _SearchState.success;
             });
           }
@@ -916,7 +992,7 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
         debugPrint('[MatchSearch] error: $e');
         if (!mounted) return;
         setState(() {
-          _apiResults  = [];
+          _apiResults = [];
           _searchState = _SearchState.error;
         });
       }
@@ -936,7 +1012,10 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
       case _SearchState.loading:
         return [];
       case _SearchState.success:
-        return _sortMatches(_apiResults, _recentTeams); // caller shows "Maç bulunamadı" when empty
+        return _sortMatches(
+          _apiResults,
+          _recentTeams,
+        ); // caller shows "Maç bulunamadı" when empty
       case _SearchState.error:
         const maxResults = 6;
         if (searchQuery.isEmpty) {
@@ -1001,19 +1080,46 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
                 GestureDetector(
                   onTap: _analyzeWithAI,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.brand,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: _aiLoading
-                        ? const SizedBox(width: 60, height: 20, child: Center(child: SizedBox(width: 14, height: 14, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))))
+                        ? const SizedBox(
+                            width: 60,
+                            height: 20,
+                            child: Center(
+                              child: SizedBox(
+                                width: 14,
+                                height: 14,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                            ),
+                          )
                         : const Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.auto_awesome, color: Colors.white, size: 14),
+                              Icon(
+                                Icons.auto_awesome,
+                                color: Colors.white,
+                                size: 14,
+                              ),
                               SizedBox(width: 6),
-                              Text('AI ile Ekle', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700)),
+                              Text(
+                                'AI ile Ekle',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
                             ],
                           ),
                   ),
@@ -1023,18 +1129,16 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
             const SizedBox(height: 3),
             Text(
               'Seçimlerini ekle ve kaydet',
-              style: TextStyle(
-                color: AppColors.textTertiary,
-                fontSize: 12,
-              ),
+              style: TextStyle(color: AppColors.textTertiary, fontSize: 12),
             ),
             const SizedBox(height: 20),
 
             // Fields
             MatchlyInput(
-                controller: titleController,
-                label: 'Kupon adı',
-                hint: 'Akşam Kuponu'),
+              controller: titleController,
+              label: 'Kupon adı',
+              hint: 'Akşam Kuponu',
+            ),
             const SizedBox(height: 10),
             _LeagueSelector(
               selected: siteController.text,
@@ -1045,19 +1149,25 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
               children: [
                 Expanded(
                   child: MatchlyInput(
-                      controller: stakeController,
-                      label: 'Bahis Miktarı',
-                      hint: '120',
-                      prefix: '₺',
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true)),
+                    controller: stakeController,
+                    label: 'Bahis Miktarı',
+                    hint: '120',
+                    prefix: '₺',
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                  ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: MatchlyInput(
-                      controller: oddsController,
-                      label: 'Oran',
-                      hint: '4.20',
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true)),
+                    controller: oddsController,
+                    label: 'Oran',
+                    hint: '4.20',
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -1082,9 +1192,10 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
                     child: Text(
                       'Tüm Seçimleri Sil',
                       style: TextStyle(
-                          color: AppColors.red,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700),
+                        color: AppColors.red,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
                 ],
@@ -1097,7 +1208,9 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
                   padding: const EdgeInsets.only(bottom: 6),
                   child: Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 10),
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.card,
                       borderRadius: BorderRadius.circular(12),
@@ -1139,8 +1252,11 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
                               color: AppColors.brand.withOpacity(0.12),
                               borderRadius: BorderRadius.circular(6),
                             ),
-                            child: Icon(Icons.edit_outlined,
-                                color: AppColors.brand, size: 15),
+                            child: Icon(
+                              Icons.edit_outlined,
+                              color: AppColors.brand,
+                              size: 15,
+                            ),
                           ),
                         ),
                         const SizedBox(width: 6),
@@ -1152,8 +1268,11 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
                               color: AppColors.red.withOpacity(0.12),
                               borderRadius: BorderRadius.circular(6),
                             ),
-                            child: Icon(Icons.delete_outline,
-                                color: AppColors.red, size: 15),
+                            child: Icon(
+                              Icons.delete_outline,
+                              color: AppColors.red,
+                              size: 15,
+                            ),
                           ),
                         ),
                       ],
@@ -1196,15 +1315,14 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
                   onPressed: _openAddFlow,
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.green,
-                    side: BorderSide(
-                        color: AppColors.green.withOpacity(0.25)),
+                    side: BorderSide(color: AppColors.green.withOpacity(0.25)),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14)),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
                   ),
                   child: const Text(
                     '+ Seçim Ekle',
-                    style: TextStyle(
-                        fontSize: 14, fontWeight: FontWeight.w700),
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
                   ),
                 ),
               ),
@@ -1232,7 +1350,8 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
                   disabledBackgroundColor: AppColors.green.withOpacity(0.6),
                   elevation: 0,
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16)),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                 ),
                 child: _saving
                     ? const SizedBox(
@@ -1246,7 +1365,9 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
                     : const Text(
                         'Kaydet',
                         style: TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.w900),
+                          fontSize: 15,
+                          fontWeight: FontWeight.w900,
+                        ),
                       ),
               ),
             ),
@@ -1274,12 +1395,13 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
                 curve: Curves.easeOut,
                 child: Container(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 14, vertical: 12),
+                    horizontal: 14,
+                    vertical: 12,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFF2A2A2E),
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(
-                        color: Colors.white.withOpacity(0.10)),
+                    border: Border.all(color: Colors.white.withOpacity(0.10)),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.45),
@@ -1374,7 +1496,9 @@ class _CouponSummaryCard extends StatelessWidget {
                 if (selections.isNotEmpty)
                   Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 3),
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.brand.withOpacity(0.15),
                       borderRadius: BorderRadius.circular(20),
@@ -1398,13 +1522,14 @@ class _CouponSummaryCard extends StatelessWidget {
           // Empty state
           if (selections.isEmpty)
             Padding(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 16, vertical: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
               child: Row(
                 children: [
-                  Icon(Icons.receipt_long_outlined,
-                      color: AppColors.textTertiary.withOpacity(0.6),
-                      size: 20),
+                  Icon(
+                    Icons.receipt_long_outlined,
+                    color: AppColors.textTertiary.withOpacity(0.6),
+                    size: 20,
+                  ),
                   const SizedBox(width: 10),
                   Text(
                     'Henüz seçim eklenmedi',
@@ -1456,7 +1581,9 @@ class _CouponSummaryCard extends StatelessWidget {
                             ),
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 9, vertical: 4),
+                                horizontal: 9,
+                                vertical: 4,
+                              ),
                               decoration: BoxDecoration(
                                 color: AppColors.brand.withOpacity(0.12),
                                 borderRadius: BorderRadius.circular(8),
@@ -1473,8 +1600,7 @@ class _CouponSummaryCard extends StatelessWidget {
                           ],
                         ),
                       ),
-                      if (!isLast)
-                        Container(height: 1, color: AppColors.gray),
+                      if (!isLast) Container(height: 1, color: AppColors.gray),
                     ],
                   );
                 }),
@@ -1484,13 +1610,11 @@ class _CouponSummaryCard extends StatelessWidget {
             // Totals footer
             Container(
               margin: const EdgeInsets.fromLTRB(12, 4, 12, 12),
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 14, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               decoration: BoxDecoration(
                 color: AppColors.background,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                    color: Colors.white.withOpacity(0.06)),
+                border: Border.all(color: Colors.white.withOpacity(0.06)),
               ),
               child: Row(
                 children: [
@@ -1520,11 +1644,7 @@ class _CouponSummaryCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  Container(
-                    width: 1,
-                    height: 32,
-                    color: AppColors.gray,
-                  ),
+                  Container(width: 1, height: 32, color: AppColors.gray),
                   const SizedBox(width: 14),
                   // Beklenti
                   Expanded(
@@ -1610,19 +1730,29 @@ class _AddSelectionPanel extends StatelessWidget {
   String get _title {
     if (isEditing) {
       switch (step) {
-        case _AddStep.search:  return 'Maç Seç';
-        case _AddStep.market:  return 'Düzenle · Market';
-        case _AddStep.period:  return 'Düzenle · Zaman';
-        case _AddStep.line:    return 'Düzenle · Hat Seç';
-        case _AddStep.option:  return 'Düzenle · Seçenek';
+        case _AddStep.search:
+          return 'Maç Seç';
+        case _AddStep.market:
+          return 'Düzenle · Market';
+        case _AddStep.period:
+          return 'Düzenle · Zaman';
+        case _AddStep.line:
+          return 'Düzenle · Hat Seç';
+        case _AddStep.option:
+          return 'Düzenle · Seçenek';
       }
     }
     switch (step) {
-      case _AddStep.search:  return 'Maç Seç';
-      case _AddStep.market:  return 'Market';
-      case _AddStep.period:  return 'Zaman';
-      case _AddStep.line:    return 'Hat Seç';
-      case _AddStep.option:  return 'Seçenek';
+      case _AddStep.search:
+        return 'Maç Seç';
+      case _AddStep.market:
+        return 'Market';
+      case _AddStep.period:
+        return 'Zaman';
+      case _AddStep.line:
+        return 'Hat Seç';
+      case _AddStep.option:
+        return 'Seçenek';
     }
   }
 
@@ -1651,8 +1781,11 @@ class _AddSelectionPanel extends StatelessWidget {
                     onTap: onBack,
                     child: Padding(
                       padding: EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-                      child: Icon(Icons.arrow_back_ios_new_rounded,
-                          color: AppColors.textTertiary, size: 15),
+                      child: Icon(
+                        Icons.arrow_back_ios_new_rounded,
+                        color: AppColors.textTertiary,
+                        size: 15,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 6),
@@ -1660,8 +1793,9 @@ class _AddSelectionPanel extends StatelessWidget {
                 Text(
                   _title,
                   style: TextStyle(
-                    color:
-                        isEditing ? AppColors.brand : AppColors.textSecondary,
+                    color: isEditing
+                        ? AppColors.brand
+                        : AppColors.textSecondary,
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0.5,
@@ -1670,8 +1804,11 @@ class _AddSelectionPanel extends StatelessWidget {
                 const Spacer(),
                 GestureDetector(
                   onTap: onCancel,
-                  child: Icon(Icons.close,
-                      color: AppColors.textTertiary, size: 18),
+                  child: Icon(
+                    Icons.close,
+                    color: AppColors.textTertiary,
+                    size: 18,
+                  ),
                 ),
                 const SizedBox(width: 6),
               ],
@@ -1708,12 +1845,59 @@ class _AddSelectionPanel extends StatelessWidget {
             _PeriodBody(onSelected: onPeriodSelected)
           else if (step == _AddStep.line)
             _ButtonsBody(
-                items: pendingMarket!.lines!, onSelected: onLineSelected)
+              items: pendingMarket!.lines!,
+              onSelected: onLineSelected,
+            )
           else
             _ButtonsBody(
-                items: pendingMarket!.options, onSelected: onOptionSelected),
+              items: pendingMarket!.options,
+              onSelected: onOptionSelected,
+            ),
           const SizedBox(height: 4),
         ],
+      ),
+    );
+  }
+}
+
+// ─── Shared premium tap animation ──────────────────────────────────────────────
+//
+// Basılıyken hafif küçülür; bırakılınca kısa bir "spring" ile hafif büyüyüp
+// rengini vurgular, sonra onTap tetiklenir. Kupon ekleme akışındaki tüm
+// seçim adımlarında (market, dönem, seçenek/çizgi, maç arama) aynı his için
+// kullanılır.
+class _TapPulse extends StatefulWidget {
+  final VoidCallback onTap;
+  final Widget Function(BuildContext context, bool confirmed) builder;
+  final HitTestBehavior? behavior;
+  const _TapPulse({required this.onTap, required this.builder, this.behavior});
+
+  @override
+  State<_TapPulse> createState() => _TapPulseState();
+}
+
+class _TapPulseState extends State<_TapPulse> {
+  bool _pressed = false;
+  bool _confirmed = false;
+
+  void _handleTap() {
+    setState(() => _confirmed = true);
+    Future.delayed(const Duration(milliseconds: 150), widget.onTap);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: widget.behavior,
+      onTapDown: (_) => setState(() => _pressed = true),
+      onTapUp: (_) => setState(() => _pressed = false),
+      onTapCancel: () => setState(() => _pressed = false),
+      onTap: _handleTap,
+      child: AnimatedScale(
+        scale: _confirmed ? 1.07 : (_pressed ? 0.95 : 1.0),
+        duration: Duration(milliseconds: _confirmed ? 260 : 100),
+        curve: _confirmed ? Curves.easeOutBack : Curves.easeOut,
+        child: widget.builder(context, _confirmed),
       ),
     );
   }
@@ -1731,9 +1915,21 @@ class _PeriodBody extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(14, 0, 14, 10),
       child: Row(
         children: [
-          Expanded(child: _PeriodOption(label: 'Maç sonu', icon: Icons.sports_soccer_rounded, onTap: () => onSelected(false))),
+          Expanded(
+            child: _PeriodOption(
+              label: 'Maç sonu',
+              icon: Icons.sports_soccer_rounded,
+              onTap: () => onSelected(false),
+            ),
+          ),
           const SizedBox(width: 8),
-          Expanded(child: _PeriodOption(label: 'İlk yarı', icon: Icons.schedule_rounded, onTap: () => onSelected(true))),
+          Expanded(
+            child: _PeriodOption(
+              label: 'İlk yarı',
+              icon: Icons.schedule_rounded,
+              onTap: () => onSelected(true),
+            ),
+          ),
         ],
       ),
     );
@@ -1744,43 +1940,46 @@ class _PeriodOption extends StatefulWidget {
   final String label;
   final IconData icon;
   final VoidCallback onTap;
-  const _PeriodOption({required this.label, required this.icon, required this.onTap});
+  const _PeriodOption({
+    required this.label,
+    required this.icon,
+    required this.onTap,
+  });
 
   @override
   State<_PeriodOption> createState() => _PeriodOptionState();
 }
 
 class _PeriodOptionState extends State<_PeriodOption> {
-  bool _pressed = false;
-
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (_) => setState(() => _pressed = true),
-      onTapUp: (_) => setState(() => _pressed = false),
-      onTapCancel: () => setState(() => _pressed = false),
+    return _TapPulse(
       onTap: widget.onTap,
-      child: AnimatedScale(
-        scale: _pressed ? 0.95 : 1.0,
-        duration: const Duration(milliseconds: 100),
-        curve: Curves.easeOut,
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          decoration: BoxDecoration(
-            color: AppColors.background,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.white.withOpacity(0.10)),
+      builder: (context, confirmed) => AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        decoration: BoxDecoration(
+          color: confirmed
+              ? AppColors.brand.withOpacity(0.16)
+              : AppColors.background,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: confirmed ? AppColors.brand : Colors.white.withOpacity(0.10),
           ),
-          child: Column(
-            children: [
-              Icon(widget.icon, size: 20, color: AppColors.brand),
-              const SizedBox(height: 6),
-              Text(
-                widget.label,
-                style: TextStyle(color: AppColors.textPrimary, fontSize: 12.5, fontWeight: FontWeight.w700),
+        ),
+        child: Column(
+          children: [
+            Icon(widget.icon, size: 20, color: AppColors.brand),
+            const SizedBox(height: 6),
+            Text(
+              widget.label,
+              style: TextStyle(
+                color: confirmed ? AppColors.brand : AppColors.textPrimary,
+                fontSize: 12.5,
+                fontWeight: FontWeight.w700,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -1795,13 +1994,16 @@ IconData _marketIcon(String name) {
   if (name.contains('KG')) return Icons.swap_horiz_rounded;
   if (name.contains('Korner')) return Icons.turn_right_rounded;
   if (name.contains('Kart')) return Icons.square_rounded;
-  if (name.contains('Alt') || name.contains('Üst')) return Icons.unfold_more_rounded;
+  if (name.contains('Alt') || name.contains('Üst'))
+    return Icons.unfold_more_rounded;
   return Icons.sports_soccer_rounded;
 }
 
 /// Base (maç sonu) market'in adına göre eşleşen İlk Yarı market'ini bulur.
 _Market? _findIyVariant(_Market base) {
-  final iyName = base.name == 'Maç Sonucu' ? 'İlk Yarı Sonucu' : 'İlk Yarı $base.name';
+  final iyName = base.name == 'Maç Sonucu'
+      ? 'İlk Yarı Sonucu'
+      : 'İlk Yarı $base.name';
   try {
     return _markets.firstWhere((m) => m.name == iyName);
   } catch (_) {
@@ -1811,7 +2013,9 @@ _Market? _findIyVariant(_Market base) {
 
 /// Sadece "maç sonu" market'lerini döndürür (İY varyantları ayrı entry olarak gösterilmez,
 /// ana market'e dokununca sekme ile erişilir).
-final _baseMarkets = _markets.where((m) => !m.name.startsWith('İlk Yarı')).toList();
+final _baseMarkets = _markets
+    .where((m) => !m.name.startsWith('İlk Yarı'))
+    .toList();
 
 class _MarketGroupBody extends StatelessWidget {
   final ValueChanged<_Market> onMarketSelected;
@@ -1852,54 +2056,44 @@ class _MarketTile extends StatefulWidget {
   State<_MarketTile> createState() => _MarketTileState();
 }
 
-class _MarketTileState extends State<_MarketTile> with SingleTickerProviderStateMixin {
-  bool _pressed = false;
-  bool _tapped = false;
-
-  void _handleTap() {
-    setState(() => _tapped = true);
-    Future.delayed(const Duration(milliseconds: 130), widget.onTap);
-  }
-
+class _MarketTileState extends State<_MarketTile> {
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (_) => setState(() => _pressed = true),
-      onTapUp: (_) => setState(() => _pressed = false),
-      onTapCancel: () => setState(() => _pressed = false),
-      onTap: _handleTap,
-      child: AnimatedScale(
-        scale: _tapped ? 1.05 : (_pressed ? 0.95 : 1.0),
-        duration: const Duration(milliseconds: 120),
-        curve: Curves.easeOut,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 120),
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          decoration: BoxDecoration(
-            color: _tapped ? AppColors.brand.withOpacity(0.16) : AppColors.background,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: _tapped ? AppColors.brand : Colors.white.withOpacity(0.10),
+    return _TapPulse(
+      onTap: widget.onTap,
+      builder: (context, confirmed) => AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: confirmed
+              ? AppColors.brand.withOpacity(0.16)
+              : AppColors.background,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: confirmed ? AppColors.brand : Colors.white.withOpacity(0.10),
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              _marketIcon(widget.market.name),
+              size: 17,
+              color: AppColors.brand,
             ),
-          ),
-          child: Row(
-            children: [
-              Icon(_marketIcon(widget.market.name), size: 17, color: AppColors.brand),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  widget.market.name,
-                  style: TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w700,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                widget.market.name,
+                style: TextStyle(
+                  color: confirmed ? AppColors.brand : AppColors.textPrimary,
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w700,
                 ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -1944,14 +2138,18 @@ class _SearchBody extends StatelessWidget {
             ),
             decoration: InputDecoration(
               hintText: 'Takım veya lig ara',
-              hintStyle:
-                  TextStyle(color: AppColors.textTertiary, fontSize: 14),
-              prefixIcon: Icon(Icons.search,
-                  color: AppColors.textTertiary, size: 18),
+              hintStyle: TextStyle(color: AppColors.textTertiary, fontSize: 14),
+              prefixIcon: Icon(
+                Icons.search,
+                color: AppColors.textTertiary,
+                size: 18,
+              ),
               filled: true,
               fillColor: AppColors.background,
-              contentPadding:
-                  const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+              contentPadding: const EdgeInsets.symmetric(
+                vertical: 10,
+                horizontal: 12,
+              ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
                 borderSide: BorderSide.none,
@@ -2017,7 +2215,10 @@ class _SearchBody extends StatelessWidget {
               ),
               itemBuilder: (_, i) {
                 final m = matchResults[i];
-                return _AnimatedMatchRow(match: m, onTap: () => onMatchSelected(m.teams));
+                return _AnimatedMatchRow(
+                  match: m,
+                  onTap: () => onMatchSelected(m.teams),
+                );
               },
             ),
           ),
@@ -2036,49 +2237,41 @@ class _AnimatedMatchRow extends StatefulWidget {
 }
 
 class _AnimatedMatchRowState extends State<_AnimatedMatchRow> {
-  bool _pressed = false;
-
   @override
   Widget build(BuildContext context) {
     final m = widget.match;
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTapDown: (_) => setState(() => _pressed = true),
-      onTapUp: (_) => setState(() => _pressed = false),
-      onTapCancel: () => setState(() => _pressed = false),
+    return _TapPulse(
       onTap: widget.onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 110),
-        color: _pressed ? AppColors.brand.withOpacity(0.08) : Colors.transparent,
+      behavior: HitTestBehavior.opaque,
+      builder: (context, confirmed) => AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        color: confirmed
+            ? AppColors.brand.withOpacity(0.14)
+            : Colors.transparent,
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        child: AnimatedScale(
-          scale: _pressed ? 0.97 : 1.0,
-          duration: const Duration(milliseconds: 110),
-          curve: Curves.easeOut,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              m.teams,
+              style: TextStyle(
+                color: confirmed ? AppColors.brand : AppColors.textPrimary,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            if (m.sublabel.isNotEmpty) ...[
+              const SizedBox(height: 2),
               Text(
-                m.teams,
+                m.sublabel,
                 style: TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
+                  color: AppColors.textTertiary,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
-              if (m.sublabel.isNotEmpty) ...[
-                const SizedBox(height: 2),
-                Text(
-                  m.sublabel,
-                  style: TextStyle(
-                    color: AppColors.textTertiary,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
             ],
-          ),
+          ],
         ),
       ),
     );
@@ -2099,10 +2292,14 @@ class _ButtonsBody extends StatelessWidget {
       child: Wrap(
         spacing: 8,
         runSpacing: 8,
-        children: items.map((item) => _AnimatedChipButton(
-          label: item,
-          onTap: () => onSelected(item),
-        )).toList(),
+        children: items
+            .map(
+              (item) => _AnimatedChipButton(
+                label: item,
+                onTap: () => onSelected(item),
+              ),
+            )
+            .toList(),
       ),
     );
   }
@@ -2118,42 +2315,28 @@ class _AnimatedChipButton extends StatefulWidget {
 }
 
 class _AnimatedChipButtonState extends State<_AnimatedChipButton> {
-  bool _pressed = false;
-  bool _tapped = false;
-
-  void _handleTap() {
-    setState(() => _tapped = true);
-    Future.delayed(const Duration(milliseconds: 120), widget.onTap);
-  }
-
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (_) => setState(() => _pressed = true),
-      onTapUp: (_) => setState(() => _pressed = false),
-      onTapCancel: () => setState(() => _pressed = false),
-      onTap: _handleTap,
-      child: AnimatedScale(
-        scale: _tapped ? 1.08 : (_pressed ? 0.94 : 1.0),
-        duration: const Duration(milliseconds: 110),
-        curve: Curves.easeOut,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 110),
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
-          decoration: BoxDecoration(
-            color: _tapped ? AppColors.brand.withOpacity(0.18) : AppColors.background,
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(
-              color: _tapped ? AppColors.brand : Colors.white.withOpacity(0.10),
-            ),
+    return _TapPulse(
+      onTap: widget.onTap,
+      builder: (context, confirmed) => AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+        decoration: BoxDecoration(
+          color: confirmed
+              ? AppColors.brand.withOpacity(0.18)
+              : AppColors.background,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: confirmed ? AppColors.brand : Colors.white.withOpacity(0.10),
           ),
-          child: Text(
-            widget.label,
-            style: TextStyle(
-              color: _tapped ? AppColors.brand : AppColors.textPrimary,
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
-            ),
+        ),
+        child: Text(
+          widget.label,
+          style: TextStyle(
+            color: confirmed ? AppColors.brand : AppColors.textPrimary,
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
           ),
         ),
       ),
@@ -2212,7 +2395,9 @@ class _LeaguePickerSheetState extends State<_LeaguePickerSheet> {
     setState(() {
       _filtered = q.trim().isEmpty
           ? _leagues
-          : _leagues.where((l) => l.toLowerCase().contains(q.toLowerCase())).toList();
+          : _leagues
+                .where((l) => l.toLowerCase().contains(q.toLowerCase()))
+                .toList();
     });
   }
 
@@ -2228,15 +2413,27 @@ class _LeaguePickerSheetState extends State<_LeaguePickerSheet> {
           children: [
             const SizedBox(height: 12),
             Container(
-              width: 40, height: 4,
-              decoration: BoxDecoration(color: AppColors.gray, borderRadius: BorderRadius.circular(999)),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: AppColors.gray,
+                borderRadius: BorderRadius.circular(999),
+              ),
             ),
             const SizedBox(height: 16),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Align(
                 alignment: Alignment.centerLeft,
-                child: Text('Lig Seç', style: TextStyle(color: AppColors.textPrimary, fontSize: 20, fontWeight: FontWeight.w800, letterSpacing: -0.4)),
+                child: Text(
+                  'Lig Seç',
+                  style: TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.4,
+                  ),
+                ),
               ),
             ),
             const SizedBox(height: 12),
@@ -2249,21 +2446,47 @@ class _LeaguePickerSheetState extends State<_LeaguePickerSheet> {
                 style: TextStyle(color: AppColors.textPrimary, fontSize: 14),
                 decoration: InputDecoration(
                   hintText: 'Lig ara...',
-                  hintStyle: TextStyle(color: AppColors.textTertiary, fontSize: 14),
-                  prefixIcon: Icon(Icons.search_rounded, color: AppColors.textTertiary, size: 18),
+                  hintStyle: TextStyle(
+                    color: AppColors.textTertiary,
+                    fontSize: 14,
+                  ),
+                  prefixIcon: Icon(
+                    Icons.search_rounded,
+                    color: AppColors.textTertiary,
+                    size: 18,
+                  ),
                   filled: true,
                   fillColor: AppColors.card,
                   contentPadding: const EdgeInsets.symmetric(vertical: 10),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                  focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: AppColors.green.withOpacity(0.5))),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(
+                      color: AppColors.green.withOpacity(0.5),
+                    ),
+                  ),
                 ),
               ),
             ),
             const SizedBox(height: 8),
             Expanded(
               child: _filtered.isEmpty
-                  ? Center(child: Text('Lig bulunamadı', style: TextStyle(color: AppColors.textTertiary, fontSize: 14)))
+                  ? Center(
+                      child: Text(
+                        'Lig bulunamadı',
+                        style: TextStyle(
+                          color: AppColors.textTertiary,
+                          fontSize: 14,
+                        ),
+                      ),
+                    )
                   : ListView.builder(
                       controller: scrollController,
                       padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
@@ -2278,12 +2501,19 @@ class _LeaguePickerSheetState extends State<_LeaguePickerSheet> {
                           },
                           child: Container(
                             margin: const EdgeInsets.only(bottom: 6),
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 13,
+                            ),
                             decoration: BoxDecoration(
-                              color: isSelected ? AppColors.green.withOpacity(0.10) : AppColors.card,
+                              color: isSelected
+                                  ? AppColors.green.withOpacity(0.10)
+                                  : AppColors.card,
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                color: isSelected ? AppColors.green.withOpacity(0.35) : Colors.white.withOpacity(0.07),
+                                color: isSelected
+                                    ? AppColors.green.withOpacity(0.35)
+                                    : Colors.white.withOpacity(0.07),
                                 width: 0.5,
                               ),
                             ),
@@ -2293,14 +2523,22 @@ class _LeaguePickerSheetState extends State<_LeaguePickerSheet> {
                                   child: Text(
                                     league,
                                     style: TextStyle(
-                                      color: isSelected ? AppColors.green : AppColors.textPrimary,
+                                      color: isSelected
+                                          ? AppColors.green
+                                          : AppColors.textPrimary,
                                       fontSize: 14,
-                                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                                      fontWeight: isSelected
+                                          ? FontWeight.w700
+                                          : FontWeight.w500,
                                     ),
                                   ),
                                 ),
                                 if (isSelected)
-                                  Icon(Icons.check_rounded, color: AppColors.green, size: 16),
+                                  Icon(
+                                    Icons.check_rounded,
+                                    color: AppColors.green,
+                                    size: 16,
+                                  ),
                               ],
                             ),
                           ),
@@ -2321,10 +2559,7 @@ class _LeagueSelector extends StatelessWidget {
   final String selected;
   final ValueChanged<String> onSelected;
 
-  const _LeagueSelector({
-    required this.selected,
-    required this.onSelected,
-  });
+  const _LeagueSelector({required this.selected, required this.onSelected});
 
   void _openPicker(BuildContext context) {
     showModalBottomSheet(
@@ -2334,10 +2569,8 @@ class _LeagueSelector extends StatelessWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (_) => _LeaguePickerSheet(
-        selected: selected,
-        onSelected: onSelected,
-      ),
+      builder: (_) =>
+          _LeaguePickerSheet(selected: selected, onSelected: onSelected),
     );
   }
 
@@ -2430,7 +2663,11 @@ class MatchlyInput extends StatelessWidget {
             hintText: hint,
             hintStyle: TextStyle(color: AppColors.textTertiary, fontSize: 15),
             prefixText: prefix,
-            prefixStyle: TextStyle(color: AppColors.textPrimary, fontSize: 15, fontWeight: FontWeight.w600),
+            prefixStyle: TextStyle(
+              color: AppColors.textPrimary,
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+            ),
             isDense: true,
             contentPadding: const EdgeInsets.only(bottom: 8),
             filled: false,
@@ -2441,7 +2678,10 @@ class MatchlyInput extends StatelessWidget {
               borderSide: BorderSide(color: Color(0xFF2a2a2e), width: 0.5),
             ),
             focusedBorder: UnderlineInputBorder(
-              borderSide: BorderSide(color: AppColors.green.withOpacity(0.6), width: 1),
+              borderSide: BorderSide(
+                color: AppColors.green.withOpacity(0.6),
+                width: 1,
+              ),
             ),
           ),
         ),
