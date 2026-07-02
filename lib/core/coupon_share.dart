@@ -34,15 +34,16 @@ class CouponShare {
 
   /// Generates the share text for [coupon] using [sharedId] as the link key.
   ///
-  /// Uses the app's custom URL scheme (registered in Info.plist, handled in
-  /// main.dart's deep link listener) so tapping the link opens Matchly
-  /// directly to this coupon — requires the recipient to already have the
-  /// app installed.
+  /// Gerçek bir https linki paylaşıyoruz (matchly:///coupon/... özel şeması
+  /// DEĞİL) — WhatsApp/SMS gibi yerler sadece http/https linklerini otomatik
+  /// tıklanabilir yapıyor, özel şemalar düz metin olarak kalıyordu. Link
+  /// matchlyapp.com/coupon/{id}'ye gidiyor; orada bir açılış sayfası
+  /// uygulamayı (matchly:///coupon/{id}) açmayı deniyor.
   static String buildShareText(Coupon coupon, {required String sharedId}) {
     final matches = coupon.matches
         .map((m) => '${m.teams} — ${m.selection}')
         .join('\n');
-    return '🎯 ${coupon.title}\n$matches\n\nMatchly\'de takip et 👇\nmatchly:///coupon/$sharedId';
+    return '🎯 ${coupon.title}\n$matches\n\nMatchly\'de takip et 👇\nhttps://matchlyapp.com/coupon/$sharedId';
   }
 
   // ── ID generation ──────────────────────────────────────────────────────────
