@@ -135,6 +135,17 @@ class _MatchlyAppState extends State<MatchlyApp> {
     final user = Supabase.instance.client.auth.currentUser;
     if (user == null) return;
     final displayName = user.userMetadata?['full_name'] ?? user.userMetadata?['name'] ?? username;
+    // ensureUser sadece VPS'teki ayri sosyal veritabanina (social.db)
+    // yaziyor - Supabase profiles tablosuna hic dokunmuyordu, bu yuzden
+    // Google/Apple ile giren herkesin profiles.username/display_name'i
+    // tetikleyicinin verdigi varsayilanda ("user_xxxxx" / "User") takili
+    // kaliyordu. Simdi profiles'a da dogrudan yaziliyor.
+    try {
+      await Supabase.instance.client.from('profiles').update({
+        'username': username,
+        'display_name': displayName,
+      }).eq('id', user.id);
+    } catch (_) {}
     await SocialService.instance.ensureUser(username, displayName);
     setState(() { _needsUsername = false; _signedIn = true; });
     FcmService.instance.registerToken();
