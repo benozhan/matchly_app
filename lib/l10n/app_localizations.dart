@@ -476,6 +476,42 @@ abstract class AppLocalizations {
   /// **'Tüm kuponları sil'**
   String get clearDataSubtitle;
 
+  /// No description provided for @deleteAccountLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hesabı Sil'**
+  String get deleteAccountLabel;
+
+  /// No description provided for @deleteAccountSubtitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hesabını ve tüm verilerini kalıcı olarak sil'**
+  String get deleteAccountSubtitle;
+
+  /// No description provided for @deleteAccountConfirmTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hesabı Kalıcı Olarak Sil'**
+  String get deleteAccountConfirmTitle;
+
+  /// No description provided for @deleteAccountConfirmBody.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu işlem geri alınamaz. Hesabın, tüm kuponların, yorumların ve verilerin kalıcı olarak silinecek.'**
+  String get deleteAccountConfirmBody;
+
+  /// No description provided for @deleteAccountConfirmButton.
+  ///
+  /// In tr, this message translates to:
+  /// **'Evet, Hesabımı Sil'**
+  String get deleteAccountConfirmButton;
+
+  /// No description provided for @deleteAccountFailedMessage.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hesap silinemedi, lütfen tekrar dene'**
+  String get deleteAccountFailedMessage;
+
   /// No description provided for @signOutLabel.
   ///
   /// In tr, this message translates to:

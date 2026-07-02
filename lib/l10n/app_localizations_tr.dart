@@ -198,6 +198,27 @@ class AppLocalizationsTr extends AppLocalizations {
   String get clearDataSubtitle => 'Tüm kuponları sil';
 
   @override
+  String get deleteAccountLabel => 'Hesabı Sil';
+
+  @override
+  String get deleteAccountSubtitle =>
+      'Hesabını ve tüm verilerini kalıcı olarak sil';
+
+  @override
+  String get deleteAccountConfirmTitle => 'Hesabı Kalıcı Olarak Sil';
+
+  @override
+  String get deleteAccountConfirmBody =>
+      'Bu işlem geri alınamaz. Hesabın, tüm kuponların, yorumların ve verilerin kalıcı olarak silinecek.';
+
+  @override
+  String get deleteAccountConfirmButton => 'Evet, Hesabımı Sil';
+
+  @override
+  String get deleteAccountFailedMessage =>
+      'Hesap silinemedi, lütfen tekrar dene';
+
+  @override
   String get signOutLabel => 'Çıkış Yap';
 
   @override

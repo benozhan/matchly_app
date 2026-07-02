@@ -184,6 +184,47 @@ class _AyarlarPageState extends State<AyarlarPage> {
     );
   }
 
+  Future<void> _deleteAccount() async {
+    final t = AppLocalizations.of(context)!;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.card,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(t.deleteAccountConfirmTitle, style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w800)),
+        content: Text(t.deleteAccountConfirmBody, style: TextStyle(color: AppColors.textSecondary, fontSize: 14)),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(t.cancelLabel, style: TextStyle(color: AppColors.textSecondary))),
+          TextButton(onPressed: () => Navigator.pop(ctx, true), child: Text(t.deleteAccountConfirmButton, style: TextStyle(color: AppColors.red, fontWeight: FontWeight.w700))),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    try {
+      await Supabase.instance.client.rpc('delete_own_account');
+      await Supabase.instance.client.auth.signOut();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(t.deleteAccountFailedMessage)),
+        );
+      }
+      return;
+    }
+
+    if (!mounted) return;
+
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(
+        builder: (_) => AuthPage(
+          onSignedIn: () {},
+        ),
+      ),
+      (_) => false,
+    );
+  }
+
   static BoxDecoration _sectionDeco() => BoxDecoration(
         color: AppColors.card,
         borderRadius: BorderRadius.circular(20),
@@ -544,6 +585,14 @@ class _AyarlarPageState extends State<AyarlarPage> {
                 subtitle: t.signOutSubtitle,
                 destructive: true,
                 onTap: _signOut,
+              ),
+              _RowDivider(),
+              _ActionRow(
+                icon: Icons.person_remove_outlined,
+                title: t.deleteAccountLabel,
+                subtitle: t.deleteAccountSubtitle,
+                destructive: true,
+                onTap: _deleteAccount,
               ),
             ],
           ),

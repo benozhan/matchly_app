@@ -199,6 +199,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get clearDataSubtitle => 'Delete all coupons';
 
   @override
+  String get deleteAccountLabel => 'Delete Account';
+
+  @override
+  String get deleteAccountSubtitle =>
+      'Permanently delete your account and all data';
+
+  @override
+  String get deleteAccountConfirmTitle => 'Permanently Delete Account';
+
+  @override
+  String get deleteAccountConfirmBody =>
+      'This cannot be undone. Your account, coupons, comments, and all data will be permanently deleted.';
+
+  @override
+  String get deleteAccountConfirmButton => 'Yes, Delete My Account';
+
+  @override
+  String get deleteAccountFailedMessage =>
+      'Couldn\'t delete account, please try again';
+
+  @override
   String get signOutLabel => 'Sign Out';
 
   @override
