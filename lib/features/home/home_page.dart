@@ -962,9 +962,9 @@ String _formatMoney(double amount) {
   final sign = n < 0 ? '-' : '';
   final abs = n.abs();
   if (abs >= 1000) {
-    return '$sign₺${abs ~/ 1000}.${(abs % 1000).toString().padLeft(3, '0')}';
+    return '$sign${abs ~/ 1000}.${(abs % 1000).toString().padLeft(3, '0')}₺';
   }
-  return '$sign₺$abs';
+  return '$sign$abs₺';
 }
 
 // ─── Hero card ────────────────────────────────────────────────────────────────
@@ -1033,6 +1033,7 @@ class _HeroCard extends StatelessWidget {
                       fontWeight: FontWeight.w900,
                       letterSpacing: -2.5,
                       height: 1.0,
+                      fontFeatures: [FontFeature.tabularFigures()],
                     ),
                   )
                 : Padding(

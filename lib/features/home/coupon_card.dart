@@ -69,6 +69,15 @@ class _CouponCardState extends State<CouponCard> {
     final oddsMatch = RegExp(r'×([\d.,]+)').firstMatch(coupon.meta);
     final oddsDisplay = oddsMatch != null ? '×${oddsMatch.group(1)}' : '—';
 
+    // Kazanan/kaybeden kuponlarda, kullanıcı özel bir başlık girmediyse
+    // (otomatik "N Seçim ×oran" başlığı hâlâ duruyorsa), seçim sayısı
+    // yerine bahis miktarını göstermek daha anlamlı — "kaç TL yattı".
+    final isResolved = coupon.status == CouponStatus.winning || coupon.status == CouponStatus.risk;
+    final isAutoTitle = RegExp(r'^\d+ Seçim ×[\d.,]+$').hasMatch(coupon.title);
+    final displayTitle = (isResolved && isAutoTitle && oddsMatch != null)
+        ? '$stakeDisplay · $oddsDisplay'
+        : coupon.title;
+
     return GestureDetector(
       onTapDown: (_) => setState(() => _pressed = true),
       onTapUp: (_) => setState(() => _pressed = false),
@@ -124,7 +133,7 @@ class _CouponCardState extends State<CouponCard> {
                           ],
                           Expanded(
                             child: Text(
-                              coupon.title,
+                              displayTitle,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
