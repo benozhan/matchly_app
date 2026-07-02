@@ -76,11 +76,18 @@ class _AuthPageState extends State<AuthPage> {
   Future<void> _signInWithGoogle() async {
     setState(() { _loading = true; _error = null; });
     try {
+      // signInWithOAuth mobilde sadece tarayiciyi acar, oturumun
+      // gercekten kurulmasini BEKLEMEZ - bu yuzden burada widget.onSignedIn()
+      // cagirmak, kullanici Google'da giris yapmayi bitirmeden once
+      // "girildi" sanip _signedIn=true yapiyordu. Bu da main.dart'taki
+      // gercek tamamlanma olayinin (onAuthStateChange/deep link) devre disi
+      // kalmasina, dolayisiyla kullanici adi ekraninin hic gosterilmemesine
+      // sebep oluyordu. Gercek tamamlanma main.dart'taki dinleyicilerde
+      // ele alinir, burada baska bir sey yapmaya gerek yok.
       await Supabase.instance.client.auth.signInWithOAuth(
         OAuthProvider.google,
         redirectTo: 'matchly://login-callback',
       );
-      widget.onSignedIn();
     } catch (e) {
       setState(() => _error = e.toString());
     } finally {
