@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../services/coupon_storage_service.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../services/ai_coupon_service.dart';
@@ -528,6 +529,8 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
 
   // ── lifecycle ─────────────────────────────────────────────────────────────
 
+  static const _kLastStakeKey = 'lastCouponStake';
+
   @override
   void initState() {
     super.initState();
@@ -535,7 +538,22 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
     oddsController.addListener(_onFieldChanged);
     if (widget.initialCoupon != null) {
       _populateFromCoupon(widget.initialCoupon!);
+    } else {
+      _loadLastStake();
     }
+  }
+
+  Future<void> _loadLastStake() async {
+    final prefs = await SharedPreferences.getInstance();
+    final last = prefs.getString(_kLastStakeKey);
+    if (last != null && mounted && stakeController.text.isEmpty) {
+      setState(() => stakeController.text = last);
+    }
+  }
+
+  Future<void> _saveLastStake(String value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_kLastStakeKey, value);
   }
 
   void _populateFromCoupon(Coupon c) {
@@ -875,6 +893,7 @@ class _AddCouponSheetState extends State<AddCouponSheet> {
       CouponShare.showTopToast(context, t.enterStakeAmount);
       return;
     }
+    unawaited(_saveLastStake(stakeController.text.trim()));
     final autoTitle = selections.isNotEmpty
         ? '${selections.length} Seçim ×${oddsController.text.trim().isEmpty ? "?" : oddsController.text.trim()}'
         : 'Yeni Kupon';
