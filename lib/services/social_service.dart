@@ -3,7 +3,9 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-const String _kBaseUrl = 'http://167.172.182.128:8001';
+import 'api_config.dart';
+
+const String _kBaseUrl = kApiBaseUrl;
 const Duration _kTimeout = Duration(seconds: 10);
 
 // ── Models ────────────────────────────────────────────────────────────────────
@@ -72,7 +74,7 @@ class SocialService {
 
   Future<SocialUser> getUser(String username) async {
     final res = await _client
-        .get(Uri.parse('$_kBaseUrl/social/users/$username'))
+        .get(Uri.parse('$_kBaseUrl/social/users/$username'), headers: apiHeaders())
         .timeout(_kTimeout);
     _checkStatus(res);
     return SocialUser.fromJson(jsonDecode(res.body) as Map<String, dynamic>);
@@ -80,7 +82,7 @@ class SocialService {
 
   Future<List<SocialUser>> getFollowers(String username) async {
     final res = await _client
-        .get(Uri.parse('$_kBaseUrl/social/users/$username/followers'))
+        .get(Uri.parse('$_kBaseUrl/social/users/$username/followers'), headers: apiHeaders())
         .timeout(_kTimeout);
     _checkStatus(res);
     return (jsonDecode(res.body) as List)
@@ -91,7 +93,7 @@ class SocialService {
 
   Future<List<SocialUser>> getFollowing(String username) async {
     final res = await _client
-        .get(Uri.parse('$_kBaseUrl/social/users/$username/following'))
+        .get(Uri.parse('$_kBaseUrl/social/users/$username/following'), headers: apiHeaders())
         .timeout(_kTimeout);
     _checkStatus(res);
     return (jsonDecode(res.body) as List)
@@ -102,7 +104,7 @@ class SocialService {
 
   Future<List<SharedCoupon>> getSharedCoupons(String username) async {
     final res = await _client
-        .get(Uri.parse('$_kBaseUrl/social/users/$username/shared-coupons'))
+        .get(Uri.parse('$_kBaseUrl/social/users/$username/shared-coupons'), headers: apiHeaders())
         .timeout(_kTimeout);
     _checkStatus(res);
     return (jsonDecode(res.body) as List)
@@ -123,7 +125,7 @@ class SocialService {
       final res = await _client
           .post(
             Uri.parse('$_kBaseUrl/social/shared-coupons'),
-            headers: {'Content-Type': 'application/json'},
+            headers: apiHeaders(json: true),
             body: jsonEncode({
               'couponId': couponId,
               'ownerUsername': ownerUsername,
@@ -148,7 +150,8 @@ class SocialService {
   Future<void> deleteSharedCoupon(String couponId) async {
     try {
       await _client
-          .delete(Uri.parse('$_kBaseUrl/social/shared-coupons/$couponId'))
+          .delete(Uri.parse('$_kBaseUrl/social/shared-coupons/$couponId'),
+              headers: apiHeaders())
           .timeout(_kTimeout);
     } catch (_) {}
   }
@@ -169,7 +172,7 @@ class SocialService {
       await _client
           .post(
             Uri.parse('$_kBaseUrl/social/coupons'),
-            headers: {'Content-Type': 'application/json'},
+            headers: apiHeaders(json: true),
             body: jsonEncode({
               'couponId':      couponId,
               'ownerUsername': ownerUsername,
@@ -223,7 +226,7 @@ class SocialService {
     // Supabase'de bulunamazsa backend API'ye düş
     try {
       final res = await _client
-          .get(Uri.parse('$_kBaseUrl/social/coupons/$couponId'))
+          .get(Uri.parse('$_kBaseUrl/social/coupons/$couponId'), headers: apiHeaders())
           .timeout(_kTimeout);
       if (res.statusCode == 200) {
         return CouponDetail.fromJson(
@@ -238,7 +241,7 @@ class SocialService {
     try {
       await _client.post(
         Uri.parse('$_kBaseUrl/social/users'),
-        headers: {'Content-Type': 'application/json'},
+        headers: apiHeaders(json: true),
         body: jsonEncode({'username': username, 'displayName': displayName, 'avatar': ''}),
       ).timeout(_kTimeout);
     } catch (_) {}
@@ -249,7 +252,7 @@ class SocialService {
       final res = await _client
           .post(
             Uri.parse('$_kBaseUrl/social/users/$username/update'),
-            headers: {'Content-Type': 'application/json'},
+            headers: apiHeaders(json: true),
             body: jsonEncode({'username': username, 'displayName': '', 'avatar': avatarUrl}),
           )
           .timeout(_kTimeout);
@@ -263,8 +266,10 @@ class SocialService {
   Future<List<SocialUser>> searchUsers(String q) async {
     if (q.trim().isEmpty) return [];
     final res = await _client
-        .get(Uri.parse(
-            '$_kBaseUrl/social/find-users?q=${Uri.encodeQueryComponent(q.trim())}'))
+        .get(
+            Uri.parse(
+                '$_kBaseUrl/social/find-users?q=${Uri.encodeQueryComponent(q.trim())}'),
+            headers: apiHeaders())
         .timeout(_kTimeout);
     _checkStatus(res);
     return (jsonDecode(res.body) as List)
@@ -276,7 +281,7 @@ class SocialService {
   /// Returns activity feed for [username] (coupons from followed users).
   Future<List<FeedItem>> getFeed(String username) async {
     final res = await _client
-        .get(Uri.parse('$_kBaseUrl/social/feed/$username'))
+        .get(Uri.parse('$_kBaseUrl/social/feed/$username'), headers: apiHeaders())
         .timeout(_kTimeout);
     _checkStatus(res);
     return (jsonDecode(res.body) as List)
@@ -291,7 +296,7 @@ class SocialService {
       await _client
           .post(
             Uri.parse('$_kBaseUrl/social/follow'),
-            headers: {'Content-Type': 'application/json'},
+            headers: apiHeaders(json: true),
             body: jsonEncode(
                 {'followerId': followerId, 'followingId': followingId}),
           )
@@ -305,7 +310,7 @@ class SocialService {
       await _client
           .delete(
             Uri.parse('$_kBaseUrl/social/follow'),
-            headers: {'Content-Type': 'application/json'},
+            headers: apiHeaders(json: true),
             body: jsonEncode(
                 {'followerId': followerId, 'followingId': followingId}),
           )

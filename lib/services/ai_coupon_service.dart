@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'api_config.dart';
+
 class AiMatchResult {
   final String original;
   final String? matched;
@@ -36,8 +38,8 @@ class AiCouponService {
     final userId = Supabase.instance.client.auth.currentUser?.id ?? '';
 
     final analyzeRes = await http.post(
-      Uri.parse('http://167.172.182.128:8001/ai/analyze-coupon'),
-      headers: {'Content-Type': 'application/json'},
+      Uri.parse('$kApiBaseUrl/ai/analyze-coupon'),
+      headers: apiHeaders(json: true),
       body: jsonEncode({'image_base64': base64Image, 'media_type': mediaType, 'user_id': userId}),
     ).timeout(const Duration(seconds: 30));
 
@@ -48,8 +50,8 @@ class AiCouponService {
     final rawMatches = (couponData['matches'] as List? ?? []);
 
     final verifyRes = await http.post(
-      Uri.parse('http://167.172.182.128:8001/ai/verify-matches'),
-      headers: {'Content-Type': 'application/json'},
+      Uri.parse('$kApiBaseUrl/ai/verify-matches'),
+      headers: apiHeaders(json: true),
       body: jsonEncode({'matches': rawMatches}),
     ).timeout(const Duration(seconds: 15));
 

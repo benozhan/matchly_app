@@ -3,11 +3,11 @@ import 'dart:io';
 
 import 'package:http/http.dart' as http;
 
+import 'api_config.dart';
+
 // ── Config ────────────────────────────────────────────────────────────────────
 
-/// Base URL of the KuponBot VPS API.
-/// Override with your actual VPS IP / domain.
-const String _kBaseUrl = 'http://167.172.182.128:8001';
+const String _kBaseUrl = kApiBaseUrl;
 
 const Duration _kTimeout = Duration(seconds: 8);
 
@@ -62,7 +62,7 @@ class MatchSearchService {
         .replace(queryParameters: query.trim().isEmpty ? {} : {'q': query.trim()});
 
     try {
-      final response = await _client.get(uri).timeout(_kTimeout);
+      final response = await _client.get(uri, headers: apiHeaders()).timeout(_kTimeout);
 
       if (response.statusCode != 200) {
         throw MatchSearchException(
@@ -148,7 +148,7 @@ extension LiveMatchService on MatchSearchService {
   Future<List<LiveMatch>> getLiveMatches() async {
     final uri = Uri.parse('$_kBaseUrl/api/matches/live');
     try {
-      final response = await _client.get(uri).timeout(_kTimeout);
+      final response = await _client.get(uri, headers: apiHeaders()).timeout(_kTimeout);
       if (response.statusCode != 200) return [];
       final List<dynamic> body = jsonDecode(response.body) as List<dynamic>;
       return body.cast<Map<String, dynamic>>().map(LiveMatch.fromJson).toList();
