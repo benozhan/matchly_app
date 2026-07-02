@@ -23,7 +23,12 @@ class MatchRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final isPending = match.status == CouponStatus.pending;
 
-    final parts = match.teams.split(' – ');
+    // Eski kuponlarda (yeni ayrac formatindan once eklenmis) "–" (uzun tire)
+    // yerine duz "-" kullanilmis olabilir — ikisini de deniyoruz, aksi halde
+    // takim adlari hic bolunmeden tek parca halinde tasip kesiliyordu.
+    final parts = match.teams.contains(' – ')
+        ? match.teams.split(' – ')
+        : match.teams.split(RegExp(r'\s+-\s+'));
     final homeName   = parts.isNotEmpty ? parts[0].trim() : match.teams;
     final awayName   = parts.length > 1  ? parts[1].trim() : '';
     final homeAbbrev = _abbrev(homeName);
