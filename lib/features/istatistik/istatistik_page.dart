@@ -448,6 +448,7 @@ class _IstatistikPageState extends State<IstatistikPage> {
                             ),
                           ),
                           Expanded(
+                            flex: 2,
                             child: Text(
                               t.couponCountSuffix(kupon),
                               style: TextStyle(
@@ -457,43 +458,50 @@ class _IstatistikPageState extends State<IstatistikPage> {
                             ),
                           ),
                           Expanded(
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.check_circle_rounded,
-                                  size: 12,
-                                  color: AppColors.green,
-                                ),
-                                const SizedBox(width: 3),
-                                Text(
-                                  '$kazanan',
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    color: AppColors.textSecondary,
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Icon(
-                                  Icons.cancel_rounded,
-                                  size: 12,
-                                  color: AppColors.red,
-                                ),
-                                const SizedBox(width: 3),
-                                Text(
-                                  '$kaybeden',
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    color: AppColors.textSecondary,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Expanded(
+                            flex: 2,
                             child: FittedBox(
                               fit: BoxFit.scaleDown,
                               alignment: Alignment.centerLeft,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.check_circle_rounded,
+                                    size: 12,
+                                    color: AppColors.green,
+                                  ),
+                                  const SizedBox(width: 3),
+                                  Text(
+                                    '$kazanan',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: AppColors.textSecondary,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Icon(
+                                    Icons.cancel_rounded,
+                                    size: 12,
+                                    color: AppColors.red,
+                                  ),
+                                  const SizedBox(width: 3),
+                                  Text(
+                                    '$kaybeden',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: AppColors.textSecondary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            flex: 2,
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.centerRight,
                               child: Text(
                                 (net >= 0 ? '+' : '') + _fmt(net.abs()),
                                 style: TextStyle(
