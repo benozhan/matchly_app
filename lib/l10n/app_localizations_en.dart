@@ -255,7 +255,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aboutMatchlyBody =>
-      'Matchly is an app designed to help you personally track your betting slips. Save your coupons, automatically track their results, view your statistics, and share them with friends if you like.\n\nFor questions, suggestions, or feedback:\nozhanakgn@gmail.com\n\nPrivacy Policy:\nhttps://matchlyapp.com/privacy';
+      'Matchly is an app designed to help you personally track your betting slips. Save your coupons, automatically track their results, view your statistics, and share them with friends if you like.\n\nFor questions, suggestions, or feedback:\ndestek@matchlyapp.com\n\nPrivacy Policy:\nhttps://matchlyapp.com/privacy';
 
   @override
   String get newUsernameHint => 'New username';
