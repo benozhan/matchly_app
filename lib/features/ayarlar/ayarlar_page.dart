@@ -564,33 +564,6 @@ class _AyarlarPageState extends State<AyarlarPage> {
         ),
         const SizedBox(height: 16),
 
-        // ── Kuponlar ─────────────────────────────────────────────────────────
-        _SectionLabel(t.sectionCoupons),
-        const SizedBox(height: 8),
-        Container(
-          decoration: _sectionDeco(),
-          child: Column(
-            children: [
-              _ValueRow(
-                icon: Icons.payments_outlined,
-                title: t.defaultStakeLabel,
-                value: '₺100',
-                comingSoon: true,
-                onTap: () => _showComingSoon(context),
-              ),
-              _RowDivider(),
-              _ValueRow(
-                icon: Icons.store_outlined,
-                title: t.defaultSiteLabel,
-                value: 'Bilyoner',
-                comingSoon: true,
-                onTap: () => _showComingSoon(context),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 16),
-
         // ── Veriler ──────────────────────────────────────────────────────────
         _SectionLabel(t.sectionData),
         const SizedBox(height: 8),
@@ -794,14 +767,12 @@ class _ValueRow extends StatelessWidget {
   final String title;
   final String value;
   final VoidCallback? onTap;
-  final bool comingSoon;
 
   const _ValueRow({
     required this.icon,
     required this.title,
     required this.value,
     this.onTap,
-    this.comingSoon = false,
   });
 
   @override
@@ -816,36 +787,12 @@ class _ValueRow extends StatelessWidget {
             _RowIcon(icon: icon),
             const SizedBox(width: 12),
             Expanded(
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Flexible(
-                    child: Text(title,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                            color: AppColors.textPrimary,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600)),
-                  ),
-                  if (comingSoon) ...[
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: AppColors.border,
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: Text(
-                        AppLocalizations.of(context)!.comingSoonBadge,
-                        style: TextStyle(
-                            color: AppColors.textTertiary,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w700),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
+              child: Text(title,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600)),
             ),
             if (value.isNotEmpty) ...[
               Text(value,

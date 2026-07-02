@@ -144,9 +144,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get sectionGeneral => 'GENEL';
 
   @override
-  String get sectionCoupons => 'KUPONLAR';
-
-  @override
   String get sectionData => 'VERİLER';
 
   @override
@@ -184,12 +181,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get pickReportTimeHelp => 'Rapor saatini seç';
-
-  @override
-  String get defaultStakeLabel => 'Varsayılan Bahis';
-
-  @override
-  String get defaultSiteLabel => 'Varsayılan Site';
 
   @override
   String get clearDataLabel => 'Verileri Temizle';

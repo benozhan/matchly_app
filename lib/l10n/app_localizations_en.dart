@@ -145,9 +145,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sectionGeneral => 'GENERAL';
 
   @override
-  String get sectionCoupons => 'COUPONS';
-
-  @override
   String get sectionData => 'DATA';
 
   @override
@@ -185,12 +182,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pickReportTimeHelp => 'Pick report time';
-
-  @override
-  String get defaultStakeLabel => 'Default Stake';
-
-  @override
-  String get defaultSiteLabel => 'Default Site';
 
   @override
   String get clearDataLabel => 'Clear Data';

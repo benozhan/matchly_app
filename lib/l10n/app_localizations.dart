@@ -368,12 +368,6 @@ abstract class AppLocalizations {
   /// **'GENEL'**
   String get sectionGeneral;
 
-  /// No description provided for @sectionCoupons.
-  ///
-  /// In tr, this message translates to:
-  /// **'KUPONLAR'**
-  String get sectionCoupons;
-
   /// No description provided for @sectionData.
   ///
   /// In tr, this message translates to:
@@ -451,18 +445,6 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Rapor saatini seç'**
   String get pickReportTimeHelp;
-
-  /// No description provided for @defaultStakeLabel.
-  ///
-  /// In tr, this message translates to:
-  /// **'Varsayılan Bahis'**
-  String get defaultStakeLabel;
-
-  /// No description provided for @defaultSiteLabel.
-  ///
-  /// In tr, this message translates to:
-  /// **'Varsayılan Site'**
-  String get defaultSiteLabel;
 
   /// No description provided for @clearDataLabel.
   ///
