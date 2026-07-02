@@ -764,7 +764,8 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
   double? get _kasa {
     final starting = _user?.startingBalance;
     if (starting == null) return null;
-    return starting + _netProfit;
+    final baseline = _user!.netProfitBaseline ?? 0;
+    return starting + (_netProfit - baseline);
   }
 
   bool _hasPromptedBalance = false;
@@ -783,10 +784,11 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
       current: _user?.startingBalance,
     );
     if (value == null) return;
-    await AuthService.instance.updateStartingBalance(value);
+    final baseline = _netProfit;
+    await AuthService.instance.updateStartingBalance(value, baseline);
     if (!mounted) return;
     setState(() {
-      _user = _user?.copyWith(startingBalance: value);
+      _user = _user?.copyWith(startingBalance: value, netProfitBaseline: baseline);
     });
   }
 

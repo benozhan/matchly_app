@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/app_colors.dart';
 import '../../core/app_state.dart';
+import '../../core/coupon_stats.dart';
 import '../../core/starting_balance_dialog.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/coupon.dart';
@@ -317,10 +318,11 @@ class _AyarlarPageState extends State<AyarlarPage> {
       current: _user?.startingBalance,
     );
     if (value == null) return;
-    await AuthService.instance.updateStartingBalance(value);
+    final baseline = calcNetProfit(widget.coupons);
+    await AuthService.instance.updateStartingBalance(value, baseline);
     if (!mounted) return;
     setState(() {
-      _user = _user?.copyWith(startingBalance: value);
+      _user = _user?.copyWith(startingBalance: value, netProfitBaseline: baseline);
     });
   }
 
