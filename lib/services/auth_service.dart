@@ -15,13 +15,13 @@ class AppUser {
     this.netProfitBaseline,
   });
 
-  factory AppUser.fromJson(Map<String, dynamic> json) {
+  factory AppUser.fromJson(Map<String, dynamic> json, {Map<String, dynamic>? balanceJson}) {
     return AppUser(
       id:          json['id']           as String? ?? '',
       username:    json['username']     as String? ?? '',
       displayName: json['display_name'] as String? ?? '',
-      startingBalance: (json['starting_balance'] as num?)?.toDouble(),
-      netProfitBaseline: (json['net_profit_baseline'] as num?)?.toDouble(),
+      startingBalance: (balanceJson?['starting_balance'] as num?)?.toDouble(),
+      netProfitBaseline: (balanceJson?['net_profit_baseline'] as num?)?.toDouble(),
     );
   }
 
@@ -53,7 +53,18 @@ class AuthService {
         .maybeSingle();
 
     if (data == null) return null;
-    return AppUser.fromJson(data);
+
+    // Kasa verisi (starting_balance/net_profit_baseline) ayrı, sadece
+    // sahibinin okuyabildiği "user_balances" tablosunda tutuluyor —
+    // profiles tablosunun SELECT politikası herkese açık olduğu için
+    // para bilgisi orada saklanmaz (bkz. user_balances RLS: user_id = auth.uid()).
+    final balance = await _client
+        .from('user_balances')
+        .select()
+        .eq('user_id', authUser.id)
+        .maybeSingle();
+
+    return AppUser.fromJson(data, balanceJson: balance);
   }
 
   /// Kasayi (baslangic bakiyesi) gunceller. `netProfitBaseline`, bu anki
@@ -63,13 +74,12 @@ class AuthService {
   Future<void> updateStartingBalance(double value, double netProfitBaseline) async {
     final authUser = _client.auth.currentUser;
     if (authUser == null) return;
-    await _client
-        .from('profiles')
-        .update({
-          'starting_balance': value,
-          'net_profit_baseline': netProfitBaseline,
-        })
-        .eq('id', authUser.id);
+    await _client.from('user_balances').upsert({
+      'user_id': authUser.id,
+      'starting_balance': value,
+      'net_profit_baseline': netProfitBaseline,
+      'updated_at': DateTime.now().toUtc().toIso8601String(),
+    });
   }
 
   Future<void> signOut() async {
