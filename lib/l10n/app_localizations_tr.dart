@@ -254,7 +254,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get aboutMatchlyBody =>
-      'Matchly, bahis kuponlarını kişisel olarak takip etmen için tasarlanmış bir uygulamadır. Kuponlarını kaydet, sonuçlarını otomatik takip et, istatistiklerini gör ve dilersen arkadaşlarınla paylaş.\n\nSoru, öneri veya geri bildirimlerin için:\nozhanakgn@gmail.com\n\nGizlilik Politikası:\nhttps://167-172-182-128.sslip.io/privacy';
+      'Matchly, bahis kuponlarını kişisel olarak takip etmen için tasarlanmış bir uygulamadır. Kuponlarını kaydet, sonuçlarını otomatik takip et, istatistiklerini gör ve dilersen arkadaşlarınla paylaş.\n\nSoru, öneri veya geri bildirimlerin için:\nozhanakgn@gmail.com\n\nGizlilik Politikası:\nhttps://matchlyapp.com/privacy';
 
   @override
   String get newUsernameHint => 'Yeni kullanıcı adı';
