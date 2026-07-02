@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/app_colors.dart';
 import '../../core/coupon_share.dart';
+import '../../core/starting_balance_dialog.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/social_service.dart';
 import '../../services/auth_service.dart';
@@ -278,6 +279,8 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _openCouponById(widget.pendingCouponId!);
       });
+    } else {
+      _maybePromptStartingBalance();
     }
   }
 
@@ -756,6 +759,37 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
 
   double get _netProfit => _allTimeStats['profit'] as double;
 
+  // ── kasa (bakiye) ──────────────────────────────────────────────────────────
+
+  double? get _kasa {
+    final starting = _user?.startingBalance;
+    if (starting == null) return null;
+    return starting + _netProfit;
+  }
+
+  bool _hasPromptedBalance = false;
+
+  Future<void> _maybePromptStartingBalance() async {
+    if (_hasPromptedBalance || _user == null || _user!.startingBalance != null) return;
+    _hasPromptedBalance = true;
+    await Future.delayed(const Duration(milliseconds: 400));
+    if (!mounted) return;
+    await _editStartingBalance();
+  }
+
+  Future<void> _editStartingBalance() async {
+    final value = await showStartingBalanceDialog(
+      context,
+      current: _user?.startingBalance,
+    );
+    if (value == null) return;
+    await AuthService.instance.updateStartingBalance(value);
+    if (!mounted) return;
+    setState(() {
+      _user = _user?.copyWith(startingBalance: value);
+    });
+  }
+
   // ── build ──────────────────────────────────────────────────────────────────
 
   @override
@@ -809,12 +843,14 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
 
                               // ── Hero card ────────────────────────────
                               _HeroCard(
+                                kasa: _kasa,
                                 totalPotential: _totalPotentialText,
                                 activeCount: activeCount,
                                 winRatePct: _winRatePct,
                                 netProfit: _netProfit,
                                 todayStats: _todayStats,
                                 yesterdayStats: _yesterdayStats,
+                                onKasaTap: _editStartingBalance,
                               ),
                               const SizedBox(height: 22),
 
@@ -919,23 +955,37 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
   }
 }
 
+String _formatMoney(double amount) {
+  final n = amount.toInt();
+  final sign = n < 0 ? '-' : '';
+  final abs = n.abs();
+  if (abs >= 1000) {
+    return '$sign₺${abs ~/ 1000}.${(abs % 1000).toString().padLeft(3, '0')}';
+  }
+  return '$sign₺$abs';
+}
+
 // ─── Hero card ────────────────────────────────────────────────────────────────
 
 class _HeroCard extends StatelessWidget {
+  final double? kasa;
   final String totalPotential;
   final int activeCount;
   final int winRatePct;
   final double netProfit;
   final Map<String, dynamic> todayStats;
   final Map<String, dynamic> yesterdayStats;
+  final VoidCallback onKasaTap;
 
   const _HeroCard({
+    required this.kasa,
     required this.totalPotential,
     required this.activeCount,
     required this.winRatePct,
     required this.netProfit,
     required this.todayStats,
     required this.yesterdayStats,
+    required this.onKasaTap,
   });
 
   @override
@@ -960,7 +1010,7 @@ class _HeroCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
-            t.heroTotalPotential,
+            t.heroKasaLabel,
             style: TextStyle(
               color: Colors.white.withOpacity(0.65),
               fontSize: 10,
@@ -969,15 +1019,38 @@ class _HeroCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 18),
-          Text(
-            totalPotential,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 62,
-              fontWeight: FontWeight.w900,
-              letterSpacing: -2.5,
-              height: 1.0,
-            ),
+          GestureDetector(
+            onTap: onKasaTap,
+            behavior: HitTestBehavior.opaque,
+            child: kasa != null
+                ? Text(
+                    _formatMoney(kasa!),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 62,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -2.5,
+                      height: 1.0,
+                    ),
+                  )
+                : Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          t.kasaNotSetLabel,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 24,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        const Icon(Icons.add_circle_rounded, color: Colors.white, size: 22),
+                      ],
+                    ),
+                  ),
           ),
           const SizedBox(height: 26),
           Container(
@@ -995,8 +1068,9 @@ class _HeroCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          Wrap(
+            alignment: WrapAlignment.center,
+            runSpacing: 8,
             children: [
               _StatDot(
                 value: '$activeCount',
@@ -1015,6 +1089,12 @@ class _HeroCard extends StatelessWidget {
                     '${netProfit >= 0 ? '+' : '-'}₺${netProfit.abs().toInt()}',
                 label: t.netStatLabel,
                 color: netProfit >= 0 ? AppColors.green : AppColors.red,
+              ),
+              const _Sep(),
+              _StatDot(
+                value: totalPotential,
+                label: t.potentialStatLabel,
+                color: Colors.white.withOpacity(0.85),
               ),
             ],
           ),

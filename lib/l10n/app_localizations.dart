@@ -368,6 +368,12 @@ abstract class AppLocalizations {
   /// **'GENEL'**
   String get sectionGeneral;
 
+  /// No description provided for @sectionCoupons.
+  ///
+  /// In tr, this message translates to:
+  /// **'KUPONLAR'**
+  String get sectionCoupons;
+
   /// No description provided for @sectionData.
   ///
   /// In tr, this message translates to:
@@ -788,11 +794,11 @@ abstract class AppLocalizations {
   /// **'{count} kupon · {active} aktif'**
   String couponCountActive(int count, int active);
 
-  /// No description provided for @heroTotalPotential.
+  /// No description provided for @heroKasaLabel.
   ///
   /// In tr, this message translates to:
-  /// **'TOPLAM BEKLENTİ'**
-  String get heroTotalPotential;
+  /// **'KASA'**
+  String get heroKasaLabel;
 
   /// No description provided for @activeStatLabel.
   ///
@@ -811,6 +817,54 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'net'**
   String get netStatLabel;
+
+  /// No description provided for @potentialStatLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'beklenti'**
+  String get potentialStatLabel;
+
+  /// No description provided for @kasaNotSetLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kasanı Gir'**
+  String get kasaNotSetLabel;
+
+  /// No description provided for @startingBalanceTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kasanı Gir'**
+  String get startingBalanceTitle;
+
+  /// No description provided for @startingBalanceBody.
+  ///
+  /// In tr, this message translates to:
+  /// **'Başlangıç bakiyeni gir, kâr/zararını buna göre takip edelim.'**
+  String get startingBalanceBody;
+
+  /// No description provided for @startingBalanceHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'örn. 1000'**
+  String get startingBalanceHint;
+
+  /// No description provided for @startingBalanceLater.
+  ///
+  /// In tr, this message translates to:
+  /// **'Daha Sonra'**
+  String get startingBalanceLater;
+
+  /// No description provided for @startingBalanceInvalidError.
+  ///
+  /// In tr, this message translates to:
+  /// **'Geçerli bir tutar gir'**
+  String get startingBalanceInvalidError;
+
+  /// No description provided for @kasaSettingsLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kasa Tutarı'**
+  String get kasaSettingsLabel;
 
   /// No description provided for @todayLabel.
   ///

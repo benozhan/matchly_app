@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/app_colors.dart';
 import '../../core/app_state.dart';
+import '../../core/starting_balance_dialog.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/coupon.dart';
 import '../../services/auth_service.dart';
@@ -310,6 +311,19 @@ class _AyarlarPageState extends State<AyarlarPage> {
     );
   }
 
+  Future<void> _editStartingBalance() async {
+    final value = await showStartingBalanceDialog(
+      context,
+      current: _user?.startingBalance,
+    );
+    if (value == null) return;
+    await AuthService.instance.updateStartingBalance(value);
+    if (!mounted) return;
+    setState(() {
+      _user = _user?.copyWith(startingBalance: value);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context)!;
@@ -558,6 +572,26 @@ class _AyarlarPageState extends State<AyarlarPage> {
                     }
                   }
                 },
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // ── Kuponlar ─────────────────────────────────────────────────────────
+        _SectionLabel(t.sectionCoupons),
+        const SizedBox(height: 8),
+        Container(
+          decoration: _sectionDeco(),
+          child: Column(
+            children: [
+              _ValueRow(
+                icon: Icons.account_balance_wallet_outlined,
+                title: t.kasaSettingsLabel,
+                value: _user?.startingBalance != null
+                    ? '₺${_user!.startingBalance!.toInt()}'
+                    : t.kasaNotSetLabel,
+                onTap: _editStartingBalance,
               ),
             ],
           ),

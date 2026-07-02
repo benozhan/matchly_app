@@ -144,6 +144,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get sectionGeneral => 'GENEL';
 
   @override
+  String get sectionCoupons => 'KUPONLAR';
+
+  @override
   String get sectionData => 'VERİLER';
 
   @override
@@ -371,7 +374,7 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String get heroTotalPotential => 'TOPLAM BEKLENTİ';
+  String get heroKasaLabel => 'KASA';
 
   @override
   String get activeStatLabel => 'aktif';
@@ -381,6 +384,31 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get netStatLabel => 'net';
+
+  @override
+  String get potentialStatLabel => 'beklenti';
+
+  @override
+  String get kasaNotSetLabel => 'Kasanı Gir';
+
+  @override
+  String get startingBalanceTitle => 'Kasanı Gir';
+
+  @override
+  String get startingBalanceBody =>
+      'Başlangıç bakiyeni gir, kâr/zararını buna göre takip edelim.';
+
+  @override
+  String get startingBalanceHint => 'örn. 1000';
+
+  @override
+  String get startingBalanceLater => 'Daha Sonra';
+
+  @override
+  String get startingBalanceInvalidError => 'Geçerli bir tutar gir';
+
+  @override
+  String get kasaSettingsLabel => 'Kasa Tutarı';
 
   @override
   String get todayLabel => 'Bugün';

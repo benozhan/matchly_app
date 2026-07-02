@@ -145,6 +145,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sectionGeneral => 'GENERAL';
 
   @override
+  String get sectionCoupons => 'COUPONS';
+
+  @override
   String get sectionData => 'DATA';
 
   @override
@@ -391,7 +394,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get heroTotalPotential => 'TOTAL POTENTIAL';
+  String get heroKasaLabel => 'BALANCE';
 
   @override
   String get activeStatLabel => 'active';
@@ -401,6 +404,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get netStatLabel => 'net';
+
+  @override
+  String get potentialStatLabel => 'potential';
+
+  @override
+  String get kasaNotSetLabel => 'Enter Balance';
+
+  @override
+  String get startingBalanceTitle => 'Enter Your Balance';
+
+  @override
+  String get startingBalanceBody =>
+      'Enter your starting balance so we can track your profit/loss against it.';
+
+  @override
+  String get startingBalanceHint => 'e.g. 1000';
+
+  @override
+  String get startingBalanceLater => 'Later';
+
+  @override
+  String get startingBalanceInvalidError => 'Enter a valid amount';
+
+  @override
+  String get kasaSettingsLabel => 'Balance Amount';
 
   @override
   String get todayLabel => 'Today';
