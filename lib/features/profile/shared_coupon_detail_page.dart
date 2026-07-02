@@ -130,6 +130,50 @@ class _SharedCouponDetailPageState extends State<SharedCouponDetailPage> {
     }
   }
 
+  Future<void> _reportComment(BuildContext context, String commentId) async {
+    final reason = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: AppColors.card,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (sheetCtx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+              child: Text('Yorumu şikayet et',
+                  style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w800)),
+            ),
+            for (final reason in const ['Spam', 'Taciz veya zorbalık', 'Uygunsuz içerik', 'Diğer'])
+              ListTile(
+                title: Text(reason, style: TextStyle(color: AppColors.textPrimary, fontSize: 14)),
+                onTap: () => Navigator.of(sheetCtx).pop(reason),
+              ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+    if (reason == null || !context.mounted) return;
+    final submitted = await CommentService.instance.reportComment(commentId, reason);
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          submitted ? 'Şikayetin alındı, teşekkürler.' : 'Bu yorumu zaten şikayet ettin.',
+          style: TextStyle(color: AppColors.textPrimary, fontSize: 13),
+        ),
+        backgroundColor: AppColors.card,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
   String _fmtDate(String raw) {
     try {
       final dt = DateTime.parse(raw).toLocal();
@@ -328,6 +372,7 @@ class _SharedCouponDetailPageState extends State<SharedCouponDetailPage> {
                           await CommentService.instance.deleteComment(id);
                           _loadComments();
                         },
+                        onReport: (id) => _reportComment(context, id),
                       ),
                     ),
                   ),
@@ -361,6 +406,7 @@ class _CommentsSection extends StatelessWidget {
   final VoidCallback onCancelReply;
   final VoidCallback onSubmit;
   final Future<void> Function(String id) onDelete;
+  final void Function(String id) onReport;
 
   const _CommentsSection({
     required this.comments,
@@ -373,6 +419,7 @@ class _CommentsSection extends StatelessWidget {
     required this.onCancelReply,
     required this.onSubmit,
     required this.onDelete,
+    required this.onReport,
   });
 
   Widget _buildCommentCard(CouponComment comment, {bool isReply = false}) {
@@ -397,6 +444,11 @@ class _CommentsSection extends StatelessWidget {
                 GestureDetector(
                   onTap: () => onDelete(comment.id),
                   child: Icon(Icons.delete_outline, size: 16, color: AppColors.textTertiary),
+                )
+              else
+                GestureDetector(
+                  onTap: () => onReport(comment.id),
+                  child: Icon(Icons.flag_outlined, size: 15, color: AppColors.textTertiary),
                 ),
             ],
           ),

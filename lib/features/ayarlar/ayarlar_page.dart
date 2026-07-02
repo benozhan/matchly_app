@@ -282,6 +282,34 @@ class _AyarlarPageState extends State<AyarlarPage> {
     );
   }
 
+  void _showAboutMatchly(BuildContext ctx) {
+    final t = AppLocalizations.of(ctx)!;
+    showDialog(
+      context: ctx,
+      builder: (dialogCtx) => AlertDialog(
+        backgroundColor: AppColors.card,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(
+          t.appName,
+          style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w800),
+        ),
+        content: SelectableText(
+          t.aboutMatchlyBody,
+          style: TextStyle(color: AppColors.textSecondary, fontSize: 13, height: 1.5),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogCtx).pop(),
+            child: Text(
+              t.okLabel,
+              style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context)!;
@@ -610,8 +638,7 @@ class _AyarlarPageState extends State<AyarlarPage> {
                 icon: Icons.info_outline_rounded,
                 title: t.appName,
                 value: '',
-                comingSoon: true,
-                onTap: () => _showComingSoon(context),
+                onTap: () => _showAboutMatchly(context),
               ),
               _RowDivider(),
               _ValueRow(

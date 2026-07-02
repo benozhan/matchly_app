@@ -578,6 +578,12 @@ abstract class AppLocalizations {
   /// **'Yakında'**
   String get comingSoonBadge;
 
+  /// No description provided for @aboutMatchlyBody.
+  ///
+  /// In tr, this message translates to:
+  /// **'Matchly, bahis kuponlarını kişisel olarak takip etmen için tasarlanmış bir uygulamadır. Kuponlarını kaydet, sonuçlarını otomatik takip et, istatistiklerini gör ve dilersen arkadaşlarınla paylaş.\n\nSoru, öneri veya geri bildirimlerin için:\nozhanakgn@gmail.com\n\nGizlilik Politikası:\nhttps://167-172-182-128.sslip.io/privacy'**
+  String get aboutMatchlyBody;
+
   /// No description provided for @newUsernameHint.
   ///
   /// In tr, this message translates to:
