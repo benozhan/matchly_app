@@ -629,7 +629,9 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
       builder: (_) => const AddCouponSheet(),
     );
     if (newCoupon == null) return;
-    setState(() => _entries.insert(0, _CouponEntry(coupon: newCoupon)));
+    final entry = _CouponEntry(coupon: newCoupon);
+    setState(() => _entries.insert(0, entry));
+    _autoShareNewCoupon(entry);
     _loadUser(); // Arka planda yenile
   }
 
@@ -642,6 +644,35 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
     );
     if (updated == null) return;
     setState(() => entry.coupon = updated);
+  }
+
+  /// Yeni eklenen kuponu, kullanıcı ayrıca "paylaş" demeden otomatik olarak
+  /// herkese açık yapıp akışa (feed) ekler — aynı [_togglePublic]'in yaptığı
+  /// iki işi yapar (is_public + shared-coupon kaydı) artı kupon detayının
+  /// tam bir kopyasını da (bkz. [_pushCouponToBackend]) kaydeder.
+  Future<void> _autoShareNewCoupon(_CouponEntry entry) async {
+    final couponId = entry.coupon.id;
+    if (couponId == null || _user == null) return;
+    setState(() {
+      entry.coupon = entry.coupon.copyWith(isPublic: true, sharedId: couponId);
+    });
+    try {
+      await Supabase.instance.client
+          .from('coupons')
+          .update({'is_public': true})
+          .eq('id', couponId);
+    } catch (_) {}
+    _pushCouponToBackend(entry.coupon, couponId);
+    if (mounted) {
+      final t = AppLocalizations.of(context)!;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(t.sharedToFeedMessage),
+          duration: const Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 
   Future<void> _togglePublic(_CouponEntry entry) async {
