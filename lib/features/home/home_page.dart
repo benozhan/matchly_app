@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/app_colors.dart';
 import '../../core/coupon_share.dart';
 import '../../core/starting_balance_dialog.dart';
+import '../../core/coupon_stats.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/social_service.dart';
 import '../../services/auth_service.dart';
@@ -760,12 +761,17 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
   double get _netProfit => _allTimeStats['profit'] as double;
 
   // ── kasa (bakiye) ──────────────────────────────────────────────────────────
+  // Not: kasa, "net" istatistik noktasından FARKLI bir hesap kullanır — bahis
+  // yatırıldığı anda (sonuç beklemeden) o tutar kasadan düşer. "net" noktası
+  // ise sadece sonuçlanmış kuponları gösterir, kasıtlı olarak değişmedi.
+
+  double get _kasaDelta => calcKasaDelta(_allCoupons);
 
   double? get _kasa {
     final starting = _user?.startingBalance;
     if (starting == null) return null;
     final baseline = _user!.netProfitBaseline ?? 0;
-    return starting + (_netProfit - baseline);
+    return starting + (_kasaDelta - baseline);
   }
 
   bool _hasPromptedBalance = false;
@@ -784,7 +790,7 @@ class _MatchlyHomePageState extends State<MatchlyHomePage> {
       current: _user?.startingBalance,
     );
     if (value == null) return;
-    final baseline = _netProfit;
+    final baseline = _kasaDelta;
     await AuthService.instance.updateStartingBalance(value, baseline);
     if (!mounted) return;
     setState(() {

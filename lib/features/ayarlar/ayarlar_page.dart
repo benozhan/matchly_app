@@ -318,7 +318,7 @@ class _AyarlarPageState extends State<AyarlarPage> {
       current: _user?.startingBalance,
     );
     if (value == null) return;
-    final baseline = calcNetProfit(widget.coupons);
+    final baseline = calcKasaDelta(widget.coupons);
     await AuthService.instance.updateStartingBalance(value, baseline);
     if (!mounted) return;
     setState(() {
